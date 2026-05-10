@@ -106,19 +106,19 @@ async def verify_otp(email: str, otp: str) -> dict:
         row["otp_id"],
     )
 
-    # Upsert user + tenant
+    # Upsert user + tenant — explicit ::text casts avoid asyncpg type ambiguity
     user = await pool.fetchrow(
         """
         WITH ins_tenant AS (
             INSERT INTO tenants (name)
-            SELECT $1
-            WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $1)
+            SELECT $1::text
+            WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $1::text)
             RETURNING tenant_id
         ),
         ins_user AS (
             INSERT INTO users (email, tenant_id, last_login)
             VALUES (
-                $1,
+                $1::text,
                 (SELECT tenant_id FROM ins_tenant),
                 NOW()
             )
