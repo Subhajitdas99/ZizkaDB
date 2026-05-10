@@ -32,7 +32,7 @@ export default function DocsPage() {
         <aside style={{ width: 220, shrink: 0, padding: '40px 0', position: 'sticky', top: 60, height: 'calc(100vh - 60px)', overflowY: 'auto' } as React.CSSProperties}>
           {[
             { label: 'GETTING STARTED', items: [['Quickstart', '#quickstart'], ['Self-host', '#selfhost'], ['Managed service', '#managed']] },
-            { label: 'SDK', items: [['Python', '#python'], ['TypeScript', '#typescript']] },
+            { label: 'SDK', items: [['Python', '#python'], ['TypeScript', '#typescript'], ['MCP Server', '#mcp'], ['REST API', '#rest']] },
             { label: 'CORE CONCEPTS', items: [['Events', '#events'], ['Causal lineage', '#lineage'], ['Time travel', '#timetravel'], ['Semantic search', '#search']] },
             { label: 'API REFERENCE', items: [['POST /events', '#api-log'], ['GET /events', '#api-query'], ['GET /events/why', '#api-why'], ['POST /search', '#api-search']] },
             { label: 'HELP', items: [['Troubleshooting', '#troubleshooting']] },
@@ -249,6 +249,124 @@ console.log(diff.hasErrors)
 // GDPR forget
 const r = await db.forget({ filterKey: 'userId', filterValue: 'user_123' })
 console.log(r.deletedEvents)`}</Code>
+          </section>
+
+          <Divider />
+
+          {/* MCP Server */}
+          <section id="mcp">
+            <H2>MCP Server</H2>
+            <p style={P}>
+              The AgentDB MCP server lets any MCP-compatible agent — Claude Desktop, Cursor, Windsurf, Zed, LangChain MCP, CrewAI, AutoGen — call AgentDB tools natively. No SDK install required inside your agent.
+            </p>
+
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 18px', margin: '0 0 20px', fontSize: 14, color: '#166534' }}>
+              <strong>No install needed in your agent.</strong> uvx downloads and runs the server on demand. Just add the config block below.
+            </div>
+
+            <H3>Claude Desktop</H3>
+            <p style={P}>Edit <code style={IC}>~/Library/Application Support/Claude/claude_desktop_config.json</code>:</p>
+            <Code>{`{
+  "mcpServers": {
+    "agentdb": {
+      "command": "uvx",
+      "args": ["agentdb-mcp"],
+      "env": {
+        "AGENTDB_API_KEY": "agdb_live_xxxx"
+      }
+    }
+  }
+}`}</Code>
+            <p style={P}>Restart Claude Desktop. You'll see AgentDB tools in the tool list.</p>
+
+            <H3>Cursor</H3>
+            <p style={P}>Edit <code style={IC}>~/.cursor/mcp.json</code> (same format):</p>
+            <Code>{`{
+  "mcpServers": {
+    "agentdb": {
+      "command": "uvx",
+      "args": ["agentdb-mcp"],
+      "env": {
+        "AGENTDB_API_KEY": "agdb_live_xxxx"
+      }
+    }
+  }
+}`}</Code>
+
+            <H3>Self-hosted AgentDB</H3>
+            <Code>{`{
+  "mcpServers": {
+    "agentdb": {
+      "command": "uvx",
+      "args": ["agentdb-mcp"],
+      "env": {
+        "AGENTDB_HOST": "http://localhost:8000"
+      }
+    }
+  }
+}`}</Code>
+
+            <H3>Available MCP tools</H3>
+            <div style={{ border: '1px solid #e5e5e5', borderRadius: 10, overflow: 'hidden', margin: '12px 0 20px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ background: '#f7f7f7', borderBottom: '1px solid #e5e5e5' }}>
+                    <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600 }}>Tool</th>
+                    <th style={{ padding: '10px 16px', textAlign: 'left', fontWeight: 600, color: '#666' }}>What it does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ['log_event', 'Log any agent action with optional causal parent_id'],
+                    ['search_memory', 'Semantic search over all logged events'],
+                    ['get_context', 'Get formatted memory block for system prompt injection'],
+                    ['why', 'Trace the causal chain that led to any event'],
+                    ['query_events', 'List recent events, optionally filtered by type'],
+                    ['time_travel', 'Replay exact agent state at any past timestamp'],
+                    ['memory_diff', 'Summarise what happened in a session'],
+                    ['forget', 'GDPR erasure — delete all events matching a filter'],
+                  ].map(([tool, desc], i) => (
+                    <tr key={tool} style={{ borderBottom: i < 7 ? '1px solid #f0f0f0' : 'none' }}>
+                      <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontSize: 12.5, color: '#111', fontWeight: 500 }}>{tool}</td>
+                      <td style={{ padding: '10px 16px', color: '#555' }}>{desc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <Divider />
+
+          {/* REST API quick reference */}
+          <section id="rest">
+            <H2>REST API</H2>
+            <p style={P}>Use the REST API from any language — Go, Rust, Ruby, Java, PHP, or anything with an HTTP client. All endpoints are at <code style={IC}>https://agentdb.zizka.ai/v1/</code></p>
+            <p style={P}>Authentication: <code style={IC}>Authorization: Bearer agdb_live_xxxx</code></p>
+
+            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '12px 16px', margin: '0 0 20px', fontSize: 13, color: '#92400e' }}>
+              Endpoints are at <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/v1/</code> — not <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/api/</code>.
+            </div>
+
+            <H3>Log an event</H3>
+            <Code>{`curl -X POST https://agentdb.zizka.ai/v1/events \\
+  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Content-Type: application/json" \\
+  -d '{"agent":"my-bot","event":"tool_call","data":{"tool":"search"}}'`}</Code>
+
+            <H3>Semantic search</H3>
+            <Code>{`curl -X POST https://agentdb.zizka.ai/v1/search \\
+  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Content-Type: application/json" \\
+  -d '{"query":"billing complaint","agent":"support-bot","limit":10}'`}</Code>
+
+            <H3>Causal chain</H3>
+            <Code>{`curl "https://agentdb.zizka.ai/v1/events/EVT_ID/why?depth=10" \\
+  -H "Authorization: Bearer agdb_live_xxxx"`}</Code>
+
+            <H3>Health check (no auth)</H3>
+            <Code>{`curl https://agentdb.zizka.ai/health
+# → {"status":"ok","version":"0.1.0"}`}</Code>
           </section>
 
           <Divider />

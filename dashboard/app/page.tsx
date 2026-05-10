@@ -3,6 +3,78 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
+// ── SDK snippets by language ───────────────────────────────────────────────
+
+const SDK_TABS = ['Python', 'TypeScript', 'MCP', 'REST API'] as const
+type SdkTab = typeof SDK_TABS[number]
+
+const INSTALL: Record<SdkTab, string> = {
+  Python:      'pip install agentdb-sdk',
+  TypeScript:  'npm install agentdb-sdk',
+  MCP:         'uvx agentdb-mcp   # no install needed',
+  'REST API':  'curl (no install)',
+}
+
+const SDK_SNIPPETS: Record<SdkTab, string> = {
+  Python: `from agentdb import AgentDB
+
+db = AgentDB("agdb_live_xxxx")   # your API key
+
+result = await db.log(
+    agent="my-bot",
+    event="tool_call",
+    data={"tool": "search", "query": "pricing"},
+)
+
+# Why did this happen?
+chain = await db.why(result.event_id)
+chain.print()`,
+
+  TypeScript: `import { AgentDB } from 'agentdb-sdk'
+
+const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
+
+const result = await db.log({
+  agent: 'my-bot',
+  event: 'tool_call',
+  data: { tool: 'search', query: 'pricing' },
+})
+
+// Why did this happen?
+const chain = await db.why(result.eventId)
+chain.print()`,
+
+  MCP: `// Add to claude_desktop_config.json or ~/.cursor/mcp.json
+{
+  "mcpServers": {
+    "agentdb": {
+      "command": "uvx",
+      "args": ["agentdb-mcp"],
+      "env": {
+        "AGENTDB_API_KEY": "agdb_live_xxxx"
+      }
+    }
+  }
+}
+
+// Claude and Cursor can now call these tools natively:
+// log_event  · search_memory  · get_context
+// why        · time_travel    · memory_diff  · forget`,
+
+  'REST API': `# Works in Python, Go, Ruby, Rust, Java — anything with HTTP
+
+curl -X POST https://agentdb.zizka.ai/v1/events \\
+  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "agent": "my-bot",
+    "event": "tool_call",
+    "data": { "tool": "search", "query": "pricing" }
+  }'
+
+# → {"event_id":"...","timestamp":"...","checksum":"..."}`,
+}
+
 const INSTALL_CMD = 'pip install agentdb-sdk'
 
 const QUICKSTART = `from agentdb import AgentDB
@@ -90,6 +162,7 @@ async def run(user_input: str):
 export default function LandingPage() {
   const [copied, setCopied] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'claude' | 'openai'>('claude')
+  const [activeSdk, setActiveSdk] = useState<SdkTab>('Python')
 
   function copy(text: string, key: string) {
     navigator.clipboard.writeText(text)
@@ -160,33 +233,67 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }}>
-          {/* Install pill */}
+        {/* SDK tab switcher */}
+        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+          <div style={{ display: 'flex', gap: 2, background: '#f0f0f0', borderRadius: 9, padding: 3, marginBottom: 10 }}>
+            {SDK_TABS.map(t => (
+              <button key={t} onClick={() => setActiveSdk(t)} style={{
+                padding: '5px 14px', fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
+                borderRadius: 7, background: activeSdk === t ? '#fff' : 'transparent',
+                color: activeSdk === t ? '#111' : '#888',
+                boxShadow: activeSdk === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
+                transition: 'all 0.15s',
+              }}>
+                {t}
+              </button>
+            ))}
+          </div>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 10,
             background: '#f5f5f5', borderRadius: 8, padding: '8px 14px',
             fontFamily: 'monospace', fontSize: 13, color: '#333',
           }}>
-            <span style={{ color: '#aaa' }}>$</span> {INSTALL_CMD}
-            <button onClick={() => copy(INSTALL_CMD, 'install')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: 0 }}>
+            <span style={{ color: '#aaa' }}>$</span>
+            <span>{INSTALL[activeSdk]}</span>
+            <button onClick={() => copy(INSTALL[activeSdk], 'install')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: 0 }}>
               {copied === 'install' ? '✓' : 'copy'}
             </button>
           </div>
+          {activeSdk === 'MCP' && (
+            <p style={{ fontSize: 12, color: '#aaa', margin: '8px 0 0' }}>
+              Works with Claude Desktop, Cursor, Windsurf, and any MCP-compatible framework
+            </p>
+          )}
         </div>
       </section>
 
       {/* Works with */}
       <section style={{ padding: '0 40px 72px', textAlign: 'center' }}>
         <p style={{ fontSize: 12, color: '#bbb', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 }}>
-          Works with any agent framework
+          Works with any agent framework or language
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          {['OpenAI Agents', 'Claude SDK', 'LangChain', 'LlamaIndex', 'CrewAI', 'AutoGen', 'Custom'].map(f => (
-            <div key={f} style={{
-              padding: '7px 16px', border: '1px solid #e5e5e5', borderRadius: 8,
-              fontSize: 13, color: '#555', background: '#fafafa',
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', maxWidth: 760, margin: '0 auto' }}>
+          {[
+            { label: 'Python SDK', sub: 'pip' },
+            { label: 'TypeScript SDK', sub: 'npm' },
+            { label: 'MCP Server', sub: 'uvx' },
+            { label: 'REST API', sub: 'any language' },
+            { label: 'Claude Desktop', sub: 'via MCP' },
+            { label: 'Cursor', sub: 'via MCP' },
+            { label: 'LangChain', sub: 'Python / JS' },
+            { label: 'CrewAI', sub: 'Python' },
+            { label: 'AutoGen', sub: 'Python' },
+            { label: 'OpenAI Agents', sub: 'Python / JS' },
+            { label: 'LlamaIndex', sub: 'Python' },
+            { label: 'Custom', sub: 'any stack' },
+          ].map(f => (
+            <div key={f.label} style={{
+              padding: '6px 14px', border: '1px solid #e5e5e5', borderRadius: 8,
+              fontSize: 12.5, color: '#555', background: '#fafafa',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
             }}>
-              {f}
+              <span style={{ fontWeight: 500 }}>{f.label}</span>
+              <span style={{ fontSize: 10.5, color: '#bbb' }}>{f.sub}</span>
             </div>
           ))}
         </div>
@@ -231,6 +338,118 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Connect your way */}
+      <section style={{ padding: '72px 40px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
+            Connect your way
+          </h2>
+          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 40 }}>
+            Python, TypeScript, MCP, or raw HTTP. Pick what fits your stack.
+          </p>
+
+          {/* SDK tabs */}
+          <div style={{ display: 'flex', gap: 2, borderBottom: '1px solid #e5e5e5', marginBottom: 0 }}>
+            {SDK_TABS.map(t => (
+              <button key={t} onClick={() => setActiveSdk(t)} style={{
+                padding: '10px 22px', fontSize: 13, fontWeight: 500, border: 'none',
+                background: 'none', cursor: 'pointer',
+                borderBottom: activeSdk === t ? '2px solid #111' : '2px solid transparent',
+                color: activeSdk === t ? '#111' : '#999', marginBottom: -1,
+              }}>
+                {t}
+                {t === 'MCP' && (
+                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 600, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 5px' }}>NEW</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ border: '1px solid #e5e5e5', borderTop: 'none', borderRadius: '0 0 14px 14px', overflow: 'hidden' }}>
+            {/* Tab header */}
+            <div style={{ display: 'flex', alignItems: 'center', padding: '10px 16px', background: '#fafafa', borderBottom: '1px solid #f0f0f0' }}>
+              <span style={{ fontSize: 12, color: '#999', fontFamily: 'monospace' }}>
+                {activeSdk === 'Python' && 'quickstart.py'}
+                {activeSdk === 'TypeScript' && 'quickstart.ts'}
+                {activeSdk === 'MCP' && 'claude_desktop_config.json  /  ~/.cursor/mcp.json'}
+                {activeSdk === 'REST API' && 'terminal'}
+              </span>
+              <button onClick={() => copy(SDK_SNIPPETS[activeSdk], 'sdk')} style={{
+                marginLeft: 'auto', background: '#f0f0f0', border: 'none', borderRadius: 6,
+                padding: '3px 10px', fontSize: 11, cursor: 'pointer', color: '#555',
+              }}>
+                {copied === 'sdk' ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+            <pre style={{
+              margin: 0, padding: '24px', fontSize: 13, lineHeight: 1.75,
+              fontFamily: 'JetBrains Mono, Fira Code, monospace',
+              background: '#fafafa', color: '#333', overflowX: 'auto',
+            }}>
+              {SDK_SNIPPETS[activeSdk]}
+            </pre>
+          </div>
+
+          {/* Per-tab callouts */}
+          {activeSdk === 'Python' && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              {[
+                { label: 'Install', value: 'pip install agentdb-sdk' },
+                { label: 'Requires', value: 'Python 3.10+' },
+                { label: 'Only dependency', value: 'httpx' },
+              ].map(i => (
+                <div key={i.label} style={{ flex: 1, background: '#f8f8f8', borderRadius: 10, padding: '14px 16px', border: '1px solid #ebebeb' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{i.label}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#333' }}>{i.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {activeSdk === 'TypeScript' && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              {[
+                { label: 'Install', value: 'npm install agentdb-sdk' },
+                { label: 'Works with', value: 'Node.js, Deno, Bun, Edge' },
+                { label: 'Only dependency', value: 'node-fetch / fetch' },
+              ].map(i => (
+                <div key={i.label} style={{ flex: 1, background: '#f8f8f8', borderRadius: 10, padding: '14px 16px', border: '1px solid #ebebeb' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{i.label}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 13, color: '#333' }}>{i.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {activeSdk === 'MCP' && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              {[
+                { label: 'Claude Desktop', value: '~/Library/Application Support/Claude/claude_desktop_config.json' },
+                { label: 'Cursor', value: '~/.cursor/mcp.json' },
+                { label: 'No install needed', value: 'uvx runs it on-demand' },
+              ].map(i => (
+                <div key={i.label} style={{ flex: 1, background: '#f8f8f8', borderRadius: 10, padding: '14px 16px', border: '1px solid #ebebeb' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{i.label}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#333' }}>{i.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          {activeSdk === 'REST API' && (
+            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+              {[
+                { label: 'Base URL', value: 'https://agentdb.zizka.ai/v1/' },
+                { label: 'Auth header', value: 'Authorization: Bearer agdb_live_...' },
+                { label: 'Works with', value: 'Go, Rust, Ruby, Java, PHP, any HTTP client' },
+              ].map(i => (
+                <div key={i.label} style={{ flex: 1, background: '#f8f8f8', borderRadius: 10, padding: '14px 16px', border: '1px solid #ebebeb' }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>{i.label}</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#333' }}>{i.value}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
