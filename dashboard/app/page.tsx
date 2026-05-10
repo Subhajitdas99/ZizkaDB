@@ -61,7 +61,7 @@ chain.print()`,
 // log_event  · search_memory  · get_context
 // why        · time_travel    · memory_diff  · forget`,
 
-  'REST API': `# Works in Python, Go, Ruby, Rust, Java — anything with HTTP
+  'REST API': `# Works in Python, Go, Ruby, Rust, Java, or anything with HTTP
 
 curl -X POST https://agentdb.zizka.ai/v1/events \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
@@ -90,7 +90,7 @@ tool = await db.log(agent="support-bot", event="tool_call",
     data={"tool": "get_billing", "user": 123},
     parent_id=msg.event_id)          # ← causal link
 
-# 3. Ask why — at any time, for any event
+# 3. Ask why, at any time, for any event
 chain = await db.why(tool.event_id)
 chain.print()
 # user_message: "why is my bill $200?"     [14:32:01]
@@ -117,7 +117,7 @@ async def run(user_input: str):
         messages=[{"role": "user", "content": user_input}],
     )
 
-    # Log Claude's reply — causally linked to the input
+    # Log Claude's reply, causally linked to the input
     await db.log(
         agent="claude-3-5-sonnet",
         event="assistant_response",
@@ -208,7 +208,7 @@ export default function LandingPage() {
           fontSize: 13, color: '#555', marginBottom: 28,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-          Now live — agentdb.zizka.ai
+          Now live: agentdb.zizka.ai
         </div>
 
         <h1 style={{ fontSize: 54, fontWeight: 700, lineHeight: 1.1, margin: '0 0 20px', letterSpacing: -1.5 }}>
@@ -216,12 +216,12 @@ export default function LandingPage() {
           <span style={{ color: '#888' }}>developers shipping AI agents</span>
         </h1>
 
-        <p style={{ fontSize: 17, color: '#555', lineHeight: 1.75, margin: '0 0 16px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
+        <p style={{ fontSize: 17, color: '#333', lineHeight: 1.75, margin: '0 0 16px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
           Debug any decision. Replay any session. Catch drift before users do.
         </p>
-        <p style={{ fontSize: 15, color: '#888', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-          AgentDB gives you causal lineage, time travel, and semantic search over your agent&apos;s full history —
-          primitives that no generic database provides out of the box.
+        <p style={{ fontSize: 15, color: '#555', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
+          AgentDB gives you causal lineage, time travel, and semantic search over your agent&apos;s full history.
+          Primitives that no generic database provides out of the box.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
@@ -305,7 +305,7 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
             Three moments you will need this
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 56 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 56 }}>
             Every developer shipping agents hits these. AgentDB solves all three.
           </p>
 
@@ -315,7 +315,7 @@ export default function LandingPage() {
                 num: '01',
                 title: 'Something went wrong in production',
                 pain: 'Your agent gave a wrong answer. You have no idea what it was looking at, what tools it called, or why.',
-                fix: 'Call db.why(event_id) and get the full causal chain back to the original user message — in one line.',
+                fix: 'Call db.why(event_id) and get the full causal chain back to the original user message, in one line.',
               },
               {
                 num: '02',
@@ -333,7 +333,7 @@ export default function LandingPage() {
               <div key={s.num} style={{ background: '#fff', borderRadius: 14, padding: '28px 24px', border: '1px solid #e5e5e5' }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#bbb', letterSpacing: 1, marginBottom: 12 }}>{s.num}</div>
                 <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, lineHeight: 1.4 }}>{s.title}</div>
-                <div style={{ fontSize: 13.5, color: '#888', lineHeight: 1.6, marginBottom: 16 }}>{s.pain}</div>
+                <div style={{ fontSize: 13.5, color: '#555', lineHeight: 1.6, marginBottom: 16 }}>{s.pain}</div>
                 <div style={{ fontSize: 13.5, color: '#16a34a', lineHeight: 1.6, fontWeight: 500 }}>✓ {s.fix}</div>
               </div>
             ))}
@@ -347,7 +347,7 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
             Connect your way
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 40 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 40 }}>
             Python, TypeScript, MCP, or raw HTTP. Pick what fits your stack.
           </p>
 
@@ -459,7 +459,7 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 30, fontWeight: 700, marginBottom: 8, letterSpacing: -0.5, textAlign: 'center' }}>
             Three lines to full agent observability
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 36 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 36 }}>
             Log → link → ask why. Works with any agent, any model.
           </p>
           <div style={{ border: '1px solid #e5e5e5', borderRadius: 16, overflow: 'hidden', boxShadow: '0 4px 40px rgba(0,0,0,0.05)' }}>
@@ -492,12 +492,12 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 30, fontWeight: 700, marginBottom: 8, letterSpacing: -0.5, textAlign: 'center' }}>
             Already using Claude or OpenAI?
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 12 }}>
-            Neither Anthropic nor OpenAI store what your agent did, why it did it, or what happened next.
-            AgentDB fills that gap — two extra lines per call.
+          <p style={{ textAlign: 'center', color: '#444', fontSize: 15, marginBottom: 12 }}>
+            Claude and OpenAI now offer built-in chat memory. AgentDB is different: it gives your code full
+            observability over every decision your agent made, why it made it, and what triggered it.
           </p>
-          <p style={{ textAlign: 'center', fontSize: 13, color: '#bbb', marginBottom: 40 }}>
-            No wrappers. No monkey-patching. Just log the events you care about with a parent_id to link them.
+          <p style={{ textAlign: 'center', fontSize: 13, color: '#666', marginBottom: 40 }}>
+            No wrappers. No monkey-patching. Log the events you care about with a parent_id to link them causally.
           </p>
 
           {/* Tabs */}
@@ -556,14 +556,14 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
             What vector databases cannot do
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 56 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 56 }}>
             Vector databases store embeddings. AgentDB stores what your agent did, why it did it, and what happened next.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               { icon: '🔍', title: 'Causal Lineage', desc: 'Every event links to its cause. Trace back from any agent output to the exact user input that triggered it.' },
               { icon: '⏪', title: 'Time Travel', desc: "Reconstruct your agent's exact state at any past moment. Useful for debugging sessions from days ago." },
-              { icon: '🧠', title: 'Semantic Search', desc: 'Search all agent history in plain text. No schema design needed — query by meaning, not keywords.' },
+              { icon: '🧠', title: 'Semantic Search', desc: 'Search all agent history in plain text. No schema design needed. Query by meaning, not keywords.' },
               { icon: '🚨', title: 'Drift Detection', desc: 'Get notified when an agent starts behaving differently from its baseline. Catch regressions before users do.' },
               { icon: '🤝', title: 'Agent Handoff', desc: 'When agents hand off tasks, pass only the causally relevant context. Stops the full-history-in-prompt pattern.' },
               { icon: '📋', title: 'Audit Log', desc: 'Every event is SHA-256 checksummed and append-only. Export a signed audit trail at any time.' },
@@ -571,7 +571,7 @@ export default function LandingPage() {
               <div key={f.title} style={{ borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5' }}>
                 <div style={{ fontSize: 26, marginBottom: 12 }}>{f.icon}</div>
                 <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{f.title}</div>
-                <div style={{ fontSize: 13.5, color: '#666', lineHeight: 1.6 }}>{f.desc}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{f.desc}</div>
               </div>
             ))}
           </div>
@@ -584,11 +584,11 @@ export default function LandingPage() {
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
             How it compares
           </h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 8 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 8 }}>
             Facts only. Every row is verifiable in each product&apos;s official documentation.
           </p>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#bbb', marginBottom: 40 }}>
-            LangSmith · Mem0 · Pinecone · AgentDB — as of May 2026
+            LangSmith · Mem0 · Pinecone · AgentDB, as of May 2026
           </p>
 
           <div style={{ border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden' }}>
@@ -612,7 +612,7 @@ export default function LandingPage() {
                 {[
                   ['Agent event logging',                    '✓', '✗', '✗', '✓'],
                   ['Causal lineage (parent → child)',        '~', '✗', '✗', '✓'],
-                  ['Time travel — state at timestamp',       '✗', '✗', '✗', '✓'],
+                  ['Time travel: state at timestamp',        '✗', '✗', '✗', '✓'],
                   ['Semantic search over history',           '✗', '✓', '✓', '✓'],
                   ['Works with any framework/model',         '~', '✓', '✓', '✓'],
                   ['Behavioral drift detection',             '✗', '✗', '✗', '✓'],
@@ -648,7 +648,7 @@ export default function LandingPage() {
       <section id="pricing" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>Pricing</h2>
-          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 48 }}>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48 }}>
             Self-host for free forever. Pay for managed hosting when you need it.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>

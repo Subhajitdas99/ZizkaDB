@@ -60,7 +60,7 @@ export default function DocsPage() {
 
           {/* Quickstart */}
           <section id="quickstart">
-            <H2>Quickstart — Managed Service</H2>
+            <H2>Quickstart: Managed Service</H2>
             <p style={P}>Sign up at <a href="https://agentdb.zizka.ai/login" style={A}>agentdb.zizka.ai</a>, get your API key, and log your first event in 2 minutes.</p>
             <Code>{`pip install agentdb-sdk`}</Code>
             <Code>{`from agentdb import AgentDB
@@ -90,7 +90,7 @@ print(result.event_id)  # ✓ logged`}</Code>
               <li>OpenAI API key (for auto-embeddings)</li>
             </ul>
 
-            <H3>Step 1 — Clone and configure</H3>
+            <H3>Step 1: Clone and configure</H3>
             <Code>{`git clone https://github.com/Zizka-ai/agentdb
 cd agentdb
 cp .env.example .env`}</Code>
@@ -98,24 +98,24 @@ cp .env.example .env`}</Code>
             <Code>{`OPENAI_API_KEY=sk-...          # for auto-embeddings
 JWT_SECRET=your-random-32-char-secret
 
-# Optional — email for OTP login (Gmail app password)
+# Optional: email for OTP login (Gmail app password)
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=465
 EMAIL_USER=you@gmail.com
 EMAIL_PASS=your-app-password`}</Code>
 
-            <H3>Step 2 — Start the stack</H3>
+            <H3>Step 2: Start the stack</H3>
             <Code>{`docker-compose -f infra/docker-compose.yml up --build`}</Code>
             <p style={P}>This starts Postgres (with pgvector), Qdrant, Redis, and the API together. API available at <code style={IC}>http://localhost:8000</code></p>
 
-            <H3>Step 3 — Verify it is running</H3>
+            <H3>Step 3: Verify it is running</H3>
             <Code>{`curl http://localhost:8000/health
 # {"status":"ok","version":"0.1.0"}`}</Code>
 
             <H3>Connect your SDK to self-hosted</H3>
             <Code>{`from agentdb import AgentDB
 
-# Point to your local instance — no API key needed
+# Self-hosted: no API key needed
 db = AgentDB(host="http://localhost:8000")
 
 await db.log(agent="my-bot", event="started", data={"v": "1.0"})`}</Code>
@@ -128,24 +128,24 @@ await db.log(agent="my-bot", event="started", data={"v": "1.0"})`}</Code>
             <H2>Python SDK</H2>
             <Code>{`pip install agentdb-sdk`}</Code>
 
-            <H3>db.log() — Log an event</H3>
+            <H3>db.log(): log an event</H3>
             <Code>{`result = await db.log(
     agent="my-bot",          # agent identifier
     event="tool_call",       # event type (any string)
     data={"tool": "search"}, # any dict
-    parent_id=prev_event_id, # optional — enables causal lineage
-    session_id="sess_abc",   # optional — groups related events
+    parent_id=prev_event_id, # optional: enables causal lineage
+    session_id="sess_abc",   # optional: groups related events
 )
 # result.event_id, result.timestamp, result.checksum`}</Code>
 
-            <H3>db.why() — Causal chain</H3>
+            <H3>db.why(): causal chain</H3>
             <Code>{`chain = await db.why(event_id, depth=10)
 chain.print()
 # user_message: "why is my bill high?"    [14:32:01]
 #   └── tool_call: get_billing(456)        [14:32:02]
 #       └── agent_response: "anomaly"      [14:32:03]`}</Code>
 
-            <H3>db.search() — Semantic search</H3>
+            <H3>db.search(): semantic search</H3>
             <Code>{`results = await db.search(
     query="customer frustrated about billing",
     agent="support-bot",  # optional filter
@@ -154,7 +154,7 @@ chain.print()
 for event in results:
     print(event.event, event.data, event.score)`}</Code>
 
-            <H3>db.at() — Time travel</H3>
+            <H3>db.at(): time travel</H3>
             <Code>{`from datetime import datetime
 
 state = await db.at(
@@ -163,7 +163,7 @@ state = await db.at(
 )
 print(state.state)   # exact agent state at that moment`}</Code>
 
-            <H3>db.query() — Query events</H3>
+            <H3>db.query(): query events</H3>
             <Code>{`events = await db.query(
     agent="my-bot",
     limit=50,
@@ -171,7 +171,7 @@ print(state.state)   # exact agent state at that moment`}</Code>
     after=datetime(2026, 5, 1), # optional time filter
 )`}</Code>
 
-            <H3>db.context_for() — Inject memory into a prompt</H3>
+            <H3>db.context_for(): inject memory into a prompt</H3>
             <p style={P}>Drop-in replacement for LLM-provided memory. Returns a formatted block ready to paste into your system prompt.</p>
             <Code>{`context = await db.context_for(
     agent="support-bot",
@@ -186,7 +186,7 @@ messages = [
     {"role": "user",   "content": user_message},
 ]`}</Code>
 
-            <H3>db.memory_diff() — What changed after a session</H3>
+            <H3>db.memory_diff(): what changed after a session</H3>
             <Code>{`diff = await db.memory_diff("sess_abc123")
 print(diff["summary"])
 # "Session with agent 'support-bot': 12 events over 45s."
@@ -194,7 +194,7 @@ print(diff["event_types"])   # {"tool_call": 3, "user_message": 2, ...}
 print(diff["has_errors"])    # True / False
 print(diff["new_event_types"])  # event types not seen in prior sessions`}</Code>
 
-            <H3>db.forget() — GDPR right to erasure</H3>
+            <H3>db.forget(): GDPR right to erasure</H3>
             <Code>{`# Delete all events for a specific user
 result = await db.forget("user_id", "user_123")
 print(result["deleted_events"])  # e.g. 47
@@ -257,7 +257,7 @@ console.log(r.deletedEvents)`}</Code>
           <section id="mcp">
             <H2>MCP Server</H2>
             <p style={P}>
-              The AgentDB MCP server lets any MCP-compatible agent — Claude Desktop, Cursor, Windsurf, Zed, LangChain MCP, CrewAI, AutoGen — call AgentDB tools natively. No SDK install required inside your agent.
+              The AgentDB MCP server lets any MCP-compatible agent (Claude Desktop, Cursor, Windsurf, Zed, LangChain MCP, CrewAI, AutoGen) call AgentDB tools natively. No SDK install required inside your agent.
             </p>
 
             <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '14px 18px', margin: '0 0 20px', fontSize: 14, color: '#166534' }}>
@@ -324,7 +324,7 @@ console.log(r.deletedEvents)`}</Code>
                     ['query_events', 'List recent events, optionally filtered by type'],
                     ['time_travel', 'Replay exact agent state at any past timestamp'],
                     ['memory_diff', 'Summarise what happened in a session'],
-                    ['forget', 'GDPR erasure — delete all events matching a filter'],
+                    ['forget', 'GDPR erasure: delete all events matching a filter'],
                   ].map(([tool, desc], i) => (
                     <tr key={tool} style={{ borderBottom: i < 7 ? '1px solid #f0f0f0' : 'none' }}>
                       <td style={{ padding: '10px 16px', fontFamily: 'monospace', fontSize: 12.5, color: '#111', fontWeight: 500 }}>{tool}</td>
@@ -341,11 +341,11 @@ console.log(r.deletedEvents)`}</Code>
           {/* REST API quick reference */}
           <section id="rest">
             <H2>REST API</H2>
-            <p style={P}>Use the REST API from any language — Go, Rust, Ruby, Java, PHP, or anything with an HTTP client. All endpoints are at <code style={IC}>https://agentdb.zizka.ai/v1/</code></p>
+            <p style={P}>Use the REST API from any language: Go, Rust, Ruby, Java, PHP, or anything with an HTTP client. All endpoints are at <code style={IC}>https://agentdb.zizka.ai/v1/</code></p>
             <p style={P}>Authentication: <code style={IC}>Authorization: Bearer agdb_live_xxxx</code></p>
 
             <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '12px 16px', margin: '0 0 20px', fontSize: 13, color: '#92400e' }}>
-              Endpoints are at <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/v1/</code> — not <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/api/</code>.
+              Endpoints are at <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/v1/</code> not <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/api/</code>.
             </div>
 
             <H3>Log an event</H3>
@@ -389,7 +389,7 @@ curl https://agentdb.zizka.ai/health
 # Interactive API explorer
 open https://agentdb.zizka.ai/docs`}</Code>
 
-            <H3 id="api-log">POST /v1/events — Log event</H3>
+            <H3 id="api-log">POST /v1/events: log event</H3>
             <Code>{`curl https://agentdb.zizka.ai/v1/events \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
@@ -400,11 +400,11 @@ open https://agentdb.zizka.ai/docs`}</Code>
     "parent_id": "evt_abc123"
   }'`}</Code>
 
-            <H3 id="api-why">GET /v1/events/{'{id}'}/why — Causal chain</H3>
+            <H3 id="api-why">GET /v1/events/{'{id}'}/why: causal chain</H3>
             <Code>{`curl "https://agentdb.zizka.ai/v1/events/evt_abc123/why?depth=10" \\
   -H "Authorization: Bearer agdb_live_xxxx"`}</Code>
 
-            <H3 id="api-search">POST /v1/search — Semantic search</H3>
+            <H3 id="api-search">POST /v1/search: semantic search</H3>
             <Code>{`curl https://agentdb.zizka.ai/v1/search \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
@@ -424,13 +424,13 @@ curl https://agentdb.zizka.ai/api/events  # 404
 
 # Correct
 curl https://agentdb.zizka.ai/v1/events   # 200`}</Code>
-            <p style={P}>The SDK handles the base URL automatically — just pass your API key and it routes correctly.</p>
+            <p style={P}>The SDK handles the base URL automatically. Just pass your API key and it routes correctly.</p>
 
             <H3>Python dependency conflicts?</H3>
             <p style={P}>The <code style={IC}>agentdb</code> package on PyPI only depends on <code style={IC}>httpx</code>. If you see Pillow or fastembed conflicts, you have a different package installed. Fix:</p>
             <Code>{`pip uninstall agentdb
 pip install agentdb-sdk  # installs from agentdb.zizka.ai / PyPI
-# Note: there is an unrelated "agentdb" package on PyPI — install agentdb-sdk`}</Code>
+# Note: there is an unrelated "agentdb" package on PyPI, install agentdb-sdk`}</Code>
 
             <H3>Self-hosted API not responding?</H3>
             <Code>{`# Check containers
@@ -475,7 +475,7 @@ function Code({ children }: { children: React.ReactNode }) {
   )
 }
 
-const P: React.CSSProperties = { fontSize: 15, color: '#555', lineHeight: 1.7, margin: '0 0 16px' }
+const P: React.CSSProperties = { fontSize: 15, color: '#333', lineHeight: 1.7, margin: '0 0 16px' }
 const A: React.CSSProperties = { color: '#111', fontWeight: 500 }
 const IC: React.CSSProperties = {
   fontFamily: 'monospace', fontSize: 13, background: '#f0f0f0',
