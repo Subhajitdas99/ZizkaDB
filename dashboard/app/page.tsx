@@ -102,9 +102,8 @@ export default function LandingPage() {
         </h1>
 
         <p style={{ fontSize: 18, color: '#555', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-          AgentDB is the operational database for AI agents.
-          Causal lineage, time-travel, semantic search — built for the question
-          every agent developer asks but can't answer.
+          AgentDB is a database built for AI agents. It stores every decision,
+          links causes to effects, and lets you search or replay anything your agent did.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -191,10 +190,10 @@ export default function LandingPage() {
       <section style={{ padding: '80px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 style={{ fontSize: 36, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Everything Pinecone can't do
+            What Pinecone does not do
           </h2>
           <p style={{ textAlign: 'center', color: '#777', fontSize: 16, marginBottom: 60 }}>
-            Built specifically for the way agents work — not adapted from a vector DB.
+            Pinecone stores vectors. AgentDB stores what your agent did, why it did it, and what happened next.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
@@ -202,32 +201,32 @@ export default function LandingPage() {
               {
                 icon: '🔍',
                 title: 'Causal Lineage',
-                desc: 'Ask why any event happened. Walk the full causal chain from any decision back to the original user message.',
+                desc: 'See the full chain of events behind any agent decision. Trace back from any output to the exact input that triggered it.',
               },
               {
                 icon: '⏪',
                 title: 'Time Travel',
-                desc: 'Reconstruct your agent\'s exact state at any point in the past. Debug what happened at 3pm last Tuesday.',
+                desc: "Reconstruct your agent's exact state at any past moment. Useful for debugging what went wrong at a specific time.",
               },
               {
                 icon: '🧠',
                 title: 'Semantic Search',
-                desc: 'Search your entire agent history with natural language. Find "billing frustration" even if the word billing was never used.',
+                desc: 'Search agent history with plain text. Query across thousands of events without knowing the exact keywords.',
               },
               {
                 icon: '🚨',
-                title: 'Behavioral Drift Detection',
-                desc: 'Know when an agent starts behaving differently from its baseline — before your users notice.',
+                title: 'Drift Detection',
+                desc: 'Get notified when an agent starts behaving differently from how it used to. Catch regressions early.',
               },
               {
                 icon: '🤝',
-                title: 'Agent Handoff Context',
-                desc: 'Pass compressed, causally-prioritised context between agents. Solve the context window problem for good.',
+                title: 'Agent Handoff',
+                desc: 'When one agent hands off to another, pass only the relevant context. No more stuffing the full history into a prompt.',
               },
               {
                 icon: '📋',
-                title: 'Compliance Audit Log',
-                desc: 'Tamper-evident, SHA-256 checksummed event log. Export signed audit trails for GDPR, HIPAA, and SOC2.',
+                title: 'Audit Log',
+                desc: 'Every event is checksummed and append-only. Export a signed audit trail at any time for compliance reviews.',
               },
             ].map(f => (
               <div key={f.title} style={{
@@ -298,10 +297,10 @@ export default function LandingPage() {
       <section id="pricing" style={{ padding: '80px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Simple pricing
+            Pricing
           </h2>
           <p style={{ textAlign: 'center', color: '#777', fontSize: 16, marginBottom: 48 }}>
-            Start free. Pay only for managed hosting — never for features.
+            Self-host for free forever. Pay for managed hosting when you need it.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
@@ -385,10 +384,10 @@ export default function LandingPage() {
           background: '#111', borderRadius: 20, padding: '60px 40px',
         }}>
           <h2 style={{ fontSize: 32, fontWeight: 700, color: '#fff', marginBottom: 16, letterSpacing: -0.5 }}>
-            Run it yourself in 60 seconds
+            Run it on your own server
           </h2>
           <p style={{ color: '#888', fontSize: 16, marginBottom: 32 }}>
-            Full feature set. No account. No credit card. Forever free.
+            Full feature set. No account needed. No usage limits. Free forever.
           </p>
           <div style={{
             background: '#1a1a1a', borderRadius: 10, padding: '16px 20px',

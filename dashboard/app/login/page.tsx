@@ -72,9 +72,10 @@ export default function LoginPage() {
         }}>
           {step === 'email' ? (
             <>
-              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in</h1>
+              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in or create account</h1>
               <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
-                We&apos;ll send a login code to your email.
+                Enter your email. We&apos;ll send a login code. No password needed.
+                New here? Your account is created automatically.
               </p>
               <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
