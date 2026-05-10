@@ -109,8 +109,11 @@ export default function LoginPage() {
                     opacity: loading || !email ? 0.4 : 1,
                   }}
                 >
-                  {loading ? 'Sending...' : 'Send login code →'}
+                  {loading ? 'Sending...' : 'Send code →'}
                 </button>
+                <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center' }}>
+                  We send a 6-digit code to your email. No password needed.
+                </p>
               </form>
             </>
           ) : (

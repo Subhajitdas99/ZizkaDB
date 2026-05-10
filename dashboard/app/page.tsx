@@ -111,7 +111,7 @@ export default function LandingPage() {
             padding: '12px 28px', background: '#111', color: '#fff',
             borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15,
           }}>
-            Start free — managed service →
+            Get started free →
           </Link>
           <Link href="/docs" style={{
             padding: '12px 28px', background: '#fff', color: '#111',
@@ -319,7 +319,7 @@ export default function LandingPage() {
                 price: '$49',
                 sub: 'per month',
                 features: ['100M events stored', '90-day retention', '3 projects', 'Email support'],
-                cta: 'Start free trial →',
+                cta: 'Get started →',
                 href: '/login',
                 highlight: true,
               },
@@ -328,7 +328,7 @@ export default function LandingPage() {
                 price: '$149',
                 sub: 'per month',
                 features: ['1B events stored', '1-year retention', '10 seats', 'Priority support'],
-                cta: 'Start free trial →',
+                cta: 'Get started →',
                 href: '/login',
                 highlight: false,
               },
