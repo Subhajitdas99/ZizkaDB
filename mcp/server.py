@@ -1,0 +1,251 @@
+"""
+AgentDB MCP Server
+
+Exposes AgentDB as MCP tools so any MCP-compatible agent
+(Claude Desktop, Cursor, LangChain MCP, CrewAI, AutoGen, etc.)
+can log events, search memory, replay sessions, and debug decisions
+without installing any SDK.
+
+Configuration (env vars):
+  AGENTDB_HOST     — defaults to https://agentdb.zizka.ai
+  AGENTDB_API_KEY  — your API key (agdb_live_...)
+
+Usage:
+  uvx agentdb-mcp                          # managed service
+  AGENTDB_HOST=http://localhost:8000 uvx agentdb-mcp  # self-hosted
+"""
+
+from __future__ import annotations
+
+import os
+import httpx
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("AgentDB")
+
+_HOST = os.getenv("AGENTDB_HOST", "https://agentdb.zizka.ai").rstrip("/")
+_KEY  = os.getenv("AGENTDB_API_KEY", "")
+
+
+async def _api(method: str, path: str, body: dict | None = None) -> dict:
+    headers = {"Content-Type": "application/json"}
+    if _KEY:
+        headers["Authorization"] = f"Bearer {_KEY}"
+
+    async with httpx.AsyncClient(timeout=15) as client:
+        url = f"{_HOST}/v1{path}"
+        if method == "GET":
+            r = await client.get(url, headers=headers)
+        elif method == "POST":
+            r = await client.post(url, headers=headers, json=body or {})
+        elif method == "DELETE":
+            r = await client.request("DELETE", url, headers=headers, json=body or {})
+        else:
+            raise ValueError(f"Unsupported method: {method}")
+
+    if not r.is_success:
+        return {"error": r.text, "status": r.status_code}
+    return r.json()
+
+
+# ── Tools ──────────────────────────────────────────────────────────────────
+
+
+@mcp.tool()
+async def log_event(
+    agent: str,
+    event: str,
+    data: dict,
+    session_id: str = "",
+    parent_id: str = "",
+) -> dict:
+    """
+    Log an event to AgentDB.
+
+    Use this every time your agent takes an action: a tool call, a decision,
+    a user message, or an agent response. Logging builds the causal graph
+    that powers why(), search_memory(), and get_context().
+
+    Args:
+        agent:      Unique identifier for your agent (e.g. "support-bot")
+        event:      What happened (e.g. "tool_call", "user_message", "decision")
+        data:       Any dict of relevant data (tool name, query, result, etc.)
+        session_id: Groups related events into a session (optional)
+        parent_id:  event_id of the event that caused this one — enables causal lineage (optional)
+
+    Returns:
+        event_id, timestamp, sequence_no, checksum
+    """
+    body: dict = {"agent": agent, "event": event, "data": data}
+    if session_id:
+        body["session_id"] = session_id
+    if parent_id:
+        body["parent_id"] = parent_id
+    return await _api("POST", "/events", body)
+
+
+@mcp.tool()
+async def search_memory(
+    query: str,
+    agent: str = "",
+    limit: int = 10,
+) -> dict:
+    """
+    Semantically search over all logged agent events.
+
+    Finds past decisions, tool calls, conversations, or any event by meaning —
+    not just keyword matching. Useful before a new task to see what happened
+    in similar past situations.
+
+    Args:
+        query: Natural language description of what you're looking for
+        agent: Filter to a specific agent (optional — leave blank to search all)
+        limit: Number of results (default 10, max 50)
+
+    Returns:
+        List of matching events with relevance scores
+    """
+    body: dict = {"query": query, "limit": limit}
+    if agent:
+        body["agent"] = agent
+    return await _api("POST", "/search", body)
+
+
+@mcp.tool()
+async def get_context(
+    agent: str,
+    task: str,
+    max_tokens: int = 2000,
+    session_id: str = "",
+) -> str:
+    """
+    Get a formatted memory context block ready to inject into a system prompt.
+
+    This is the drop-in replacement for LLM-provided memory (Claude Projects,
+    ChatGPT memory). It combines recent events with semantically relevant past
+    events, fits within a token budget, and formats as plain text.
+
+    Typical usage:
+        context = await get_context("support-bot", "user asking about billing")
+        system_prompt = f"You are a support agent.\\n\\n{context}"
+
+    Args:
+        agent:      Your agent identifier
+        task:       What the agent is about to do (guides semantic retrieval)
+        max_tokens: Token budget for the context block (default 2000)
+        session_id: Current session ID to exclude from context (optional)
+
+    Returns:
+        Formatted context string — paste directly into your system prompt
+    """
+    body: dict = {"agent": agent, "task": task, "max_tokens": max_tokens}
+    if session_id:
+        body["session_id"] = session_id
+    result = await _api("POST", "/memory/context", body)
+    if isinstance(result, dict):
+        return result.get("context", "")
+    return str(result)
+
+
+@mcp.tool()
+async def why(event_id: str, depth: int = 10) -> dict:
+    """
+    Trace the causal chain that led to an event.
+
+    Given any event ID, walks back through parent_id links to reconstruct
+    the full decision tree: user message → tool call → result → response.
+    Essential for debugging why an agent did something unexpected.
+
+    Args:
+        event_id: The event you want to explain
+        depth:    How many levels back to trace (default 10)
+
+    Returns:
+        Ordered list of events from root cause to the specified event
+    """
+    return await _api("GET", f"/events/{event_id}/why?depth={depth}")
+
+
+@mcp.tool()
+async def query_events(
+    agent: str,
+    limit: int = 20,
+    event_type: str = "",
+) -> dict:
+    """
+    List recent events for an agent.
+
+    Args:
+        agent:      Agent identifier to query
+        limit:      Number of events to return (default 20)
+        event_type: Filter by event type, e.g. "tool_call" (optional)
+
+    Returns:
+        List of events ordered by time (most recent first)
+    """
+    qs = f"?agent={agent}&limit={limit}"
+    if event_type:
+        qs += f"&event_type={event_type}"
+    return await _api("GET", f"/events{qs}")
+
+
+@mcp.tool()
+async def time_travel(agent: str, timestamp: str) -> dict:
+    """
+    Replay the exact state of an agent at a specific point in time.
+
+    Reconstructs what the agent knew and had done up to that moment.
+    Useful for investigating complaints ("what did the agent tell them at 3pm?")
+    or comparing behaviour across versions.
+
+    Args:
+        agent:     Agent identifier
+        timestamp: ISO 8601 datetime, e.g. "2026-05-10T15:00:00Z"
+
+    Returns:
+        Agent state snapshot at that moment (events, summary, last_event)
+    """
+    return await _api("POST", "/events/at", {"agent": agent, "timestamp": timestamp})
+
+
+@mcp.tool()
+async def memory_diff(session_id: str) -> dict:
+    """
+    Summarise what happened in a session.
+
+    Returns event counts, types seen, causal depth, whether any errors
+    occurred, and event types that had never appeared in prior sessions.
+    Call this at the end of a session to understand what changed.
+
+    Args:
+        session_id: The session to analyse
+
+    Returns:
+        summary, event_types, total_events, has_errors, new_event_types
+    """
+    return await _api("GET", f"/memory/diff/{session_id}")
+
+
+@mcp.tool()
+async def forget(filter_key: str, filter_value: str) -> dict:
+    """
+    Delete all events matching a filter (GDPR right to erasure).
+
+    Removes events from both the database and the vector index.
+    Commonly used to delete all data for a specific user on request.
+
+    Args:
+        filter_key:   Field in event data to match (e.g. "user_id", "email", "session_id")
+        filter_value: Value to match (e.g. "user_123", "alice@example.com")
+
+    Returns:
+        deleted_events count
+    """
+    return await _api("DELETE", "/memory/forget", {
+        "filter_key": filter_key,
+        "filter_value": filter_value,
+    })
+
+
+if __name__ == "__main__":
+    mcp.run()
