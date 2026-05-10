@@ -25,7 +25,9 @@ class CreateAPIKeyBody(BaseModel):
 
 @router.post("/request-otp")
 async def request_otp_route(body: RequestOTPBody):
-    # Simple in-memory rate limit (3 per minute per email)
+    import logging
+    log = logging.getLogger(__name__)
+
     key = body.email.lower()
     _rate_limit[key] = _rate_limit.get(key, 0) + 1
     if _rate_limit[key] > 3:
@@ -33,10 +35,10 @@ async def request_otp_route(body: RequestOTPBody):
 
     try:
         await request_otp(body.email)
-    except Exception:
-        pass  # Never reveal if email exists
-
-    return {"message": "Code sent if email is valid"}
+        return {"message": "Code sent"}
+    except Exception as e:
+        log.error(f"request_otp failed for {body.email}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to send code. Check server logs.")
 
 
 @router.post("/verify-otp")

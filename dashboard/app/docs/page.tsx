@@ -20,7 +20,7 @@ export default function DocsPage() {
           <Link href="#quickstart" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Quickstart</Link>
           <Link href="#sdk" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>SDK</Link>
           <Link href="#api" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>API</Link>
-          <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '7px 16px', background: '#111', borderRadius: 8 }}>
+          <Link href="/signup" style={{ fontSize: 14, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '7px 16px', background: '#111', borderRadius: 8 }}>
             Managed service →
           </Link>
         </div>
@@ -89,19 +89,27 @@ print(result.event_id)  # ✓ logged`}</Code>
               <li>OpenAI API key (for auto-embeddings)</li>
             </ul>
 
-            <H3>Option A — Single container (simplest)</H3>
-            <Code>{`docker run -p 8000:8000 \\
-  -e OPENAI_API_KEY=sk-... \\
-  agentdb/server`}</Code>
-            <p style={P}>API available at <code style={IC}>http://localhost:8000</code></p>
-
-            <H3>Option B — Docker Compose (recommended)</H3>
+            <H3>Step 1 — Clone and configure</H3>
             <Code>{`git clone https://github.com/Zizka-ai/agentdb
 cd agentdb
-cp .env.example .env
-# Add OPENAI_API_KEY to .env
-docker-compose -f infra/docker-compose.yml up`}</Code>
-            <p style={P}>This starts Postgres, Qdrant, Redis, and the API together.</p>
+cp .env.example .env`}</Code>
+            <p style={P}>Open <code style={IC}>.env</code> and set at minimum:</p>
+            <Code>{`OPENAI_API_KEY=sk-...          # for auto-embeddings
+JWT_SECRET=your-random-32-char-secret
+
+# Optional — email for OTP login (Gmail app password)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=465
+EMAIL_USER=you@gmail.com
+EMAIL_PASS=your-app-password`}</Code>
+
+            <H3>Step 2 — Start the stack</H3>
+            <Code>{`docker-compose -f infra/docker-compose.yml up --build`}</Code>
+            <p style={P}>This starts Postgres (with pgvector), Qdrant, Redis, and the API together. API available at <code style={IC}>http://localhost:8000</code></p>
+
+            <H3>Step 3 — Verify it is running</H3>
+            <Code>{`curl http://localhost:8000/health
+# {"status":"ok","version":"0.1.0"}`}</Code>
 
             <H3>Connect your SDK to self-hosted</H3>
             <Code>{`from agentdb import AgentDB

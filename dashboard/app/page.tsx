@@ -75,7 +75,7 @@ export default function LandingPage() {
           }}>
             Sign in
           </Link>
-          <Link href="/login" style={{
+          <Link href="/signup" style={{
             fontSize: 14, fontWeight: 500, color: '#fff',
             textDecoration: 'none', padding: '7px 16px',
             background: '#111', borderRadius: 8,
@@ -107,7 +107,7 @@ export default function LandingPage() {
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/login" style={{
+          <Link href="/signup" style={{
             padding: '12px 28px', background: '#111', color: '#fff',
             borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15,
           }}>
@@ -190,10 +190,10 @@ export default function LandingPage() {
       <section style={{ padding: '80px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 style={{ fontSize: 36, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            What Pinecone does not do
+            What vector databases cannot do
           </h2>
           <p style={{ textAlign: 'center', color: '#777', fontSize: 16, marginBottom: 60 }}>
-            Pinecone stores vectors. AgentDB stores what your agent did, why it did it, and what happened next.
+            Vector databases store embeddings. AgentDB stores what your agent did, why it did it, and what happened next.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
@@ -244,43 +244,55 @@ export default function LandingPage() {
 
       {/* Comparison table */}
       <section style={{ padding: '80px 40px' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 48, letterSpacing: -0.5 }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
             How it compares
           </h2>
+          <p style={{ textAlign: 'center', color: '#777', fontSize: 15, marginBottom: 12 }}>
+            Facts only. Each row is verifiable in the official docs of each product.
+          </p>
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#bbb', marginBottom: 40 }}>
+            Supabase (pgvector) · Pinecone · Mem0 · AgentDB — as of May 2026
+          </p>
 
           <div style={{ border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
               <thead>
                 <tr style={{ background: '#fafafa', borderBottom: '1px solid #e5e5e5' }}>
-                  <th style={{ padding: '14px 20px', textAlign: 'left', fontWeight: 600, color: '#333' }}>Capability</th>
-                  {['Pinecone', 'Mem0', 'AgentDB'].map(h => (
+                  <th style={{ padding: '13px 18px', textAlign: 'left', fontWeight: 600, color: '#333', width: '36%' }}>Capability</th>
+                  {['Supabase', 'Pinecone', 'Mem0', 'AgentDB'].map(h => (
                     <th key={h} style={{
-                      padding: '14px 20px', textAlign: 'center', fontWeight: 600,
-                      color: h === 'AgentDB' ? '#111' : '#888',
+                      padding: '13px 14px', textAlign: 'center', fontWeight: 600,
+                      color: h === 'AgentDB' ? '#111' : '#999',
+                      background: h === 'AgentDB' ? '#f8fffe' : 'transparent',
                     }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {[
-                  ['Vector / semantic search', '✓', '✓', '✓'],
-                  ['Causal lineage (why)', '✗', '✗', '✓'],
-                  ['Time travel & replay', '✗', '✗', '✓'],
-                  ['Cross-agent fleet intelligence', '✗', '✗', '✓'],
-                  ['Behavioral drift detection', '✗', '✗', '✓'],
-                  ['Compliance audit export', '✗', '✗', '✓'],
-                  ['Self-hostable', '✗', '✓', '✓'],
-                  ['Model agnostic', '✓', '✓', '✓'],
+                  // [capability, supabase, pinecone, mem0, agentdb]
+                  ['Vector / semantic search',         '✓', '✓', '✓', '✓'],
+                  ['Structured event storage (SQL)',    '✓', '✗', '✗', '✓'],
+                  ['Causal lineage — ask why',          '✗', '✗', '✗', '✓'],
+                  ['Time travel — state at timestamp',  '✗', '✗', '✗', '✓'],
+                  ['Cross-agent shared memory',         '✗', '✗', '~', '✓'],
+                  ['Behavioral drift detection',        '✗', '✗', '✗', '✓'],
+                  ['Tamper-evident audit log',          '✗', '✗', '✗', '✓'],
+                  ['Self-hostable (free)',               '✓', '✗', '✓', '✓'],
+                  ['Built specifically for AI agents',  '✗', '✗', '~', '✓'],
                 ].map(([cap, ...vals], i) => (
-                  <tr key={cap} style={{ borderBottom: i < 7 ? '1px solid #f0f0f0' : 'none' }}>
-                    <td style={{ padding: '13px 20px', color: '#444' }}>{cap}</td>
+                  <tr key={cap} style={{ borderBottom: i < 8 ? '1px solid #f0f0f0' : 'none' }}>
+                    <td style={{ padding: '12px 18px', color: '#444', fontSize: 13.5 }}>{cap}</td>
                     {vals.map((v, j) => (
                       <td key={j} style={{
-                        padding: '13px 20px', textAlign: 'center',
-                        color: v === '✓' ? (j === 2 ? '#16a34a' : '#aaa') : '#ddd',
-                        fontWeight: j === 2 && v === '✓' ? 600 : 400,
-                        background: j === 2 ? '#fafffe' : 'transparent',
+                        padding: '12px 14px', textAlign: 'center',
+                        color: v === '✓' ? (j === 3 ? '#16a34a' : '#aaa')
+                             : v === '~' ? '#f59e0b'
+                             : '#ddd',
+                        fontWeight: j === 3 && v === '✓' ? 700 : 400,
+                        background: j === 3 ? '#f8fffe' : 'transparent',
+                        fontSize: 15,
                       }}>
                         {v}
                       </td>
@@ -290,6 +302,9 @@ export default function LandingPage() {
               </tbody>
             </table>
           </div>
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#ccc', marginTop: 12 }}>
+            ~ = partial support &nbsp;·&nbsp; ✓ = full support &nbsp;·&nbsp; ✗ = not supported
+          </p>
         </div>
       </section>
 
@@ -320,7 +335,7 @@ export default function LandingPage() {
                 sub: 'per month',
                 features: ['100M events stored', '90-day retention', '3 projects', 'Email support'],
                 cta: 'Get started →',
-                href: '/login',
+                href: '/signup',
                 highlight: true,
               },
               {
@@ -329,7 +344,7 @@ export default function LandingPage() {
                 sub: 'per month',
                 features: ['1B events stored', '1-year retention', '10 seats', 'Priority support'],
                 cta: 'Get started →',
-                href: '/login',
+                href: '/signup',
                 highlight: false,
               },
             ].map(plan => (
@@ -391,11 +406,12 @@ export default function LandingPage() {
           </p>
           <div style={{
             background: '#1a1a1a', borderRadius: 10, padding: '16px 20px',
-            fontFamily: 'monospace', fontSize: 14, color: '#22c55e',
-            textAlign: 'left', marginBottom: 28,
+            fontFamily: 'monospace', fontSize: 13, color: '#22c55e',
+            textAlign: 'left', marginBottom: 28, lineHeight: 1.8,
           }}>
-            <span style={{ color: '#555' }}>$ </span>
-            docker run -p 8000:8000 agentdb/server
+            <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/agentdb</div>
+            <div><span style={{ color: '#555' }}>$ </span>cp .env.example .env &amp;&amp; nano .env</div>
+            <div><span style={{ color: '#555' }}>$ </span>docker-compose -f infra/docker-compose.yml up</div>
           </div>
           <Link href="/docs" style={{
             padding: '12px 28px', background: '#fff', color: '#111',

@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { requestOtp, verifyOtp } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
@@ -21,7 +22,7 @@ export default function LoginPage() {
       await requestOtp(email)
       setStep('otp')
     } catch {
-      setError('Failed to send code. Try again.')
+      setError('Could not send code. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -47,11 +48,11 @@ export default function LoginPage() {
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif',
     }}>
-      <div style={{ width: '100%', maxWidth: 400, padding: '0 24px' }}>
+      <div style={{ width: '100%', maxWidth: 420, padding: '0 24px' }}>
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
             <div style={{
               width: 36, height: 36, borderRadius: 9, background: '#111',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -59,7 +60,7 @@ export default function LoginPage() {
               <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
             </div>
             <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>AgentDB</span>
-          </a>
+          </Link>
           <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
             The operational database for AI agents
           </p>
@@ -72,14 +73,16 @@ export default function LoginPage() {
         }}>
           {step === 'email' ? (
             <>
-              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in</h1>
-              <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
-                Enter your email and we&apos;ll send a 6-digit login code.
+              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>
+                Create your account
+              </h1>
+              <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.6 }}>
+                Enter your email. We send a 6-digit code — no password needed.
               </p>
               <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#555', marginBottom: 6 }}>
-                    Email address
+                    Work email
                   </label>
                   <input
                     type="email"
@@ -98,7 +101,7 @@ export default function LoginPage() {
                     onBlur={e => (e.target.style.borderColor = '#ddd')}
                   />
                 </div>
-                {error && <p style={{ fontSize: 13, color: '#ef4444' }}>{error}</p>}
+                {error && <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{error}</p>}
                 <button
                   type="submit"
                   disabled={loading || !email}
@@ -108,23 +111,25 @@ export default function LoginPage() {
                     opacity: loading || !email ? 0.4 : 1,
                   }}
                 >
-                  {loading ? 'Sending...' : 'Send code →'}
+                  {loading ? 'Sending...' : 'Send verification code →'}
                 </button>
-                <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center' }}>
-                  We send a 6-digit code to your email. No password needed.
+                <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center', margin: 0 }}>
+                  Free to start. No credit card required.
                 </p>
               </form>
             </>
           ) : (
             <>
-              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Check your email</h1>
-              <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
+              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>
+                Verify your email
+              </h1>
+              <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.6 }}>
                 We sent a 6-digit code to <strong style={{ color: '#111' }}>{email}</strong>
               </p>
               <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#555', marginBottom: 6 }}>
-                    Login code
+                    Verification code
                   </label>
                   <input
                     type="text"
@@ -136,7 +141,7 @@ export default function LoginPage() {
                     maxLength={6}
                     style={{
                       width: '100%', boxSizing: 'border-box',
-                      padding: '12px', borderRadius: 9, fontSize: 24,
+                      padding: '12px', borderRadius: 9, fontSize: 28,
                       border: '1px solid #ddd', outline: 'none', color: '#111',
                       background: '#fafafa', textAlign: 'center', letterSpacing: '0.4em',
                       fontFamily: 'monospace',
@@ -145,7 +150,7 @@ export default function LoginPage() {
                     onBlur={e => (e.target.style.borderColor = '#ddd')}
                   />
                 </div>
-                {error && <p style={{ fontSize: 13, color: '#ef4444' }}>{error}</p>}
+                {error && <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{error}</p>}
                 <button
                   type="submit"
                   disabled={loading || otp.length < 6}
@@ -155,7 +160,7 @@ export default function LoginPage() {
                     opacity: loading || otp.length < 6 ? 0.4 : 1,
                   }}
                 >
-                  {loading ? 'Verifying...' : 'Sign in →'}
+                  {loading ? 'Verifying...' : 'Create account →'}
                 </button>
                 <button
                   type="button"
@@ -169,17 +174,11 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 16 }}>
-          No account yet?{' '}
-          <a href="/signup" style={{ color: '#555', textDecoration: 'none', fontWeight: 500 }}>
-            Create one free →
-          </a>
-        </p>
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#ccc', marginTop: 8 }}>
-          Self-hosting?{' '}
-          <a href="/docs" style={{ color: '#aaa', textDecoration: 'none' }}>
-            View setup guide →
-          </a>
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 20 }}>
+          Already have an account?{' '}
+          <Link href="/login" style={{ color: '#555', textDecoration: 'none', fontWeight: 500 }}>
+            Sign in →
+          </Link>
         </p>
       </div>
     </div>
