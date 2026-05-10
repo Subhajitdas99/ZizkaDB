@@ -162,12 +162,133 @@ export class AgentDB {
   }
 
   // ─────────────────────────────────────────
+  // CONTEXT FOR — prompt-ready memory injection
+  // ─────────────────────────────────────────
+
+  /**
+   * Get a formatted memory block ready to inject into a system prompt.
+   * Combines recent events + semantically relevant past events.
+   *
+   * @example
+   * const context = await db.contextFor({
+   *   agent: 'support-bot',
+   *   task: 'user asking about their invoice',
+   * })
+   * const messages = [
+   *   { role: 'system', content: `You are a support agent.\n\n${context}` },
+   *   { role: 'user',   content: userMessage },
+   * ]
+   */
+  async contextFor(options: {
+    agent: string
+    task: string
+    maxTokens?: number
+    sessionId?: string
+  }): Promise<string> {
+    const res = await this.post('/v1/memory/context', {
+      agent: options.agent,
+      task: options.task,
+      max_tokens: options.maxTokens ?? 2000,
+      session_id: options.sessionId ?? null,
+    }) as Record<string, unknown>
+    return (res.context as string) ?? ''
+  }
+
+  /**
+   * Same as contextFor() but returns full metadata including source events and token count.
+   */
+  async contextForFull(options: {
+    agent: string
+    task: string
+    maxTokens?: number
+    sessionId?: string
+  }): Promise<{ context: string; eventCount: number; estimatedTokens: number; sources: unknown[] }> {
+    const res = await this.post('/v1/memory/context', {
+      agent: options.agent,
+      task: options.task,
+      max_tokens: options.maxTokens ?? 2000,
+      session_id: options.sessionId ?? null,
+    }) as Record<string, unknown>
+    return {
+      context: res.context as string,
+      eventCount: res.event_count as number,
+      estimatedTokens: res.estimated_tokens as number,
+      sources: res.sources as unknown[],
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // MEMORY DIFF — what changed after a session
+  // ─────────────────────────────────────────
+
+  /**
+   * Returns a summary of what happened in a session.
+   * Useful after a session ends to understand what patterns emerged.
+   *
+   * @example
+   * const diff = await db.memoryDiff('sess_abc')
+   * console.log(diff.summary)
+   * if (diff.hasErrors) console.warn('Errors detected in session')
+   */
+  async memoryDiff(sessionId: string): Promise<{
+    sessionId: string
+    agent: string
+    eventCount: number
+    eventTypes: Record<string, number>
+    causalDepth: number
+    hasErrors: boolean
+    durationSeconds: number | null
+    newEventTypes: string[]
+    summary: string
+  }> {
+    const res = await this.get(`/v1/memory/diff/${sessionId}`, {}) as Record<string, unknown>
+    return {
+      sessionId: res.session_id as string,
+      agent: res.agent as string,
+      eventCount: res.event_count as number,
+      eventTypes: res.event_types as Record<string, number>,
+      causalDepth: res.causal_depth as number,
+      hasErrors: res.has_errors as boolean,
+      durationSeconds: res.duration_seconds as number | null,
+      newEventTypes: res.new_event_types as string[],
+      summary: res.summary as string,
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // FORGET — GDPR compliance
+  // ─────────────────────────────────────────
+
+  /**
+   * Delete all events where data[filterKey] === filterValue.
+   * Also removes vectors from the search index.
+   * Use for GDPR right-to-erasure requests.
+   *
+   * @example
+   * const result = await db.forget({ filterKey: 'user_id', filterValue: 'user_123' })
+   * console.log(`Deleted ${result.deletedEvents} events`)
+   */
+  async forget(options: {
+    filterKey: string
+    filterValue: string
+  }): Promise<{ deletedEvents: number; message: string }> {
+    const res = await this.delete('/v1/memory/forget', {
+      filter_key: options.filterKey,
+      filter_value: options.filterValue,
+    }) as Record<string, unknown>
+    return {
+      deletedEvents: res.deleted_events as number,
+      message: res.message as string,
+    }
+  }
+
+  // ─────────────────────────────────────────
   // AGENTS
   // ─────────────────────────────────────────
 
   async agents(): Promise<AgentInfo[]> {
     const res = await this.get('/v1/agents', {})
-    return res.map((a: Record<string, unknown>) => ({
+    return (res as Record<string, unknown>[]).map((a) => ({
       agent: a.agent,
       firstSeen: new Date(a.first_seen as string),
       lastSeen: new Date(a.last_seen as string),
@@ -209,6 +330,22 @@ export class AgentDB {
       const res = await fetch(url, {
         method: 'GET',
         headers: this.headers,
+        signal: controller.signal,
+      })
+      return this.handle(res)
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+
+  private async delete(path: string, body: unknown): Promise<unknown> {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), this.timeout)
+    try {
+      const res = await fetch(`${this.baseUrl}${path}`, {
+        method: 'DELETE',
+        headers: this.headers,
+        body: JSON.stringify(body),
         signal: controller.signal,
       })
       return this.handle(res)

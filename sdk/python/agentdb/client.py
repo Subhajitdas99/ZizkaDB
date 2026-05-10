@@ -255,6 +255,124 @@ class AgentDB:
         )
 
     # ─────────────────────────────────────────
+    # CONTEXT FOR — prompt-ready memory injection
+    # ─────────────────────────────────────────
+
+    async def context_for(
+        self,
+        agent: str,
+        task: str,
+        max_tokens: int = 2000,
+        session_id: str | None = None,
+    ) -> str:
+        """
+        Get a formatted memory block ready to inject into a system prompt.
+        Combines recent events + semantically relevant past events.
+
+        Args:
+            agent:      Agent identifier
+            task:       What the agent is about to do (natural language)
+            max_tokens: Token budget for the context block (default 2000)
+            session_id: Current session ID to exclude from context
+
+        Returns:
+            A formatted string — paste directly into your system prompt.
+
+        Example:
+            context = await db.context_for(
+                agent="support-bot",
+                task="user asking about their invoice"
+            )
+            messages = [
+                {"role": "system", "content": f"You are a support agent.\\n\\n{context}"},
+                {"role": "user",   "content": user_message},
+            ]
+        """
+        response = await self._post(
+            "/v1/memory/context",
+            {
+                "agent": agent,
+                "task": task,
+                "max_tokens": max_tokens,
+                "session_id": session_id,
+            },
+        )
+        return response.get("context", "")
+
+    async def context_for_full(
+        self,
+        agent: str,
+        task: str,
+        max_tokens: int = 2000,
+        session_id: str | None = None,
+    ) -> dict:
+        """
+        Same as context_for() but returns the full response including
+        source event references and token count.
+        """
+        return await self._post(
+            "/v1/memory/context",
+            {
+                "agent": agent,
+                "task": task,
+                "max_tokens": max_tokens,
+                "session_id": session_id,
+            },
+        )
+
+    # ─────────────────────────────────────────
+    # MEMORY DIFF — what changed after a session
+    # ─────────────────────────────────────────
+
+    async def memory_diff(self, session_id: str) -> dict:
+        """
+        Returns a summary of what happened in a session and what new
+        patterns emerged compared to prior sessions.
+
+        Args:
+            session_id: The session to analyse
+
+        Returns:
+            Dict with: summary, event_count, event_types, causal_depth,
+                       has_errors, new_event_types, top_events
+
+        Example:
+            diff = await db.memory_diff("sess_abc")
+            print(diff["summary"])
+            # "Session with agent 'support-bot': 12 events over 45s."
+            if diff["has_errors"]:
+                print("Errors detected:", diff["new_event_types"])
+        """
+        return await self._get(f"/v1/memory/diff/{session_id}", {})
+
+    # ─────────────────────────────────────────
+    # FORGET — GDPR compliance
+    # ─────────────────────────────────────────
+
+    async def forget(self, filter_key: str, filter_value: str) -> dict:
+        """
+        Delete all events where data[filter_key] == filter_value.
+        Also removes vectors from the search index.
+
+        Use this for GDPR right-to-erasure requests.
+
+        Args:
+            filter_key:   Field in event data to match (e.g. "user_id", "email")
+            filter_value: Value to match (e.g. "user_123")
+
+        Returns:
+            Dict with deleted_events count and confirmation message
+
+        Example:
+            result = await db.forget("user_id", "user_123")
+            print(result["deleted_events"])  # e.g. 47
+        """
+        return await self._delete(
+            "/v1/memory/forget",
+            {"filter_key": filter_key, "filter_value": filter_value},
+        )
+
+    # ─────────────────────────────────────────
     # AGENTS — list agents
     # ─────────────────────────────────────────
 
@@ -295,6 +413,15 @@ class AgentDB:
         client = await self._get_client()
         try:
             resp = await client.get(path, params=params)
+            return self._handle(resp)
+        finally:
+            if not self._client:
+                await client.aclose()
+
+    async def _delete(self, path: str, body: dict) -> Any:
+        client = await self._get_client()
+        try:
+            resp = await client.request("DELETE", path, json=body)
             return self._handle(resp)
         finally:
             if not self._client:

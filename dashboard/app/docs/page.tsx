@@ -169,6 +169,38 @@ print(state.state)   # exact agent state at that moment`}</Code>
     event_type="tool_call",     # optional filter
     after=datetime(2026, 5, 1), # optional time filter
 )`}</Code>
+
+            <H3>db.context_for() — Inject memory into a prompt</H3>
+            <p style={P}>Drop-in replacement for LLM-provided memory. Returns a formatted block ready to paste into your system prompt.</p>
+            <Code>{`context = await db.context_for(
+    agent="support-bot",
+    task="user asking about their invoice",
+    max_tokens=2000,        # token budget
+    session_id=current_sid, # exclude current session
+)
+
+# Paste directly into your system prompt
+messages = [
+    {"role": "system", "content": f"You are a support agent.\\n\\n{context}"},
+    {"role": "user",   "content": user_message},
+]`}</Code>
+
+            <H3>db.memory_diff() — What changed after a session</H3>
+            <Code>{`diff = await db.memory_diff("sess_abc123")
+print(diff["summary"])
+# "Session with agent 'support-bot': 12 events over 45s."
+print(diff["event_types"])   # {"tool_call": 3, "user_message": 2, ...}
+print(diff["has_errors"])    # True / False
+print(diff["new_event_types"])  # event types not seen in prior sessions`}</Code>
+
+            <H3>db.forget() — GDPR right to erasure</H3>
+            <Code>{`# Delete all events for a specific user
+result = await db.forget("user_id", "user_123")
+print(result["deleted_events"])  # e.g. 47
+
+# Also works by email, session, or any field in event data
+await db.forget("email", "user@company.com")
+await db.forget("session_id", "sess_xyz")`}</Code>
           </section>
 
           <Divider />
@@ -185,8 +217,7 @@ const db = new AgentDB({ host: 'http://localhost:8000' })
 
 // Log
 const result = await db.log({
-  agent: 'my-bot',
-  event: 'tool_call',
+  agent: 'my-bot', event: 'tool_call',
   data: { tool: 'search', query: '...' },
   parentId: prevEventId,
 })
@@ -199,7 +230,24 @@ chain.print()
 const results = await db.search({ query: 'billing issue', limit: 10 })
 
 // Time travel
-const state = await db.at({ agent: 'my-bot', timestamp: new Date('2026-05-01') })`}</Code>
+const state = await db.at({ agent: 'my-bot', timestamp: new Date('2026-05-01') })
+
+// Context injection — drop-in for LLM memory
+const context = await db.contextFor({
+  agent: 'my-bot',
+  task: 'user asking about invoice',
+  maxTokens: 2000,
+})
+// → paste into system prompt
+
+// Memory diff after session
+const diff = await db.memoryDiff('sess_abc')
+console.log(diff.summary)
+console.log(diff.hasErrors)
+
+// GDPR forget
+const r = await db.forget({ filterKey: 'userId', filterValue: 'user_123' })
+console.log(r.deletedEvents)`}</Code>
           </section>
 
           <Divider />
