@@ -43,34 +43,42 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0a0a' }}>
-      <div className="w-full max-w-sm px-6">
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif',
+    }}>
+      <div style={{ width: '100%', maxWidth: 400, padding: '0 24px' }}>
 
         {/* Logo */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-                 style={{ background: '#22c55e' }}>
-              <span className="text-black font-bold text-sm">A</span>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 9, background: '#111',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
             </div>
-            <span className="text-white font-semibold text-xl">AgentDB</span>
-          </div>
-          <p className="text-sm" style={{ color: '#737373' }}>
+            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>AgentDB</span>
+          </a>
+          <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
             The operational database for AI agents
           </p>
         </div>
 
         {/* Card */}
-        <div className="rounded-xl p-8" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
+        <div style={{
+          background: '#fff', borderRadius: 16, padding: '36px 32px',
+          border: '1px solid #e5e5e5', boxShadow: '0 2px 20px rgba(0,0,0,0.05)',
+        }}>
           {step === 'email' ? (
             <>
-              <h1 className="text-white font-semibold text-lg mb-1">Sign in</h1>
-              <p className="text-sm mb-6" style={{ color: '#737373' }}>
-                We'll send a login code to your email.
+              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in</h1>
+              <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
+                We&apos;ll send a login code to your email.
               </p>
-              <form onSubmit={handleRequestOtp} className="space-y-4">
+              <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label className="block text-sm mb-1.5" style={{ color: '#a3a3a3' }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#555', marginBottom: 6 }}>
                     Email address
                   </label>
                   <input
@@ -80,21 +88,25 @@ export default function LoginPage() {
                     placeholder="you@company.com"
                     required
                     autoFocus
-                    className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition"
                     style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #2a2a2a',
+                      width: '100%', boxSizing: 'border-box',
+                      padding: '10px 14px', borderRadius: 9, fontSize: 14,
+                      border: '1px solid #ddd', outline: 'none', color: '#111',
+                      background: '#fafafa',
                     }}
-                    onFocus={e => (e.target.style.borderColor = '#22c55e')}
-                    onBlur={e => (e.target.style.borderColor = '#2a2a2a')}
+                    onFocus={e => (e.target.style.borderColor = '#111')}
+                    onBlur={e => (e.target.style.borderColor = '#ddd')}
                   />
                 </div>
-                {error && <p className="text-sm" style={{ color: '#ef4444' }}>{error}</p>}
+                {error && <p style={{ fontSize: 13, color: '#ef4444' }}>{error}</p>}
                 <button
                   type="submit"
                   disabled={loading || !email}
-                  className="w-full rounded-lg py-2.5 text-sm font-medium text-black transition disabled:opacity-40"
-                  style={{ background: '#22c55e' }}
+                  style={{
+                    padding: '11px', borderRadius: 9, fontSize: 14, fontWeight: 500,
+                    background: '#111', color: '#fff', border: 'none', cursor: 'pointer',
+                    opacity: loading || !email ? 0.4 : 1,
+                  }}
                 >
                   {loading ? 'Sending...' : 'Send login code →'}
                 </button>
@@ -102,13 +114,13 @@ export default function LoginPage() {
             </>
           ) : (
             <>
-              <h1 className="text-white font-semibold text-lg mb-1">Check your email</h1>
-              <p className="text-sm mb-6" style={{ color: '#737373' }}>
-                We sent a 6-digit code to <span style={{ color: '#e5e5e5' }}>{email}</span>
+              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Check your email</h1>
+              <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
+                We sent a 6-digit code to <strong style={{ color: '#111' }}>{email}</strong>
               </p>
-              <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
-                  <label className="block text-sm mb-1.5" style={{ color: '#a3a3a3' }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#555', marginBottom: 6 }}>
                     Login code
                   </label>
                   <input
@@ -119,31 +131,33 @@ export default function LoginPage() {
                     required
                     autoFocus
                     maxLength={6}
-                    className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none font-mono tracking-widest text-center transition"
                     style={{
-                      background: '#1a1a1a',
-                      border: '1px solid #2a2a2a',
-                      fontSize: '22px',
-                      letterSpacing: '0.3em',
+                      width: '100%', boxSizing: 'border-box',
+                      padding: '12px', borderRadius: 9, fontSize: 24,
+                      border: '1px solid #ddd', outline: 'none', color: '#111',
+                      background: '#fafafa', textAlign: 'center', letterSpacing: '0.4em',
+                      fontFamily: 'monospace',
                     }}
-                    onFocus={e => (e.target.style.borderColor = '#22c55e')}
-                    onBlur={e => (e.target.style.borderColor = '#2a2a2a')}
+                    onFocus={e => (e.target.style.borderColor = '#111')}
+                    onBlur={e => (e.target.style.borderColor = '#ddd')}
                   />
                 </div>
-                {error && <p className="text-sm" style={{ color: '#ef4444' }}>{error}</p>}
+                {error && <p style={{ fontSize: 13, color: '#ef4444' }}>{error}</p>}
                 <button
                   type="submit"
                   disabled={loading || otp.length < 6}
-                  className="w-full rounded-lg py-2.5 text-sm font-medium text-black transition disabled:opacity-40"
-                  style={{ background: '#22c55e' }}
+                  style={{
+                    padding: '11px', borderRadius: 9, fontSize: 14, fontWeight: 500,
+                    background: '#111', color: '#fff', border: 'none', cursor: 'pointer',
+                    opacity: loading || otp.length < 6 ? 0.4 : 1,
+                  }}
                 >
                   {loading ? 'Verifying...' : 'Sign in →'}
                 </button>
                 <button
                   type="button"
                   onClick={() => { setStep('email'); setOtp(''); setError('') }}
-                  className="w-full text-sm text-center"
-                  style={{ color: '#737373' }}
+                  style={{ fontSize: 13, color: '#888', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   ← Use a different email
                 </button>
@@ -152,14 +166,10 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p className="text-center text-xs mt-6" style={{ color: '#525252' }}>
+        <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 20 }}>
           Self-hosting?{' '}
-          <a
-            href="https://github.com/Zizka-ai/agentdb"
-            className="underline"
-            style={{ color: '#737373' }}
-          >
-            View on GitHub
+          <a href="/docs" style={{ color: '#555', textDecoration: 'none', fontWeight: 500 }}>
+            View setup guide →
           </a>
         </p>
       </div>
