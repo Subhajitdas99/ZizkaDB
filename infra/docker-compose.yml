@@ -59,6 +59,8 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production}
       ENV: ${ENV:-development}
+      # Set this for local development — accepts requests without signup
+      DEV_API_KEY: ${DEV_API_KEY:-agdb_dev_local}
       # Email — same vars as zizka.ai
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT:-465}
