@@ -175,13 +175,22 @@ def decode_access_token(token: str) -> dict:
 
 async def _send_otp_email(email: str, otp: str) -> None:
     smtp_host = os.getenv("SMTP_HOST")
+
+    # If SMTP is not configured, log the OTP so it can be used during testing.
+    if not smtp_host:
+        print(f"\n{'='*50}")
+        print(f"OTP FOR {email}: {otp}")
+        print(f"(SMTP not configured — check server logs to get the code)")
+        print(f"{'='*50}\n")
+        return
+
     smtp_port = int(os.getenv("SMTP_PORT", 587))
     smtp_user = os.getenv("SMTP_USER")
     smtp_pass = os.getenv("SMTP_PASS")
     from_addr = os.getenv("EMAIL_FROM", "noreply@agentdb.zizka.ai")
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"{otp} — your AgentDB login code"
+    msg["Subject"] = f"{otp} is your AgentDB login code"
     msg["From"] = from_addr
     msg["To"] = email
 
@@ -198,7 +207,7 @@ async def _send_otp_email(email: str, otp: str) -> None:
       </div>
       <p style="color:#888;font-size:12px;margin-top:20px">
         Expires in 15 minutes.<br>
-        If you didn't request this, ignore this email.
+        If you did not request this, ignore this email.
       </p>
     </div>
     """

@@ -1,4 +1,6 @@
-const API = process.env.API_URL ?? 'http://localhost:8000'
+// NEXT_PUBLIC_ prefix makes this available in the browser.
+// Falls back to '' (relative URL) so Nginx can route /v1/ → FastAPI.
+const API = process.env.NEXT_PUBLIC_API_URL ?? ''
 
 async function apiFetch(path: string, token: string, options: RequestInit = {}) {
   const res = await fetch(`${API}${path}`, {
