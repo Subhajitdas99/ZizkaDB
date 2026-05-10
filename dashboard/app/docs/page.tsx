@@ -35,6 +35,7 @@ export default function DocsPage() {
             { label: 'SDK', items: [['Python', '#python'], ['TypeScript', '#typescript']] },
             { label: 'CORE CONCEPTS', items: [['Events', '#events'], ['Causal lineage', '#lineage'], ['Time travel', '#timetravel'], ['Semantic search', '#search']] },
             { label: 'API REFERENCE', items: [['POST /events', '#api-log'], ['GET /events', '#api-query'], ['GET /events/why', '#api-why'], ['POST /search', '#api-search']] },
+            { label: 'HELP', items: [['Troubleshooting', '#troubleshooting']] },
           ].map(section => (
             <div key={section.label} style={{ marginBottom: 28, paddingLeft: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', letterSpacing: 0.8, marginBottom: 8 }}>
@@ -61,7 +62,7 @@ export default function DocsPage() {
           <section id="quickstart">
             <H2>Quickstart — Managed Service</H2>
             <p style={P}>Sign up at <a href="https://agentdb.zizka.ai/login" style={A}>agentdb.zizka.ai</a>, get your API key, and log your first event in 2 minutes.</p>
-            <Code>{`pip install agentdb`}</Code>
+            <Code>{`pip install agentdb-sdk`}</Code>
             <Code>{`from agentdb import AgentDB
 
 db = AgentDB("agdb_live_xxxx")   # your API key
@@ -125,7 +126,7 @@ await db.log(agent="my-bot", event="started", data={"v": "1.0"})`}</Code>
           {/* SDK — Python */}
           <section id="python">
             <H2>Python SDK</H2>
-            <Code>{`pip install agentdb`}</Code>
+            <Code>{`pip install agentdb-sdk`}</Code>
 
             <H3>db.log() — Log an event</H3>
             <Code>{`result = await db.log(
@@ -255,8 +256,20 @@ console.log(r.deletedEvents)`}</Code>
           {/* API Reference */}
           <section id="api">
             <H2>API Reference</H2>
-            <p style={P}>All endpoints are available at <code style={IC}>https://agentdb.zizka.ai</code> (managed) or your self-hosted URL.</p>
-            <p style={P}>Authentication: pass your API key as <code style={IC}>Authorization: Bearer agdb_live_xxxx</code></p>
+            <p style={P}>All endpoints live under <code style={IC}>/v1/</code>. The base URL is <code style={IC}>https://agentdb.zizka.ai</code> for the managed service, or your self-hosted URL.</p>
+            <p style={P}>Authentication: <code style={IC}>Authorization: Bearer agdb_live_xxxx</code></p>
+
+            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '14px 18px', margin: '0 0 24px', fontSize: 14, color: '#92400e' }}>
+              <strong>Common mistake:</strong> endpoints are at <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/v1/events</code> not <code style={{ fontFamily: 'monospace', background: '#fef3c7', padding: '1px 5px', borderRadius: 3 }}>/api/events</code>. The SDK handles this automatically.
+            </div>
+
+            <H3>Verify the API is reachable</H3>
+            <Code>{`# No auth required
+curl https://agentdb.zizka.ai/health
+# → {"status":"ok","version":"0.1.0"}
+
+# Interactive API explorer
+open https://agentdb.zizka.ai/docs`}</Code>
 
             <H3 id="api-log">POST /v1/events — Log event</H3>
             <Code>{`curl https://agentdb.zizka.ai/v1/events \\
@@ -278,6 +291,38 @@ console.log(r.deletedEvents)`}</Code>
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{"query": "billing frustration", "limit": 10}'`}</Code>
+          </section>
+
+          <Divider />
+
+          {/* Troubleshooting */}
+          <section id="troubleshooting">
+            <H2>Troubleshooting</H2>
+
+            <H3>Getting 404 on API calls?</H3>
+            <p style={P}>The API is at <code style={IC}>/v1/</code>, not <code style={IC}>/api/</code>. This catches most people familiar with Next.js apps.</p>
+            <Code>{`# Wrong
+curl https://agentdb.zizka.ai/api/events  # 404
+
+# Correct
+curl https://agentdb.zizka.ai/v1/events   # 200`}</Code>
+            <p style={P}>The SDK handles the base URL automatically — just pass your API key and it routes correctly.</p>
+
+            <H3>Python dependency conflicts?</H3>
+            <p style={P}>The <code style={IC}>agentdb</code> package on PyPI only depends on <code style={IC}>httpx</code>. If you see Pillow or fastembed conflicts, you have a different package installed. Fix:</p>
+            <Code>{`pip uninstall agentdb
+pip install agentdb-sdk  # installs from agentdb.zizka.ai / PyPI
+# Note: there is an unrelated "agentdb" package on PyPI — install agentdb-sdk`}</Code>
+
+            <H3>Self-hosted API not responding?</H3>
+            <Code>{`# Check containers
+docker-compose -f infra/docker-compose.yml ps
+
+# Check logs
+docker-compose -f infra/docker-compose.yml logs api --tail=30
+
+# Restart
+docker-compose -f infra/docker-compose.yml restart api`}</Code>
           </section>
 
           <div style={{ height: 80 }} />

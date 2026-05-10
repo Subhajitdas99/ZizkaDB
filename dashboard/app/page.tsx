@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
-const INSTALL_CMD = 'pip install agentdb'
+const INSTALL_CMD = 'pip install agentdb-sdk'
 
 const QUICKSTART = `from agentdb import AgentDB
 

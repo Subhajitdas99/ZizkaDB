@@ -7,8 +7,10 @@ The operational database for AI agents.
 ## Quickstart
 
 ```bash
-pip install agentdb
+pip install agentdb-sdk
 ```
+
+> **Important:** There is an unrelated package called `agentdb` on PyPI. Install `agentdb-sdk` — the import is still `from agentdb import AgentDB`.
 
 ```python
 from agentdb import AgentDB

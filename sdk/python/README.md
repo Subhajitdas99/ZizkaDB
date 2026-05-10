@@ -1,12 +1,14 @@
-# agentdb
+# agentdb-sdk
 
 Python SDK for [AgentDB](https://agentdb.zizka.ai) — the operational database for AI agents.
 
 ## Install
 
 ```bash
-pip install agentdb
+pip install agentdb-sdk
 ```
+
+> **Note:** There is an unrelated package called `agentdb` on PyPI. Make sure to install `agentdb-sdk` (this package). The import is still `from agentdb import AgentDB`.
 
 ## Quickstart
 
