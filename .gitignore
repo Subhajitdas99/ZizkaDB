@@ -1,0 +1,34 @@
+# Environment
+.env
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+.turbo/
+*.log
+
+# macOS
+.DS_Store
+
+# Docker volumes
+postgres_data/
+qdrant_data/
+redis_data/
+
+# IDE
+.idea/
+.vscode/
+*.swp
