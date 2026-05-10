@@ -174,20 +174,22 @@ def decode_access_token(token: str) -> dict:
 # ─────────────────────────────────────────
 
 async def _send_otp_email(email: str, otp: str) -> None:
-    smtp_host = os.getenv("SMTP_HOST")
+    # Uses the same env var names as zizka.ai (EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM)
+    host = os.getenv("EMAIL_HOST")
+    user = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASS")
 
-    # If SMTP is not configured, log the OTP so it can be used during testing.
-    if not smtp_host:
+    # If SMTP is not configured, print the OTP to server logs for testing.
+    if not host or not user or not password:
         print(f"\n{'='*50}")
         print(f"OTP FOR {email}: {otp}")
-        print(f"(SMTP not configured — check server logs to get the code)")
-        print(f"{'='*50}\n")
+        print(f"(Set EMAIL_HOST / EMAIL_USER / EMAIL_PASS to send real emails)")
+        print(f"{'='*50}\n", flush=True)
         return
 
-    smtp_port = int(os.getenv("SMTP_PORT", 587))
-    smtp_user = os.getenv("SMTP_USER")
-    smtp_pass = os.getenv("SMTP_PASS")
-    from_addr = os.getenv("EMAIL_FROM", "noreply@agentdb.zizka.ai")
+    port = int(os.getenv("EMAIL_PORT", 587))
+    from_addr = os.getenv("EMAIL_FROM", f'"AgentDB" <{user}>')
+    is_ssl = port == 465
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"{otp} is your AgentDB login code"
@@ -196,16 +198,14 @@ async def _send_otp_email(email: str, otp: str) -> None:
 
     text = f"Your AgentDB login code: {otp}\n\nExpires in 15 minutes."
     html = f"""
-    <div style="font-family:monospace;max-width:420px;margin:40px auto;padding:24px">
-      <h2 style="font-size:15px;color:#111;margin-bottom:24px">
-        Your AgentDB login code
-      </h2>
+    <div style="font-family:Arial,sans-serif;max-width:420px;margin:40px auto;padding:24px;background:#fff;border-radius:12px;">
+      <p style="font-size:14px;color:#555;margin:0 0 20px">Your AgentDB login code:</p>
       <div style="font-size:38px;font-weight:700;letter-spacing:10px;
                   background:#f5f5f5;padding:24px;text-align:center;
-                  border-radius:8px;color:#111">
+                  border-radius:8px;color:#111;font-family:monospace">
         {otp}
       </div>
-      <p style="color:#888;font-size:12px;margin-top:20px">
+      <p style="color:#aaa;font-size:12px;margin-top:20px;line-height:1.6">
         Expires in 15 minutes.<br>
         If you did not request this, ignore this email.
       </p>
@@ -215,7 +215,14 @@ async def _send_otp_email(email: str, otp: str) -> None:
     msg.attach(MIMEText(text, "plain"))
     msg.attach(MIMEText(html, "html"))
 
-    with smtplib.SMTP(smtp_host, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.sendmail(from_addr, email, msg.as_string())
+    if is_ssl:
+        import ssl
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(host, port, context=context) as server:
+            server.login(user, password)
+            server.sendmail(from_addr, email, msg.as_string())
+    else:
+        with smtplib.SMTP(host, port) as server:
+            server.starttls()
+            server.login(user, password)
+            server.sendmail(from_addr, email, msg.as_string())
