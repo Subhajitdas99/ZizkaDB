@@ -1,0 +1,98 @@
+export interface AgentDBConfig {
+  apiKey?: string
+  host?: string
+  timeout?: number
+}
+
+export interface LogOptions {
+  agent: string
+  event: string
+  data: Record<string, unknown>
+  parentId?: string
+  sessionId?: string
+  metadata?: Record<string, unknown>
+}
+
+export interface QueryOptions {
+  agent: string
+  limit?: number
+  before?: Date
+  after?: Date
+  eventType?: string
+  sessionId?: string
+}
+
+export interface SearchOptions {
+  query: string
+  agent?: string
+  limit?: number
+}
+
+export interface AtOptions {
+  agent: string
+  timestamp: Date
+}
+
+export interface AgentEvent {
+  eventId: string
+  agent: string
+  timestamp: Date
+  event: string
+  data: Record<string, unknown>
+  parentId: string | null
+  sessionId: string | null
+  sequenceNo: number
+  score?: number
+}
+
+export interface LogResult {
+  eventId: string
+  timestamp: Date
+  sequenceNo: number
+  checksum: string
+}
+
+export interface CausalChain {
+  eventId: string
+  chainLength: number
+  chain: AgentEvent[]
+  print(): void
+}
+
+export interface AgentState {
+  agent: string
+  at: Date
+  eventCount: number
+  state: Record<string, unknown>
+}
+
+export interface AgentInfo {
+  agent: string
+  firstSeen: Date
+  lastSeen: Date
+  eventCount: number
+}
+
+export class AgentDBError extends Error {
+  constructor(
+    message: string,
+    public statusCode?: number,
+  ) {
+    super(message)
+    this.name = 'AgentDBError'
+  }
+}
+
+export class AuthError extends AgentDBError {
+  constructor(message: string) {
+    super(message, 401)
+    this.name = 'AuthError'
+  }
+}
+
+export class NotFoundError extends AgentDBError {
+  constructor(message: string) {
+    super(message, 404)
+    this.name = 'NotFoundError'
+  }
+}
