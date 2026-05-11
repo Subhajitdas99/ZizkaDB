@@ -139,7 +139,8 @@ async def log_event(
 @router.get("")
 async def query_events(
     agent: str,
-    limit: int = Query(default=50, le=1000),
+    limit: int  = Query(default=50, le=1000),
+    offset: int = Query(default=0, ge=0),
     before: datetime | None = None,
     after: datetime | None = None,
     event_type: str | None = None,
@@ -170,7 +171,7 @@ async def query_events(
         params.append(session_id)
         i += 1
 
-    params.append(limit)
+    params.extend([limit, offset])
     where = " AND ".join(conditions)
 
     rows = await pool.fetch(
@@ -180,7 +181,7 @@ async def query_events(
         FROM events
         WHERE {where}
         ORDER BY timestamp DESC
-        LIMIT ${i}
+        LIMIT ${i} OFFSET ${i + 1}
         """,
         *params,
     )

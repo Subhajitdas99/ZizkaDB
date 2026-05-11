@@ -32,7 +32,9 @@ export async function getEvents(
   params: Record<string, string> = {},
 ) {
   const qs = new URLSearchParams({ agent, ...params }).toString()
-  return apiFetch(`/v1/events?${qs}`, token)
+  const data = await apiFetch(`/v1/events?${qs}`, token)
+  // API returns either an array directly or { events: [] }
+  return Array.isArray(data) ? data : (data as { events?: unknown[] }).events ?? []
 }
 
 export async function getWhyChain(token: string, eventId: string) {

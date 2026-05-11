@@ -76,6 +76,21 @@ services:
       - ../core:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
+  dashboard:
+    build:
+      context: ../dashboard
+      dockerfile: Dockerfile
+      args:
+        # Browser calls the API at this URL — defaults to localhost for self-hosted
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    container_name: agentdb_dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+    depends_on:
+      - api
+
 volumes:
   postgres_data:
   qdrant_data:

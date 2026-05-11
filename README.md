@@ -25,12 +25,26 @@ print(await db.why("my-bot"))
 
 ## Self-Host
 
+**One-click deploy (Railway):**
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/agentdb)
+
+**Docker Compose (any VPS or local):**
+
 ```bash
 git clone https://github.com/Zizka-ai/agentdb
 cd agentdb
-cp .env.example .env
-docker-compose up
+cp .env.example infra/.env        # add OPENAI_API_KEY at minimum
+docker-compose -f infra/docker-compose.yml up -d
 ```
+
+Then open:
+- **Dashboard** → `http://localhost:3000` — event logs, causal chains, agent activity
+- **API** → `http://localhost:8000` — REST API
+
+No signup required. Your data stays on your machine.
+
+> **Opt out of anonymous telemetry:** `export AGENTDB_TELEMETRY=false`
 
 ## Managed Service
 

@@ -18,6 +18,11 @@ Usage:
 from __future__ import annotations
 
 import os
+import sys
+import platform
+import threading
+import uuid
+from pathlib import Path
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -25,6 +30,50 @@ mcp = FastMCP("AgentDB")
 
 _HOST = os.getenv("AGENTDB_HOST", "https://agentdb.zizka.ai").rstrip("/")
 _KEY  = os.getenv("AGENTDB_API_KEY", "")
+
+# ── Anonymous telemetry (opt-out: AGENTDB_TELEMETRY=false) ────────────────────
+
+def _get_install_id() -> str:
+    try:
+        path = Path.home() / ".agentdb" / "install_id"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            iid = path.read_text().strip()
+            if iid:
+                return iid
+        iid = str(uuid.uuid4())
+        path.write_text(iid)
+        return iid
+    except Exception:
+        return str(uuid.uuid4())
+
+
+def _telemetry_ping() -> None:
+    if os.getenv("AGENTDB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
+        return
+    try:
+        import urllib.request, json
+        mode = "self-hosted" if os.getenv("AGENTDB_HOST") else "cloud"
+        payload = json.dumps({
+            "install_id":  _get_install_id(),
+            "sdk":         "mcp",
+            "sdk_version": "0.1.0",
+            "python":      f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "os":          platform.system(),
+            "mode":        mode,
+        }).encode()
+        req = urllib.request.Request(
+            "https://agentdb.zizka.ai/v1/telemetry",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=3)
+    except Exception:
+        pass
+
+
+threading.Thread(target=_telemetry_ping, daemon=True).start()
 
 
 async def _api(method: str, path: str, body: dict | None = None) -> dict:
