@@ -39,6 +39,70 @@ import { AgentDBError, AuthError, NotFoundError } from './types'
 export * from './types'
 
 const CLOUD_HOST = 'https://agentdb.zizka.ai/api'
+const TELEMETRY_URL = 'https://agentdb.zizka.ai/v1/telemetry'
+const SDK_VERSION = '0.1.0'
+
+let _telemetrySent = false
+
+function _sendTelemetry(mode: 'cloud' | 'self-hosted'): void {
+  if (_telemetrySent) return
+  if (
+    typeof process !== 'undefined' &&
+    /^(false|0|no|off)$/i.test(process.env.AGENTDB_TELEMETRY ?? '')
+  ) return
+
+  _telemetrySent = true
+
+  const payload = {
+    install_id:  _getInstallId(),
+    sdk:         'typescript',
+    sdk_version: SDK_VERSION,
+    node:        typeof process !== 'undefined' ? process.version : 'unknown',
+    os:          typeof process !== 'undefined' ? process.platform : 'unknown',
+    mode,
+  }
+
+  // Fire and forget — never awaited, never throws
+  try {
+    fetch(TELEMETRY_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+      signal:  AbortSignal.timeout(3000),
+    }).catch(() => {})
+  } catch {
+    // ignore
+  }
+}
+
+function _getInstallId(): string {
+  try {
+    // Node.js environment — persist to ~/.agentdb/install_id
+    const { homedir } = require('os') as typeof import('os')
+    const { mkdirSync, readFileSync, writeFileSync, existsSync } = require('fs') as typeof import('fs')
+    const { join } = require('path') as typeof import('path')
+    const dir = join(homedir(), '.agentdb')
+    const file = join(dir, 'install_id')
+    mkdirSync(dir, { recursive: true })
+    if (existsSync(file)) {
+      const id = readFileSync(file, 'utf8').trim()
+      if (id) return id
+    }
+    const id = _uuid()
+    writeFileSync(file, id)
+    return id
+  } catch {
+    return _uuid()
+  }
+}
+
+function _uuid(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
+}
 
 export class AgentDB {
   private readonly baseUrl: string
@@ -60,6 +124,8 @@ export class AgentDB {
       'Content-Type': 'application/json',
       ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
     }
+
+    _sendTelemetry(config.host ? 'self-hosted' : 'cloud')
   }
 
   // ─────────────────────────────────────────

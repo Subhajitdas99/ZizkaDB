@@ -26,6 +26,20 @@ async def init_db():
     )
     logger.info("Postgres connected")
 
+    await _pg_pool.execute("""
+        CREATE TABLE IF NOT EXISTS sdk_telemetry (
+            install_id   TEXT PRIMARY KEY,
+            sdk          TEXT    NOT NULL DEFAULT 'unknown',
+            sdk_version  TEXT    NOT NULL DEFAULT 'unknown',
+            runtime      TEXT    NOT NULL DEFAULT 'unknown',
+            os           TEXT    NOT NULL DEFAULT 'unknown',
+            mode         TEXT    NOT NULL DEFAULT 'cloud',
+            first_seen   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            last_seen    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            ping_count   INTEGER NOT NULL DEFAULT 1
+        )
+    """)
+
     _redis = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
     logger.info("Redis connected")
 

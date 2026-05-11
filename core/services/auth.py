@@ -12,7 +12,7 @@ from db.connection import get_pool
 
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
 JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "dev-refresh-secret")
-ACCESS_TOKEN_EXPIRE_MINUTES = 15
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
 

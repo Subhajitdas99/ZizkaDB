@@ -30,6 +30,7 @@ from typing import Any
 
 from .models import Event, LogResult, CausalChain, AgentState, AgentInfo
 from .exceptions import AgentDBError, AuthError, NotFoundError, RateLimitError
+from .telemetry import ping as _telemetry_ping
 
 CLOUD_HOST = "https://agentdb.zizka.ai/api"
 
@@ -63,6 +64,8 @@ class AgentDB:
         self._base_url = host.rstrip("/") if host else CLOUD_HOST
         self._timeout = timeout
         self._client: httpx.AsyncClient | None = None
+
+        _telemetry_ping(mode="self-hosted" if host else "cloud")
 
     # ─────────────────────────────────────────
     # CONTEXT MANAGER
