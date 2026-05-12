@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentdb-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MCP server for AgentDB — give any AI agent persistent memory and observability"
 readme = "README.md"
 license = { text = "MIT" }
@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.scripts]
-agentdb-mcp = "server:mcp.run"
+agentdb-mcp = "agentdb_mcp.server:main"
 
 [project.urls]
 Homepage = "https://agentdb.zizka.ai"
@@ -33,4 +33,4 @@ Repository = "https://github.com/Zizka-ai/agentdb"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["server*"]
+include = ["agentdb_mcp*"]

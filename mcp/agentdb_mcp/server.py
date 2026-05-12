@@ -23,6 +23,7 @@ import platform
 import threading
 import uuid
 from pathlib import Path
+
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -57,7 +58,7 @@ def _telemetry_ping() -> None:
         payload = json.dumps({
             "install_id":  _get_install_id(),
             "sdk":         "mcp",
-            "sdk_version": "0.1.0",
+            "sdk_version": "0.1.1",
             "python":      f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             "os":          platform.system(),
             "mode":        mode,
@@ -120,7 +121,7 @@ async def log_event(
         event:      What happened (e.g. "tool_call", "user_message", "decision")
         data:       Any dict of relevant data (tool name, query, result, etc.)
         session_id: Groups related events into a session (optional)
-        parent_id:  event_id of the event that caused this one — enables causal lineage (optional)
+        parent_id:  event_id of the event that caused this one -- enables causal lineage (optional)
 
     Returns:
         event_id, timestamp, sequence_no, checksum
@@ -142,13 +143,13 @@ async def search_memory(
     """
     Semantically search over all logged agent events.
 
-    Finds past decisions, tool calls, conversations, or any event by meaning —
+    Finds past decisions, tool calls, conversations, or any event by meaning --
     not just keyword matching. Useful before a new task to see what happened
     in similar past situations.
 
     Args:
         query: Natural language description of what you're looking for
-        agent: Filter to a specific agent (optional — leave blank to search all)
+        agent: Filter to a specific agent (optional -- leave blank to search all)
         limit: Number of results (default 10, max 50)
 
     Returns:
@@ -185,7 +186,7 @@ async def get_context(
         session_id: Current session ID to exclude from context (optional)
 
     Returns:
-        Formatted context string — paste directly into your system prompt
+        Formatted context string -- paste directly into your system prompt
     """
     body: dict = {"agent": agent, "task": task, "max_tokens": max_tokens}
     if session_id:
@@ -202,7 +203,7 @@ async def why(event_id: str, depth: int = 10) -> dict:
     Trace the causal chain that led to an event.
 
     Given any event ID, walks back through parent_id links to reconstruct
-    the full decision tree: user message → tool call → result → response.
+    the full decision tree: user message -> tool call -> result -> response.
     Essential for debugging why an agent did something unexpected.
 
     Args:
@@ -296,5 +297,9 @@ async def forget(filter_key: str, filter_value: str) -> dict:
     })
 
 
-if __name__ == "__main__":
+def main() -> None:
     mcp.run()
+
+
+if __name__ == "__main__":
+    main()
