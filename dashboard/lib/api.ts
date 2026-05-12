@@ -48,6 +48,19 @@ export async function searchEvents(token: string, query: string, agent?: string)
   })
 }
 
+export async function getAgentSessions(token: string, agentId: string) {
+  return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/sessions`, token)
+}
+
+export async function getMemoryDiff(token: string, sessionId: string) {
+  return apiFetch(`/v1/memory/diff/${encodeURIComponent(sessionId)}`, token)
+}
+
+export async function timeTravel(token: string, agent: string, timestamp: string) {
+  const qs = new URLSearchParams({ agent, timestamp }).toString()
+  return apiFetch(`/v1/events/at?${qs}`, token)
+}
+
 export async function getApiKeys(token: string) {
   return apiFetch('/v1/auth/api-keys', token)
 }
