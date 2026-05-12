@@ -140,7 +140,12 @@ export class AgentDB {
       parent_id: options.parentId ?? null,
       session_id: options.sessionId ?? null,
       metadata: options.metadata ?? null,
-    })
+    }) as {
+      event_id: string
+      timestamp: string
+      sequence_no: number
+      checksum: string
+    }
     return {
       eventId: res.event_id,
       timestamp: new Date(res.timestamp),
@@ -163,7 +168,7 @@ export class AgentDB {
     if (options.eventType) params.event_type = options.eventType
     if (options.sessionId) params.session_id = options.sessionId
 
-    const res = await this.get('/v1/events', params)
+    const res = await this.get('/v1/events', params) as Record<string, unknown>[]
     return res.map(parseEvent)
   }
 
@@ -174,7 +179,11 @@ export class AgentDB {
   async why(eventId: string, depth = 10): Promise<CausalChain> {
     const res = await this.get(`/v1/events/${eventId}/why`, {
       depth: String(depth),
-    })
+    }) as {
+      event_id: string
+      chain_length: number
+      chain: Record<string, unknown>[]
+    }
     const chain = res.chain.map(parseEvent)
 
     return {
@@ -186,7 +195,7 @@ export class AgentDB {
           console.log('(empty chain)')
           return
         }
-        chain.forEach((event, i) => {
+        chain.forEach((event: AgentEvent, i: number) => {
           const indent = '    '.repeat(i)
           const connector = i > 0 ? '└── ' : ''
           const data = JSON.stringify(event.data).slice(0, 60)
@@ -206,7 +215,7 @@ export class AgentDB {
       query: options.query,
       agent: options.agent ?? null,
       limit: options.limit ?? 10,
-    })
+    }) as { results: Record<string, unknown>[] }
     return res.results.map(parseEvent)
   }
 
@@ -218,7 +227,12 @@ export class AgentDB {
     const res = await this.get('/v1/events/at', {
       agent: options.agent,
       timestamp: options.timestamp.toISOString(),
-    })
+    }) as {
+      agent: string
+      at: string
+      event_count: number
+      state: Record<string, unknown>
+    }
     return {
       agent: res.agent,
       at: new Date(res.at),
@@ -399,7 +413,7 @@ export class AgentDB {
   // HTTP HELPERS
   // ─────────────────────────────────────────
 
-  private async post(path: string, body: unknown): Promise<Record<string, unknown>> {
+  private async post(path: string, body: unknown): Promise<unknown> {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), this.timeout)
 

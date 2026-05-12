@@ -7,9 +7,9 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     }
   },
   "files": [
@@ -21,15 +21,25 @@
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "prepublishOnly": "npm run build"
   },
-  "keywords": ["ai", "agents", "database", "memory", "llm", "observability", "drift", "agentdb"],
+  "keywords": [
+    "ai",
+    "agents",
+    "database",
+    "memory",
+    "llm",
+    "observability",
+    "drift",
+    "agentdb"
+  ],
   "author": "Zizka AI",
   "license": "AGPL-3.0",
   "homepage": "https://agentdb.zizka.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Zizka-ai/agentdb"
+    "url": "git+https://github.com/Zizka-ai/agentdb.git"
   },
   "devDependencies": {
+    "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.4.0"
   }
