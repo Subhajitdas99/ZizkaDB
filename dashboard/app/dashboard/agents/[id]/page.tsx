@@ -5,13 +5,14 @@ import { useParams, useRouter } from 'next/navigation'
 import {
   getEvents, getWhyChain, getAgentStats,
   getAgentSessions, getMemoryDiff, timeTravel, searchEvents,
+  getAgentBaseline,
 } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
 import { formatDistanceToNow, format, formatDuration, intervalToDuration } from 'date-fns'
 import {
   ChevronLeft, RefreshCw, Search, Clock, GitBranch,
   BarChart2, Layers, Rewind, ChevronDown, ChevronRight,
-  AlertCircle, Zap, ArrowRight,
+  AlertCircle, Zap, ArrowRight, Activity, TrendingUp, TrendingDown,
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -48,8 +49,46 @@ interface Stats {
 
 interface WhyChain { event_id: string; chain_length: number; chain: Event[] }
 
-type Tab = 'events' | 'sessions' | 'timetravel'
+type Tab = 'behavior' | 'events' | 'sessions' | 'timetravel'
 type PanelTab = 'data' | 'why'
+
+// ── Baseline types ────────────────────────────────────────────────────────────
+
+type DistMap = Record<string, number>
+
+interface BaselineWindow {
+  sessions:               number
+  events:                 number
+  event_distribution:     DistMap
+  transitions:            DistMap
+  avg_events_per_session: number
+  avg_session_seconds:    number
+  error_rate_pct:         number
+}
+
+interface BaselineChange {
+  metric:    string
+  baseline:  number
+  recent:    number
+  delta_pp:  number
+}
+
+interface BaselineResponse {
+  agent:         string
+  status:        'ok' | 'warming_up' | 'insufficient_data'
+  message?:      string
+  sessions:      number
+  recent_window: number
+  baseline?:     BaselineWindow
+  recent?:       BaselineWindow
+  drift?: {
+    score:                      number
+    verdict:                    'stable' | 'minor_drift' | 'noticeable_drift' | 'significant_drift'
+    biggest_changes:            BaselineChange[]
+    error_rate_change_pp:       number
+    session_length_change_pct:  number
+  }
+}
 
 const PAGE = 50
 
@@ -93,6 +132,10 @@ export default function AgentPage() {
   const [ttLoading,    setTtLoading]    = useState(false)
   const [ttResult,     setTtResult]     = useState<Record<string, unknown> | null>(null)
   const [ttError,      setTtError]      = useState('')
+
+  // ── behavior tab state ────────────────────────────────────────────────────
+  const [baseline,        setBaseline]        = useState<BaselineResponse | null>(null)
+  const [baselineLoading, setBaselineLoading] = useState(false)
 
   // ── initial load ──────────────────────────────────────────────────────────
   const loadEvents = useCallback(async (pageNum = 1, append = false, session: string | null = null, type: string | null = null) => {
@@ -210,6 +253,18 @@ export default function AgentPage() {
     } finally { setSessEvLoading(false) }
   }
 
+  // ── behavior / baseline ───────────────────────────────────────────────────
+  const loadBaseline = async () => {
+    if (baseline) return
+    setBaselineLoading(true)
+    let token: string
+    try { token = requireAuth() } catch { return }
+    try {
+      const b = await getAgentBaseline(token, agentId)
+      setBaseline(b)
+    } finally { setBaselineLoading(false) }
+  }
+
   // ── time travel ───────────────────────────────────────────────────────────
   const doTimeTravel = async () => {
     if (!ttTimestamp) { setTtError('Pick a date and time first.'); return }
@@ -239,13 +294,18 @@ export default function AgentPage() {
       {/* ── Tab bar ── */}
       <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
         {([
+          { key: 'behavior',   label: 'Behavior',    icon: Activity, badge: 'NEW' as const },
           { key: 'events',     label: 'Events',      icon: BarChart2 },
           { key: 'sessions',   label: 'Sessions',    icon: Layers },
           { key: 'timetravel', label: 'Time Travel', icon: Rewind },
-        ] as { key: Tab; label: string; icon: React.ElementType }[]).map(({ key, label, icon: Icon }) => (
+        ] as { key: Tab; label: string; icon: React.ElementType; badge?: 'NEW' }[]).map(({ key, label, icon: Icon, badge }) => (
           <button
             key={key}
-            onClick={() => { setTab(key); if (key === 'sessions') loadSessions() }}
+            onClick={() => {
+              setTab(key)
+              if (key === 'sessions') loadSessions()
+              if (key === 'behavior') loadBaseline()
+            }}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition"
             style={{
               background: tab === key ? '#1a1a1a' : 'transparent',
@@ -255,9 +315,25 @@ export default function AgentPage() {
           >
             <Icon size={14} />
             {label}
+            {badge && (
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                    style={{ background: '#f97316', color: '#fff', letterSpacing: 0.5 }}>
+                {badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
+
+      {/* ══════════════════ BEHAVIOR TAB ══════════════════ */}
+      {tab === 'behavior' && (
+        <BehaviorTab
+          baseline={baseline}
+          loading={baselineLoading}
+          agentId={agentId}
+          onRetry={() => { setBaseline(null); loadBaseline() }}
+        />
+      )}
 
       {/* ══════════════════ EVENTS TAB ══════════════════ */}
       {tab === 'events' && (
@@ -762,6 +838,289 @@ function WhyPanel({ chain }: { chain: WhyChain }) {
       </div>
     </div>
   )
+}
+
+// ── Behavior tab ──────────────────────────────────────────────────────────────
+
+function BehaviorTab({ baseline, loading, agentId, onRetry }: {
+  baseline: BaselineResponse | null
+  loading:  boolean
+  agentId:  string
+  onRetry:  () => void
+}) {
+  if (loading || !baseline) return <Skeleton rows={6} />
+
+  if (baseline.status === 'insufficient_data') {
+    return (
+      <div className="rounded-xl p-8 text-center" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
+        <Activity size={32} style={{ color: '#525252', margin: '0 auto 12px' }} />
+        <h3 className="text-base font-medium mb-2" style={{ color: '#e5e5e5' }}>No baseline yet</h3>
+        <p className="text-sm" style={{ color: '#737373' }}>
+          {baseline.message}
+        </p>
+      </div>
+    )
+  }
+
+  const recent_window = baseline.recent_window
+  const sessions      = baseline.sessions
+
+  if (baseline.status === 'warming_up') {
+    const recent = baseline.recent
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl p-5" style={{ background: '#1a0f00', border: '1px solid #f9731640' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Activity size={14} style={{ color: '#f97316' }} />
+            <h3 className="text-sm font-semibold" style={{ color: '#fed7aa' }}>Warming up</h3>
+          </div>
+          <p className="text-sm" style={{ color: '#fdba74' }}>
+            {baseline.message} Drift detection kicks in once <span className="font-mono">{agentId}</span> has more than {recent_window} sessions.
+          </p>
+        </div>
+        {recent && <WindowCard title="Current behavior" subtitle={`${recent.sessions} sessions, ${recent.events} events`} window={recent} highlight />}
+      </div>
+    )
+  }
+
+  const drift    = baseline.drift!
+  const baseW    = baseline.baseline!
+  const recentW  = baseline.recent!
+
+  return (
+    <div className="space-y-5">
+      {/* Drift headline */}
+      <DriftHeadline drift={drift} agentId={agentId} sessions={sessions} recentWindow={recent_window} onRetry={onRetry} />
+
+      {/* Biggest changes */}
+      {drift.biggest_changes.length > 0 && (
+        <div className="rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
+          <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#1f1f1f' }}>
+            <TrendingUp size={13} style={{ color: '#22c55e' }} />
+            <span className="text-sm font-medium text-white">Biggest behavioral changes</span>
+            <span className="text-xs ml-auto" style={{ color: '#525252' }}>
+              recent {recent_window} vs prior {sessions - recent_window} sessions
+            </span>
+          </div>
+          <div className="divide-y" style={{ borderColor: '#1f1f1f' }}>
+            {drift.biggest_changes.map(c => (
+              <ChangeRow key={c.metric} change={c} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Side by side windows */}
+      <div className="grid grid-cols-2 gap-4">
+        <WindowCard
+          title="Baseline"
+          subtitle={`${baseW.sessions} sessions, ${baseW.events} events (older)`}
+          window={baseW}
+        />
+        <WindowCard
+          title="Recent"
+          subtitle={`${recentW.sessions} sessions, ${recentW.events} events (newest ${recent_window})`}
+          window={recentW}
+          highlight
+        />
+      </div>
+    </div>
+  )
+}
+
+function DriftHeadline({ drift, agentId, sessions, recentWindow, onRetry }: {
+  drift:        NonNullable<BaselineResponse['drift']>
+  agentId:      string
+  sessions:     number
+  recentWindow: number
+  onRetry:      () => void
+}) {
+  const verdictMeta = {
+    stable:             { color: '#22c55e', bg: '#0f1f0f', border: '#22c55e40', label: 'Stable',             desc: `${agentId} is behaving consistently with its baseline.` },
+    minor_drift:        { color: '#eab308', bg: '#1a1500', border: '#eab30840', label: 'Minor drift',        desc: `Small shifts in event distribution. Worth a quick look.` },
+    noticeable_drift:   { color: '#f97316', bg: '#1a0f00', border: '#f9731640', label: 'Noticeable drift',   desc: `Recent sessions are diverging from baseline. Investigate before users notice.` },
+    significant_drift:  { color: '#ef4444', bg: '#1a0000', border: '#ef444440', label: 'Significant drift',  desc: `Recent sessions look meaningfully different. Likely a regression.` },
+  }
+  const m = verdictMeta[drift.verdict]
+  const scorePct = Math.round(drift.score * 100)
+
+  return (
+    <div className="rounded-xl p-5" style={{ background: m.bg, border: `1px solid ${m.border}` }}>
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Activity size={14} style={{ color: m.color }} />
+            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: m.color }}>{m.label}</span>
+          </div>
+          <h2 className="text-lg font-semibold" style={{ color: '#fff' }}>
+            Drift score: <span className="font-mono">{drift.score.toFixed(3)}</span>
+            <span className="text-sm font-normal ml-2" style={{ color: '#a3a3a3' }}>({scorePct} / 100)</span>
+          </h2>
+          <p className="text-sm mt-1" style={{ color: '#d4d4d4' }}>{m.desc}</p>
+        </div>
+        <button onClick={onRetry}
+                className="text-xs px-3 py-1.5 rounded-lg transition shrink-0"
+                style={{ background: '#0a0a0a', color: '#a3a3a3', border: '1px solid #2a2a2a' }}>
+          <RefreshCw size={11} className="inline mr-1" />
+          Recompute
+        </button>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-2 rounded-full overflow-hidden mb-3" style={{ background: '#0a0a0a' }}>
+        <div className="h-full rounded-full transition-all"
+             style={{ width: `${Math.min(scorePct, 100)}%`, background: m.color }} />
+      </div>
+
+      {/* Sub-stats */}
+      <div className="grid grid-cols-3 gap-3 mt-4">
+        <SubStat label="Sessions analyzed" value={String(sessions)} sub={`${recentWindow} recent vs ${sessions - recentWindow} prior`} />
+        <SubStat
+          label="Error rate change"
+          value={`${drift.error_rate_change_pp >= 0 ? '+' : ''}${drift.error_rate_change_pp.toFixed(2)}pp`}
+          sub={drift.error_rate_change_pp > 0.5 ? 'Errors are up' : drift.error_rate_change_pp < -0.5 ? 'Errors are down' : 'Effectively unchanged'}
+          tone={drift.error_rate_change_pp > 0.5 ? 'bad' : drift.error_rate_change_pp < -0.5 ? 'good' : 'neutral'}
+        />
+        <SubStat
+          label="Avg session length"
+          value={`${drift.session_length_change_pct >= 0 ? '+' : ''}${drift.session_length_change_pct.toFixed(1)}%`}
+          sub={Math.abs(drift.session_length_change_pct) > 15 ? 'Significant shift' : 'Within normal range'}
+          tone={Math.abs(drift.session_length_change_pct) > 15 ? 'bad' : 'neutral'}
+        />
+      </div>
+    </div>
+  )
+}
+
+function SubStat({ label, value, sub, tone = 'neutral' }: {
+  label: string
+  value: string
+  sub:   string
+  tone?: 'good' | 'bad' | 'neutral'
+}) {
+  const c = tone === 'good' ? '#22c55e' : tone === 'bad' ? '#ef4444' : '#e5e5e5'
+  return (
+    <div className="rounded-lg p-3" style={{ background: '#0a0a0a', border: '1px solid #1f1f1f' }}>
+      <div className="text-xs mb-1" style={{ color: '#737373' }}>{label}</div>
+      <div className="text-base font-semibold font-mono" style={{ color: c }}>{value}</div>
+      <div className="text-xs mt-0.5" style={{ color: '#525252' }}>{sub}</div>
+    </div>
+  )
+}
+
+function ChangeRow({ change }: { change: BaselineChange }) {
+  const isUp   = change.delta_pp > 0
+  const Icon   = isUp ? TrendingUp : TrendingDown
+  const color  = Math.abs(change.delta_pp) > 10 ? '#f97316' : '#a3a3a3'
+
+  const [scope, ...rest] = change.metric.split('.')
+  const detail = rest.join('.')
+  const scopeLabel = scope === 'event_distribution' ? 'event' : scope === 'transitions' ? 'transition' : scope
+
+  return (
+    <div className="px-4 py-2.5 flex items-center gap-3">
+      <Icon size={13} style={{ color }} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2">
+          <span className="text-xs uppercase tracking-wider" style={{ color: '#525252' }}>{scopeLabel}</span>
+          <span className="text-sm font-mono truncate" style={{ color: '#e5e5e5' }}>{detail}</span>
+        </div>
+        <div className="text-xs font-mono mt-0.5" style={{ color: '#525252' }}>
+          {change.baseline.toFixed(2)}% → {change.recent.toFixed(2)}%
+        </div>
+      </div>
+      <div className="text-sm font-semibold font-mono shrink-0" style={{ color }}>
+        {isUp ? '+' : ''}{change.delta_pp.toFixed(2)}pp
+      </div>
+    </div>
+  )
+}
+
+function WindowCard({ title, subtitle, window: w, highlight = false }: {
+  title:    string
+  subtitle: string
+  window:   BaselineWindow
+  highlight?: boolean
+}) {
+  const topEvents      = topN(w.event_distribution, 6)
+  const topTransitions = topN(w.transitions, 5)
+
+  return (
+    <div className="rounded-xl" style={{
+      background:   highlight ? '#0f1f0f' : '#0d0d0d',
+      border:       `1px solid ${highlight ? '#22c55e30' : '#1f1f1f'}`,
+    }}>
+      <div className="px-4 py-3 border-b" style={{ borderColor: highlight ? '#22c55e20' : '#1f1f1f' }}>
+        <div className="text-sm font-semibold" style={{ color: '#fff' }}>{title}</div>
+        <div className="text-xs mt-0.5" style={{ color: '#737373' }}>{subtitle}</div>
+      </div>
+      <div className="p-4 space-y-4">
+        {/* Quick numbers */}
+        <div className="grid grid-cols-3 gap-2">
+          <Mini label="Events / session" value={w.avg_events_per_session.toFixed(1)} />
+          <Mini label="Avg duration"     value={w.avg_session_seconds < 60 ? `${w.avg_session_seconds.toFixed(0)}s` : `${(w.avg_session_seconds / 60).toFixed(1)}m`} />
+          <Mini label="Error rate"       value={`${w.error_rate_pct.toFixed(1)}%`} tone={w.error_rate_pct > 5 ? 'bad' : 'neutral'} />
+        </div>
+
+        {/* Event distribution */}
+        <div>
+          <div className="text-xs font-medium mb-2" style={{ color: '#a3a3a3' }}>Event distribution</div>
+          {topEvents.length === 0 ? (
+            <div className="text-xs" style={{ color: '#525252' }}>No events</div>
+          ) : (
+            <div className="space-y-1.5">
+              {topEvents.map(([type, pct]) => (
+                <DistRow key={type} label={type} pct={pct} color={eventColor(type)} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Top transitions */}
+        {topTransitions.length > 0 && (
+          <div>
+            <div className="text-xs font-medium mb-2" style={{ color: '#a3a3a3' }}>Common decision sequences (parent → child)</div>
+            <div className="space-y-1.5">
+              {topTransitions.map(([key, pct]) => (
+                <DistRow key={key} label={key} pct={pct} color="#3b82f6" />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function DistRow({ label, pct, color }: { label: string; pct: number; color: string }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-0.5">
+        <span className="text-xs font-mono truncate pr-2" style={{ color: '#d4d4d4' }}>{label}</span>
+        <span className="text-xs font-mono shrink-0" style={{ color: '#737373' }}>{pct.toFixed(1)}%</span>
+      </div>
+      <div className="h-1 rounded overflow-hidden" style={{ background: '#0a0a0a' }}>
+        <div className="h-full rounded transition-all"
+             style={{ width: `${Math.min(pct, 100)}%`, background: color, opacity: 0.7 }} />
+      </div>
+    </div>
+  )
+}
+
+function Mini({ label, value, tone = 'neutral' }: { label: string; value: string; tone?: 'bad' | 'neutral' }) {
+  const c = tone === 'bad' ? '#ef4444' : '#e5e5e5'
+  return (
+    <div className="rounded p-2.5" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
+      <div className="text-xs mb-0.5" style={{ color: '#737373' }}>{label}</div>
+      <div className="text-sm font-semibold font-mono" style={{ color: c }}>{value}</div>
+    </div>
+  )
+}
+
+function topN(dist: DistMap, n: number): [string, number][] {
+  return Object.entries(dist)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, n)
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

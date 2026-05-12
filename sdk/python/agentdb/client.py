@@ -385,6 +385,43 @@ class AgentDB:
         return [AgentInfo.from_dict(a) for a in response]
 
     # ─────────────────────────────────────────
+    # BASELINE — behavioral baseline + drift signal
+    # ─────────────────────────────────────────
+
+    async def baseline(self, agent: str, recent_window: int = 50) -> dict:
+        """
+        Get the behavioral baseline for an agent.
+
+        Splits this agent's sessions into two windows: the most recent N
+        sessions (`recent`) and everything older (`baseline`). Returns
+        event-type distribution, parent->child transition distribution,
+        average session shape, and error rate for each window, plus a
+        drift score (0 = identical, 1 = totally different) and the
+        biggest behavioural changes between the two windows.
+
+        Use this to answer "has this agent started behaving differently
+        since I shipped v2?" before users notice.
+
+        Args:
+            agent:         Agent identifier
+            recent_window: Number of most-recent sessions in the "recent"
+                           window. Default 50.
+
+        Returns:
+            Dict with: status, sessions, recent_window, baseline, recent,
+                       drift {score, verdict, biggest_changes, ...}
+
+        Example:
+            b = await db.baseline("support-bot")
+            if b["drift"]["score"] > 0.15:
+                print("Drift detected:", b["drift"]["biggest_changes"])
+        """
+        return await self._get(
+            f"/v1/agents/{agent}/baseline",
+            {"recent_window": recent_window},
+        )
+
+    # ─────────────────────────────────────────
     # HTTP HELPERS
     # ─────────────────────────────────────────
 

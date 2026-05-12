@@ -61,6 +61,18 @@ export async function timeTravel(token: string, agent: string, timestamp: string
   return apiFetch(`/v1/events/at?${qs}`, token)
 }
 
+export async function getAgentBaseline(
+  token: string,
+  agentId: string,
+  recentWindow = 50,
+) {
+  const qs = new URLSearchParams({ recent_window: String(recentWindow) }).toString()
+  return apiFetch(
+    `/v1/agents/${encodeURIComponent(agentId)}/baseline?${qs}`,
+    token,
+  )
+}
+
 export async function getApiKeys(token: string) {
   return apiFetch('/v1/auth/api-keys', token)
 }

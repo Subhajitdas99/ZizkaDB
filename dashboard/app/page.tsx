@@ -204,24 +204,23 @@ export default function LandingPage() {
       <section style={{ padding: '96px 40px 72px', maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: '#f5f5f5', borderRadius: 100, padding: '5px 14px',
-          fontSize: 13, color: '#555', marginBottom: 28,
+          background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 100, padding: '5px 14px',
+          fontSize: 13, color: '#9a3412', marginBottom: 28, fontWeight: 500,
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-          Now live: agentdb.zizka.ai
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
+          New: behavioral baselines on every agent
         </div>
 
         <h1 style={{ fontSize: 54, fontWeight: 700, lineHeight: 1.1, margin: '0 0 20px', letterSpacing: -1.5 }}>
-          The database built for<br />
-          <span style={{ color: '#888' }}>developers shipping AI agents</span>
+          AgentDB tells you when your agent<br />
+          <span style={{ color: '#f97316' }}>stops behaving like itself.</span>
         </h1>
 
-        <p style={{ fontSize: 17, color: '#333', lineHeight: 1.75, margin: '0 0 16px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto' }}>
-          Debug any decision. Replay any session. Catch drift before users do.
+        <p style={{ fontSize: 17, color: '#222', lineHeight: 1.7, margin: '0 0 16px', maxWidth: 620, marginLeft: 'auto', marginRight: 'auto', fontWeight: 500 }}>
+          Agents fail silently. They drift. They regress between deployments and nobody notices until a user complains.
         </p>
-        <p style={{ fontSize: 15, color: '#555', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
-          AgentDB gives you causal lineage, time travel, and semantic search over your agent&apos;s full history.
-          Primitives that no generic database provides out of the box.
+        <p style={{ fontSize: 15, color: '#444', lineHeight: 1.7, margin: '0 0 40px', maxWidth: 600, marginLeft: 'auto', marginRight: 'auto' }}>
+          AgentDB builds a behavioral baseline for every agent you log to it, then surfaces exactly where new sessions diverge from that baseline. Causal lineage, time travel and semantic search are the tools you use to investigate what the baseline flagged.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
@@ -303,37 +302,48 @@ export default function LandingPage() {
       <section style={{ padding: '72px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Three moments you will need this
+            The three moments observability tools fail you
           </h2>
-          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 56 }}>
-            Every developer shipping agents hits these. AgentDB solves all three.
+          <p style={{ textAlign: 'center', color: '#444', fontSize: 15, marginBottom: 56, maxWidth: 640, margin: '0 auto 56px' }}>
+            LangSmith, Langfuse and Arize show you traces after you go looking. AgentDB starts with the one nobody else solves: the agent that quietly stops behaving like itself.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               {
                 num: '01',
-                title: 'Something went wrong in production',
+                title: 'You shipped v2 and your agent quietly regressed',
+                pain: 'Over three days the agent starts giving slightly worse answers in one specific scenario. No error fires. A user eventually complains.',
+                fix: 'AgentDB compares each new session against the baseline distribution of decision patterns and surfaces exactly where v2 diverged from v1.',
+              },
+              {
+                num: '02',
+                title: 'Something went wrong in a single session',
                 pain: 'Your agent gave a wrong answer. You have no idea what it was looking at, what tools it called, or why.',
                 fix: 'Call db.why(event_id) and get the full causal chain back to the original user message, in one line.',
               },
               {
-                num: '02',
-                title: 'You shipped v2 of your agent',
-                pain: "You changed the prompt or model. Is it actually better? You're guessing based on vibes.",
-                fix: 'Query both agents side by side. Compare behavioral patterns over the same inputs using semantic search.',
-              },
-              {
                 num: '03',
-                title: 'A user filed a complaint',
-                pain: "A customer says the agent told them something wrong three days ago. You can't reconstruct the session.",
+                title: 'A user filed a complaint about something three days ago',
+                pain: "A customer says the agent told them something wrong on Tuesday. You can't reconstruct the session.",
                 fix: 'Call db.at(agent, timestamp) to replay the exact agent state at that moment. Every event is checksummed.',
               },
-            ].map(s => (
-              <div key={s.num} style={{ background: '#fff', borderRadius: 14, padding: '28px 24px', border: '1px solid #e5e5e5' }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#bbb', letterSpacing: 1, marginBottom: 12 }}>{s.num}</div>
+            ].map((s, i) => (
+              <div key={s.num} style={{
+                background: '#fff', borderRadius: 14, padding: '28px 24px',
+                border: i === 0 ? '2px solid #f97316' : '1px solid #e5e5e5',
+                position: 'relative',
+              }}>
+                {i === 0 && (
+                  <div style={{
+                    position: 'absolute', top: -10, left: 18,
+                    background: '#f97316', color: '#fff', fontSize: 10, fontWeight: 700,
+                    padding: '2px 9px', borderRadius: 100, letterSpacing: 0.5,
+                  }}>THE ONE NOBODY ELSE SOLVES</div>
+                )}
+                <div style={{ fontSize: 11, fontWeight: 700, color: i === 0 ? '#f97316' : '#bbb', letterSpacing: 1, marginBottom: 12 }}>{s.num}</div>
                 <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, lineHeight: 1.4 }}>{s.title}</div>
-                <div style={{ fontSize: 13.5, color: '#555', lineHeight: 1.6, marginBottom: 16 }}>{s.pain}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6, marginBottom: 16 }}>{s.pain}</div>
                 <div style={{ fontSize: 13.5, color: '#16a34a', lineHeight: 1.6, fontWeight: 500 }}>✓ {s.fix}</div>
               </div>
             ))}
@@ -537,9 +547,9 @@ export default function LandingPage() {
           {/* What you get callouts */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 24 }}>
             {[
-              { label: 'After 1 session', value: 'Full causal chain of every decision' },
-              { label: 'After 10 sessions', value: 'Semantic search across all agent history' },
-              { label: 'After 100 sessions', value: 'Drift detection and behavioral baseline' },
+              { label: 'After 1 session', value: 'Full causal chain of every decision your agent made' },
+              { label: 'After 10 sessions', value: 'Semantic search and time travel across history' },
+              { label: 'After 50 sessions', value: 'Behavioral baseline visible in dashboard. Alerts coming.' },
             ].map(item => (
               <div key={item.label} style={{ background: '#fff', borderRadius: 10, padding: '16px 18px', border: '1px solid #e5e5e5' }}>
                 <div style={{ fontSize: 11, fontWeight: 600, color: '#aaa', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>{item.label}</div>
@@ -615,7 +625,7 @@ export default function LandingPage() {
                   ['Time travel: state at timestamp',        '✗', '✗', '✗', '✓'],
                   ['Semantic search over history',           '✗', '✓', '✓', '✓'],
                   ['Works with any framework/model',         '~', '✓', '✓', '✓'],
-                  ['Behavioral drift detection',             '✗', '✗', '✗', '✓'],
+                  ['Behavioral baseline per agent',          '✗', '✗', '✗', '✓'],
                   ['Cross-agent fleet queries',              '✗', '✗', '✗', '✓'],
                   ['Tamper-evident audit export',            '✗', '✗', '✗', '✓'],
                   ['Self-hostable for free',                 '✓', '✓', '✗', '✓'],

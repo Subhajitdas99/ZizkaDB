@@ -132,8 +132,11 @@ export default function DocsPage() {
             <div>
               <h1 style={S.h1}>Managed Service</h1>
               <p style={S.lead}>
-                The fastest way to get started. Sign up, grab an API key, and your agent has persistent memory and full observability in under 5 minutes.
+                The fastest way to get started. Sign up, grab an API key, and start logging.
               </p>
+              <Callout type="info">
+                <strong>What AgentDB does:</strong> as you log events, it builds a behavioral baseline for each agent: which event types it emits, which decision sequences are normal, what the typical session shape looks like. Each new session is compared against that baseline so you can see when an agent has stopped behaving like itself. Causal lineage, time travel, and semantic search are how you investigate what changed.
+              </Callout>
 
               <Step n={1} title="Create your account">
                 <p style={S.p}>Go to <a href="/signup" style={{ color: '#111', fontWeight: 500 }}>agentdb.zizka.ai/signup</a> and sign in with your email. No password needed.</p>
@@ -266,6 +269,7 @@ chain.print()`}</Code>
                 <div style={{ display: 'grid', gap: 10 }}>
                   {[
                     { method: 'db.log()', desc: 'Log any event. Add parent_id to link it causally to a previous event.' },
+                    { method: 'db.baseline(agent)', desc: 'Get the behavioral baseline for an agent: event distribution, decision-tree shapes, error rate, and how recent sessions compare.' },
                     { method: 'db.why(event_id)', desc: 'Trace the full causal chain from any event back to the root cause.' },
                     { method: 'db.search(query)', desc: 'Semantic search across all agent history. Find events by meaning, not keywords.' },
                     { method: 'db.at(agent, timestamp)', desc: 'Replay exact agent state at any past moment. Every event is checksummed.' },

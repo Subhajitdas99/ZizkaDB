@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentdb-sdk"
-version = "0.1.0"
-description = "The operational database for AI agents"
+version = "0.2.0"
+description = "AgentDB tells you when your agent stops behaving like itself. Causal lineage, time travel and behavioral baselines for any AI agent."
 readme = "README.md"
 license = { text = "AGPL-3.0" }
 requires-python = ">=3.10"

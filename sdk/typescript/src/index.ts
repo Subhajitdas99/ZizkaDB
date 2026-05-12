@@ -40,7 +40,7 @@ export * from './types'
 
 const CLOUD_HOST = 'https://agentdb.zizka.ai/api'
 const TELEMETRY_URL = 'https://agentdb.zizka.ai/v1/telemetry'
-const SDK_VERSION = '0.1.0'
+const SDK_VERSION = '0.2.0'
 
 let _telemetrySent = false
 
@@ -360,6 +360,39 @@ export class AgentDB {
       lastSeen: new Date(a.last_seen as string),
       eventCount: a.event_count,
     }))
+  }
+
+  // ─────────────────────────────────────────
+  // BASELINE — behavioral baseline + drift signal
+  // ─────────────────────────────────────────
+
+  /**
+   * Get the behavioral baseline for an agent.
+   *
+   * Splits this agent's sessions into two windows: the most recent N
+   * sessions (`recent`) and everything older (`baseline`). Returns event-type
+   * distribution, parent->child transition distribution, average session
+   * shape, and error rate for each window, plus a drift score (0 = identical,
+   * 1 = totally different) and the biggest behavioural changes between the
+   * two windows.
+   *
+   * Use this to answer "has this agent started behaving differently since I
+   * shipped v2?" before users notice.
+   *
+   * @example
+   * const b = await db.baseline({ agent: 'support-bot' })
+   * if (b.drift && b.drift.score > 0.15) {
+   *   console.warn('Drift detected:', b.drift.biggest_changes)
+   * }
+   */
+  async baseline(options: {
+    agent: string
+    recentWindow?: number
+  }): Promise<Record<string, unknown>> {
+    const res = await this.get(`/v1/agents/${options.agent}/baseline`, {
+      recent_window: String(options.recentWindow ?? 50),
+    })
+    return res as Record<string, unknown>
   }
 
   // ─────────────────────────────────────────
