@@ -2,7 +2,7 @@
  * AgentDB TypeScript SDK
  *
  * @example
- * import { AgentDB } from 'agentdb'
+ * import { AgentDB } from 'agentdb-sdk'
  *
  * // Cloud
  * const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
@@ -38,9 +38,9 @@ import { AgentDBError, AuthError, NotFoundError } from './types'
 
 export * from './types'
 
-const CLOUD_HOST = 'https://agentdb.zizka.ai/api'
+const CLOUD_HOST = 'https://agentdb.zizka.ai'
 const TELEMETRY_URL = 'https://agentdb.zizka.ai/v1/telemetry'
-const SDK_VERSION = '0.2.0'
+const SDK_VERSION = '0.2.1'
 
 let _telemetrySent = false
 
@@ -355,10 +355,10 @@ export class AgentDB {
   async agents(): Promise<AgentInfo[]> {
     const res = await this.get('/v1/agents', {})
     return (res as Record<string, unknown>[]).map((a) => ({
-      agent: a.agent,
+      agent: a.agent as string,
       firstSeen: new Date(a.first_seen as string),
       lastSeen: new Date(a.last_seen as string),
-      eventCount: a.event_count,
+      eventCount: a.event_count as number,
     }))
   }
 

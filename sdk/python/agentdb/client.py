@@ -32,7 +32,7 @@ from .models import Event, LogResult, CausalChain, AgentState, AgentInfo
 from .exceptions import AgentDBError, AuthError, NotFoundError, RateLimitError
 from .telemetry import ping as _telemetry_ping
 
-CLOUD_HOST = "https://agentdb.zizka.ai/api"
+CLOUD_HOST = "https://agentdb.zizka.ai"
 
 
 class AgentDB:
@@ -250,12 +250,7 @@ class AgentDB:
             "/v1/events/at",
             {"agent": agent, "timestamp": timestamp.isoformat()},
         )
-        return AgentState(
-            agent=response["agent"],
-            at=datetime.fromisoformat(response["at"]),
-            event_count=response["event_count"],
-            state=response["state"],
-        )
+        return AgentState.from_dict(response)
 
     # ─────────────────────────────────────────
     # CONTEXT FOR — prompt-ready memory injection

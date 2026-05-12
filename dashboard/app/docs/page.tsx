@@ -164,33 +164,43 @@ export default function DocsPage() {
                   <div style={{ paddingTop: 20 }}>
                     <p style={S.p}>Install the SDK. It has one dependency (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '1px 5px', borderRadius: 3 }}>httpx</code>) and works with Python 3.10+.</p>
                     <Code lang="bash">pip install agentdb-sdk</Code>
-                    <p style={S.p}>Log your first event:</p>
-                    <Code lang="python">{`from agentdb import AgentDB
+                    <p style={S.p}>Log your first event. This snippet is fully runnable — paste it into a file, set your key, run it.</p>
+                    <Code lang="python">{`import asyncio
+from agentdb import AgentDB
 
 db = AgentDB("agdb_live_xxxx")   # paste your API key here
 
-# Log any agent action
-result = await db.log(
-    agent="my-bot",          # a name for your agent
-    event="tool_call",       # what happened
-    data={"tool": "search", "query": "pricing"},
-)
-print(result.event_id)  # saved`}</Code>
+async def main():
+    # Log any agent action
+    result = await db.log(
+        agent="my-bot",          # a name for your agent
+        event="tool_call",       # what happened
+        data={"tool": "search", "query": "pricing"},
+    )
+    print(result.event_id)       # saved
+
+asyncio.run(main())`}</Code>
+                    <Callout type="info">
+                      <strong>All Python examples below run inside an <code style={{ fontFamily: 'monospace' }}>async def main()</code> wrapped with <code style={{ fontFamily: 'monospace' }}>asyncio.run(main())</code>.</strong> The SDK is async-first because real agents stream events; trying to run <code style={{ fontFamily: 'monospace' }}>await</code> at module level will raise <code style={{ fontFamily: 'monospace' }}>SyntaxError: 'await' outside async function</code>.
+                    </Callout>
                     <p style={S.p}>Link events causally (this is what makes debugging possible):</p>
-                    <Code lang="python">{`# Log the user's message
-msg = await db.log(agent="my-bot", event="user_message",
-    data={"text": "why is my bill $200?"})
+                    <Code lang="python">{`async def main():
+    # Log the user's message
+    msg = await db.log(agent="my-bot", event="user_message",
+        data={"text": "why is my bill $200?"})
 
-# Log the tool call that happened because of it
-tool = await db.log(agent="my-bot", event="tool_call",
-    data={"tool": "get_billing"},
-    parent_id=msg.event_id)  # link to parent
+    # Log the tool call that happened because of it
+    tool = await db.log(agent="my-bot", event="tool_call",
+        data={"tool": "get_billing"},
+        parent_id=msg.event_id)  # link to parent
 
-# Now ask: why did this tool get called?
-chain = await db.why(tool.event_id)
-chain.print()
-# user_message: "why is my bill $200?"   [14:32:01]
-#   tool_call: get_billing               [14:32:02]`}</Code>
+    # Now ask: why did this tool get called?
+    chain = await db.why(tool.event_id)
+    chain.print()
+    # user_message: "why is my bill $200?"   [14:32:01]
+    #   tool_call: get_billing               [14:32:02]
+
+asyncio.run(main())`}</Code>
                     <Callout type="tip">
                       <strong>Tip:</strong> Pass <code style={{ fontFamily: 'monospace' }}>session_id</code> to group all events in one conversation. Later you can call <code style={{ fontFamily: 'monospace' }}>db.memory_diff(session_id)</code> to see what changed.
                     </Callout>
@@ -420,12 +430,16 @@ EMAIL_PASS=your-app-password`}</Code>
               </Step>
 
               <Step n={4} title="Connect the SDK to your instance">
-                <Code lang="python">{`from agentdb import AgentDB
+                <Code lang="python">{`import asyncio
+from agentdb import AgentDB
 
 # No API key needed for self-hosted
 db = AgentDB(host="http://localhost:8000")
 
-await db.log(agent="my-bot", event="started", data={})`}</Code>
+async def main():
+    await db.log(agent="my-bot", event="started", data={})
+
+asyncio.run(main())`}</Code>
                 <p style={S.p}>For TypeScript:</p>
                 <Code lang="typescript">{`import { AgentDB } from 'agentdb-sdk'
 
@@ -462,6 +476,9 @@ npm install && npm run dev
               <p style={S.lead}>
                 AgentDB is built around a few ideas that make debugging agents fundamentally different from debugging normal software.
               </p>
+              <Callout type="info">
+                Python snippets here are reference-style — wrap them in <code style={{ fontFamily: 'monospace' }}>async def main(): ...</code> with <code style={{ fontFamily: 'monospace' }}>asyncio.run(main())</code> at the bottom to make them runnable. See the <a href="#" onClick={(e) => { e.preventDefault(); setSection('managed'); setTab('python') }} style={{ color: '#111', fontWeight: 500 }}>Managed Service → Python</a> tab for the full template.
+              </Callout>
 
               {[
                 {

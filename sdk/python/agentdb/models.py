@@ -87,6 +87,15 @@ class AgentState:
     event_count: int
     state: dict[str, Any]
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "AgentState":
+        return cls(
+            agent=d["agent"],
+            at=datetime.fromisoformat(d["at"]),
+            event_count=d["event_count"],
+            state=d.get("state", {}),
+        )
+
 
 @dataclass
 class AgentInfo:
