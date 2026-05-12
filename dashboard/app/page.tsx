@@ -665,12 +665,12 @@ export default function LandingPage() {
                 cta: 'Setup guide →', href: '/docs', highlight: false,
               },
               {
-                name: 'Pro', price: '$49', sub: 'per month',
+                name: 'Pro', price: '€29', sub: 'per month',
                 features: ['100M events', '90-day retention', '3 projects', 'Email support'],
                 cta: 'Start free →', href: '/signup', highlight: true,
               },
               {
-                name: 'Team', price: '$149', sub: 'per month',
+                name: 'Team', price: '€99', sub: 'per month',
                 features: ['1B events', '1-year retention', '10 seats', 'Priority support'],
                 cta: 'Start free →', href: '/signup', highlight: false,
               },
