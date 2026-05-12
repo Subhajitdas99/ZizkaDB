@@ -658,7 +658,7 @@ export default function LandingPage() {
             Free if you self-host. Paid if you don&apos;t want to.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-            {[
+            {([
               {
                 name: 'Self-Hosted', price: 'Free', sub: 'forever',
                 features: ['Full feature set', 'Your infra', 'Docker Compose', 'Community support'],
@@ -667,14 +667,16 @@ export default function LandingPage() {
               {
                 name: 'Pro', price: '€29', sub: 'per month',
                 features: ['100M events', '90-day retention', '3 projects', 'Email support'],
-                cta: 'Start free →', href: '/signup', highlight: true,
+                cta: 'Start 14-day free trial →', href: '/signup', highlight: true,
+                note: 'No credit card needed',
               },
               {
                 name: 'Team', price: '€99', sub: 'per month',
                 features: ['1B events', '1-year retention', '10 seats', 'Priority support'],
-                cta: 'Start free →', href: '/signup', highlight: false,
+                cta: 'Start 14-day free trial →', href: '/signup', highlight: false,
+                note: 'No credit card needed',
               },
-            ].map(plan => (
+            ] as { name: string; price: string; sub: string; features: string[]; cta: string; href: string; highlight: boolean; note?: string }[]).map(plan => (
               <div key={plan.name} style={{
                 background: '#fff', borderRadius: 14, padding: '32px 28px',
                 border: plan.highlight ? '2px solid #111' : '1px solid #e5e5e5',
@@ -709,6 +711,11 @@ export default function LandingPage() {
                 }}>
                   {plan.cta}
                 </Link>
+                {plan.note && (
+                  <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 8 }}>
+                    {plan.note}
+                  </div>
+                )}
               </div>
             ))}
           </div>
