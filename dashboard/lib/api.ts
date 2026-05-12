@@ -73,6 +73,53 @@ export async function getAgentBaseline(
   )
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin (single-tenant; locked to founder@zizka.ai by the backend)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function adminRequestOtp(email: string) {
+  const res = await fetch(`${API}/v1/admin/auth/request-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail ?? 'Request failed')
+  }
+  return res.json()
+}
+
+export async function adminVerifyOtp(email: string, otp: string) {
+  const res = await fetch(`${API}/v1/admin/auth/verify-otp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, otp }),
+  })
+  if (!res.ok) throw new Error('Invalid code')
+  return res.json()
+}
+
+export async function adminOverview(token: string) {
+  return apiFetch('/v1/admin/overview', token)
+}
+
+export async function adminTelemetrySummary(token: string) {
+  return apiFetch('/v1/admin/telemetry/summary', token)
+}
+
+export async function adminTelemetryRecent(token: string, limit = 50) {
+  return apiFetch(`/v1/admin/telemetry/recent?limit=${limit}`, token)
+}
+
+export async function adminManagedUsers(token: string) {
+  return apiFetch('/v1/admin/managed/users', token)
+}
+
+export async function adminManagedUsage(token: string) {
+  return apiFetch('/v1/admin/managed/usage', token)
+}
+
 export async function getApiKeys(token: string) {
   return apiFetch('/v1/auth/api-keys', token)
 }

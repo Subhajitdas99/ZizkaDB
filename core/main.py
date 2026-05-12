@@ -10,6 +10,7 @@ from api.auth import router as auth_router
 from api.search import router as search_router
 from api.memory import router as memory_router
 from api.telemetry import router as telemetry_router
+from api.admin import router as admin_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -45,6 +46,7 @@ app.include_router(agents_router,    prefix="/v1/agents",    tags=["agents"])
 app.include_router(search_router,    prefix="/v1/search",    tags=["search"])
 app.include_router(memory_router,    prefix="/v1/memory",    tags=["memory"])
 app.include_router(telemetry_router, prefix="/v1/telemetry", tags=["telemetry"])
+app.include_router(admin_router,     prefix="/v1/admin",     include_in_schema=False)
 
 
 @app.get("/health")
