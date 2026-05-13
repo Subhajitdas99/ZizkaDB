@@ -1,6 +1,7 @@
+import os
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, EmailStr
-from services.auth import request_otp, verify_otp, generate_api_key
+from services.auth import request_otp, verify_otp, generate_api_key, _issue_tokens
 from api.deps import get_tenant
 from fastapi import Depends
 from db.connection import get_pool
@@ -8,6 +9,10 @@ from db.connection import get_pool
 router = APIRouter()
 
 _rate_limit: dict[str, int] = {}
+
+_DEV_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+_DEV_USER_ID   = "00000000-0000-0000-0000-000000000001"
+_DEV_EMAIL     = "dev@localhost"
 
 
 class RequestOTPBody(BaseModel):
@@ -83,6 +88,42 @@ async def create_api_key(
         "name": body.name,
         "warning": "Save this key — it will not be shown again.",
     }
+
+
+@router.post("/dev-token")
+async def dev_token_route():
+    """
+    Only works when ENV=development (self-hosted local mode).
+    Issues a real JWT for a fixed local dev user so the dashboard
+    is accessible without email / signup.
+    """
+    if os.getenv("ENV", "development") != "development":
+        raise HTTPException(status_code=403, detail="Not available in production")
+
+    pool = get_pool()
+    await _ensure_dev_tenant(pool)
+    tokens = _issue_tokens(_DEV_USER_ID, _DEV_EMAIL, _DEV_TENANT_ID)
+    return {"access_token": tokens["access_token"], "token_type": "bearer"}
+
+
+async def _ensure_dev_tenant(pool) -> None:
+    """Idempotently create the dev tenant + user rows if they don't exist."""
+    await pool.execute(
+        """
+        INSERT INTO tenants (tenant_id, name)
+        VALUES ($1::uuid, 'Local Dev')
+        ON CONFLICT (tenant_id) DO NOTHING
+        """,
+        _DEV_TENANT_ID,
+    )
+    await pool.execute(
+        """
+        INSERT INTO users (user_id, email, tenant_id, last_login)
+        VALUES ($1::uuid, $2::text, $3::uuid, NOW())
+        ON CONFLICT (email) DO UPDATE SET last_login = NOW()
+        """,
+        _DEV_USER_ID, _DEV_EMAIL, _DEV_TENANT_ID,
+    )
 
 
 @router.get("/api-keys")

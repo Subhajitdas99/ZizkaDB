@@ -5,13 +5,33 @@ import { useRouter } from 'next/navigation'
 import { requestOtp, verifyOtp } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 
+const IS_DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [step, setStep] = useState<'email' | 'otp'>('email')
   const [loading, setLoading] = useState(false)
+  const [devLoading, setDevLoading] = useState(false)
   const [error, setError] = useState('')
+
+  async function handleDevLogin() {
+    setDevLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`${API_URL}/v1/auth/dev-token`, { method: 'POST' })
+      if (!res.ok) throw new Error('Dev token failed')
+      const data = await res.json() as { access_token: string }
+      setToken(data.access_token)
+      router.push('/dashboard')
+    } catch {
+      setError('Could not connect to AgentDB API. Is docker-compose running on port 8000?')
+    } finally {
+      setDevLoading(false)
+    }
+  }
 
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault()
@@ -65,17 +85,57 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Card */}
+        {/* Dev Mode Banner — shown only in self-hosted mode */}
+        {IS_DEV_MODE && (
+          <div style={{
+            background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 12,
+            padding: '16px 20px', marginBottom: 20,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <span style={{
+                background: '#22c55e', color: '#fff', fontSize: 11, fontWeight: 700,
+                padding: '2px 7px', borderRadius: 99, letterSpacing: '0.05em',
+              }}>SELF-HOSTED</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: '#15803d' }}>Local dev mode</span>
+            </div>
+            <p style={{ fontSize: 13, color: '#166534', margin: '0 0 12px' }}>
+              Running your own AgentDB instance? Open the dashboard directly — no account needed.
+            </p>
+            <button
+              onClick={handleDevLogin}
+              disabled={devLoading}
+              style={{
+                width: '100%', padding: '10px', borderRadius: 9, fontSize: 14, fontWeight: 600,
+                background: '#16a34a', color: '#fff', border: 'none', cursor: 'pointer',
+                opacity: devLoading ? 0.6 : 1,
+              }}
+            >
+              {devLoading ? 'Connecting...' : 'Open my dashboard →'}
+            </button>
+          </div>
+        )}
+
+        {/* Standard email login card */}
         <div style={{
           background: '#fff', borderRadius: 16, padding: '36px 32px',
           border: '1px solid #e5e5e5', boxShadow: '0 2px 20px rgba(0,0,0,0.05)',
         }}>
+          {IS_DEV_MODE && (
+            <p style={{ fontSize: 12, color: '#aaa', marginTop: 0, marginBottom: 20, textAlign: 'center' }}>
+              Or sign in with managed service account
+            </p>
+          )}
+
           {step === 'email' ? (
             <>
-              <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in</h1>
-              <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
-                Enter your email and we&apos;ll send a 6-digit login code.
-              </p>
+              {!IS_DEV_MODE && (
+                <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', marginBottom: 6 }}>Sign in</h1>
+              )}
+              {!IS_DEV_MODE && (
+                <p style={{ fontSize: 14, color: '#888', marginBottom: 24 }}>
+                  Enter your email and we&apos;ll send a 6-digit login code.
+                </p>
+              )}
               <form onSubmit={handleRequestOtp} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#555', marginBottom: 6 }}>
@@ -87,7 +147,7 @@ export default function LoginPage() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@company.com"
                     required
-                    autoFocus
+                    autoFocus={!IS_DEV_MODE}
                     style={{
                       width: '100%', boxSizing: 'border-box',
                       padding: '10px 14px', borderRadius: 9, fontSize: 14,
@@ -169,12 +229,14 @@ export default function LoginPage() {
           )}
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 16 }}>
-          No account yet?{' '}
-          <a href="/signup" style={{ color: '#555', textDecoration: 'none', fontWeight: 500 }}>
-            Create one free →
-          </a>
-        </p>
+        {!IS_DEV_MODE && (
+          <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 16 }}>
+            No account yet?{' '}
+            <a href="/signup" style={{ color: '#555', textDecoration: 'none', fontWeight: 500 }}>
+              Create one free →
+            </a>
+          </p>
+        )}
         <p style={{ textAlign: 'center', fontSize: 13, color: '#ccc', marginTop: 8 }}>
           Self-hosting?{' '}
           <a href="/docs" style={{ color: '#aaa', textDecoration: 'none' }}>

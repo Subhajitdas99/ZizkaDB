@@ -83,6 +83,8 @@ services:
       args:
         # Browser calls the API at this URL — defaults to localhost for self-hosted
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        # Dev mode: show bypass login button (no email required)
+        NEXT_PUBLIC_DEV_MODE: ${NEXT_PUBLIC_DEV_MODE:-true}
     container_name: agentdb_dashboard
     ports:
       - "3000:3000"
