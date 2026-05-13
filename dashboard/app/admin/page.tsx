@@ -9,7 +9,7 @@ import {
 import { format, formatDistanceToNow } from 'date-fns'
 
 const ADMIN_EMAIL = 'founder@zizka.ai'
-const TOKEN_KEY   = 'agentdb_admin_token'
+const TOKEN_KEY   = 'zizkadb_admin_token'
 
 type Section = 'telemetry' | 'managed'
 
@@ -118,7 +118,7 @@ function Login({ onAuthed }: { onAuthed: (t: string) => void }) {
           ADMIN
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 6px', color: '#fff' }}>
-          AgentDB control room
+          ZizkaDB control room
         </h1>
         <p style={{ fontSize: 13, color: '#737373', margin: '0 0 24px', lineHeight: 1.5 }}>
           {step === 'request'
@@ -210,7 +210,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           <div style={{ width: 28, height: 28, borderRadius: 7, background: '#f97316',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontSize: 13, fontWeight: 700, color: '#fff' }}>A</div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>AgentDB</span>
+          <span style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>ZizkaDB</span>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#f97316', letterSpacing: 1.5 }}>
             ADMIN
           </span>

@@ -1,8 +1,8 @@
 """
-Anonymous usage telemetry for the AgentDB Python SDK.
+Anonymous usage telemetry for the ZizkaDB Python SDK.
 
 What is sent (once per install, fire-and-forget):
-  install_id  — random UUID stored in ~/.agentdb/install_id (never changes)
+  install_id  — random UUID stored in ~/.zizkadb/install_id (never changes)
   sdk_version — e.g. "0.1.0"
   python      — e.g. "3.12.3"
   os          — e.g. "Linux", "Darwin", "Windows"
@@ -11,8 +11,8 @@ What is sent (once per install, fire-and-forget):
 What is NOT sent: API keys, agent names, event data, IP address, hostname.
 
 Opt out at any time:
-  export AGENTDB_TELEMETRY=false   # shell
-  AGENTDB_TELEMETRY=false          # .env
+  export ZIZKADB_TELEMETRY=false   # shell
+  ZIZKADB_TELEMETRY=false          # .env
 """
 
 from __future__ import annotations
@@ -24,8 +24,8 @@ import threading
 import uuid
 from pathlib import Path
 
-_TELEMETRY_URL = "https://agentdb.zizka.ai/v1/telemetry"
-_INSTALL_ID_PATH = Path.home() / ".agentdb" / "install_id"
+_TELEMETRY_URL = "https://db.zizka.ai/v1/telemetry"
+_INSTALL_ID_PATH = Path.home() / ".zizkadb" / "install_id"
 _sent = False  # only fire once per process
 
 
@@ -70,7 +70,7 @@ def _send(mode: str) -> None:
 
 def _sdk_version() -> str:
     try:
-        from agentdb import __version__
+        from zizkadb import __version__
         return __version__
     except Exception:
         return "unknown"
@@ -82,7 +82,7 @@ def ping(mode: str = "cloud") -> None:
 
     if _sent:
         return
-    if os.getenv("AGENTDB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
+    if os.getenv("ZIZKADB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
         return
 
     _sent = True

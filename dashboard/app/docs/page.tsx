@@ -94,7 +94,7 @@ export default function DocsPage() {
           <div style={{ width: 26, height: 26, borderRadius: 6, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>A</span>
           </div>
-          <span style={{ fontWeight: 700, fontSize: 14, color: '#111' }}>AgentDB</span>
+          <span style={{ fontWeight: 700, fontSize: 14, color: '#111' }}>ZizkaDB</span>
           <span style={{ fontSize: 12, color: '#bbb' }}>/ Docs</span>
         </Link>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
@@ -135,11 +135,11 @@ export default function DocsPage() {
                 The fastest way to get started. Sign up, grab an API key, and start logging.
               </p>
               <Callout type="info">
-                <strong>What AgentDB does:</strong> as you log events, it builds a behavioral baseline for each agent: which event types it emits, which decision sequences are normal, what the typical session shape looks like. Each new session is compared against that baseline so you can see when an agent has stopped behaving like itself. Causal lineage, time travel, and semantic search are how you investigate what changed.
+                <strong>What ZizkaDB does:</strong> as you log events, it builds a behavioral baseline for each agent: which event types it emits, which decision sequences are normal, what the typical session shape looks like. Each new session is compared against that baseline so you can see when an agent has stopped behaving like itself. Causal lineage, time travel, and semantic search are how you investigate what changed.
               </Callout>
 
               <Step n={1} title="Create your account">
-                <p style={S.p}>Go to <a href="/signup" style={{ color: '#111', fontWeight: 500 }}>agentdb.zizka.ai/signup</a> and sign in with your email. No password needed.</p>
+                <p style={S.p}>Go to <a href="/signup" style={{ color: '#111', fontWeight: 500 }}>db.zizka.ai/signup</a> and sign in with your email. No password needed.</p>
               </Step>
 
               <Step n={2} title="Get your API key">
@@ -163,12 +163,12 @@ export default function DocsPage() {
                 {tab === 'python' && (
                   <div style={{ paddingTop: 20 }}>
                     <p style={S.p}>Install the SDK. It has one dependency (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '1px 5px', borderRadius: 3 }}>httpx</code>) and works with Python 3.10+.</p>
-                    <Code lang="bash">pip install agentdb-sdk</Code>
+                    <Code lang="bash">pip install zizkadb-sdk</Code>
                     <p style={S.p}>Log your first event. This snippet is fully runnable — paste it into a file, set your key, run it.</p>
                     <Code lang="python">{`import asyncio
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 
-db = AgentDB("agdb_live_xxxx")   # paste your API key here
+db = ZizkaDB("agdb_live_xxxx")   # paste your API key here
 
 async def main():
     # Log any agent action
@@ -210,11 +210,11 @@ asyncio.run(main())`}</Code>
                 {tab === 'typescript' && (
                   <div style={{ paddingTop: 20 }}>
                     <p style={S.p}>Install the SDK. Works with Node.js, Deno, Bun, and Edge runtimes.</p>
-                    <Code lang="bash">npm install agentdb-sdk</Code>
+                    <Code lang="bash">npm install zizkadb-sdk</Code>
                     <p style={S.p}>Log your first event:</p>
-                    <Code lang="typescript">{`import { AgentDB } from 'agentdb-sdk'
+                    <Code lang="typescript">{`import { ZizkaDB } from 'zizkadb-sdk'
 
-const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
+const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
 
 // Log any agent action
 const result = await db.log({
@@ -243,12 +243,12 @@ chain.print()`}</Code>
 
                 {tab === 'rest' && (
                   <div style={{ paddingTop: 20 }}>
-                    <p style={S.p}>Use from any language with HTTP. Base URL: <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '1px 5px', borderRadius: 3 }}>https://agentdb.zizka.ai/v1/</code></p>
+                    <p style={S.p}>Use from any language with HTTP. Base URL: <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '1px 5px', borderRadius: 3 }}>https://db.zizka.ai/v1/</code></p>
                     <Callout type="warning">
                       All endpoints are at <strong>/v1/</strong> not /api/. This trips people up if they are coming from Next.js apps.
                     </Callout>
                     <p style={S.p}>Log an event:</p>
-                    <Code lang="bash">{`curl -X POST https://agentdb.zizka.ai/v1/events \\
+                    <Code lang="bash">{`curl -X POST https://db.zizka.ai/v1/events \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -258,19 +258,19 @@ chain.print()`}</Code>
   }'
 # returns: { "event_id": "...", "checksum": "..." }`}</Code>
                     <p style={S.p}>Search past events semantically:</p>
-                    <Code lang="bash">{`curl -X POST https://agentdb.zizka.ai/v1/search \\
+                    <Code lang="bash">{`curl -X POST https://db.zizka.ai/v1/search \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{ "query": "billing complaint", "limit": 5 }'`}</Code>
                     <p style={S.p}>Check the API is up (no auth needed):</p>
-                    <Code lang="bash">{`curl https://agentdb.zizka.ai/health
+                    <Code lang="bash">{`curl https://db.zizka.ai/health
 # { "status": "ok", "version": "0.1.0" }`}</Code>
                   </div>
                 )}
               </Step>
 
               <Step n={4} title="Open the dashboard">
-                <p style={S.p}>Go to <a href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>agentdb.zizka.ai/dashboard</a> to see your agents, search their history, and replay any session.</p>
+                <p style={S.p}>Go to <a href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>db.zizka.ai/dashboard</a> to see your agents, search their history, and replay any session.</p>
               </Step>
 
               {/* All methods reference */}
@@ -303,28 +303,28 @@ chain.print()`}</Code>
             <div>
               <h1 style={S.h1}>MCP Server</h1>
               <p style={S.lead}>
-                If you use Claude Desktop or Cursor, you can connect AgentDB in 2 minutes with no code at all. The MCP server gives Claude and Cursor direct access to all AgentDB tools as native functions.
+                If you use Claude Desktop or Cursor, you can connect ZizkaDB in 2 minutes with no code at all. The MCP server gives Claude and Cursor direct access to all ZizkaDB tools as native functions.
               </p>
 
               <Callout type="info">
-                <strong>What is MCP?</strong> Model Context Protocol is a standard that lets AI apps (Claude, Cursor, etc.) call external tools. Adding AgentDB as an MCP server means the AI can log events, search memory, and replay sessions by itself.
+                <strong>What is MCP?</strong> Model Context Protocol is a standard that lets AI apps (Claude, Cursor, etc.) call external tools. Adding ZizkaDB as an MCP server means the AI can log events, search memory, and replay sessions by itself.
               </Callout>
 
               <h2 style={{ ...S.h2, marginTop: 32 }}>Claude Desktop</h2>
               <Step n={1} title="Get your API key">
-                <p style={S.p}>Sign up at <a href="/signup" style={{ color: '#111', fontWeight: 500 }}>agentdb.zizka.ai/signup</a> and create an API key from Settings.</p>
+                <p style={S.p}>Sign up at <a href="/signup" style={{ color: '#111', fontWeight: 500 }}>db.zizka.ai/signup</a> and create an API key from Settings.</p>
               </Step>
               <Step n={2} title="Edit your Claude Desktop config">
                 <p style={S.p}>Open this file on your Mac:</p>
                 <Code>~/Library/Application Support/Claude/claude_desktop_config.json</Code>
-                <p style={S.p}>Add the AgentDB server:</p>
+                <p style={S.p}>Add the ZizkaDB server:</p>
                 <Code lang="json">{`{
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
-        "AGENTDB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
     }
   }
@@ -334,7 +334,7 @@ chain.print()`}</Code>
                 </Callout>
               </Step>
               <Step n={3} title="Restart Claude Desktop">
-                <p style={S.p}>Quit and reopen Claude Desktop. You will see AgentDB tools appear in the tool list. Claude can now call them automatically during conversations.</p>
+                <p style={S.p}>Quit and reopen Claude Desktop. You will see ZizkaDB tools appear in the tool list. Claude can now call them automatically during conversations.</p>
               </Step>
 
               <h2 style={S.h2}>Cursor</h2>
@@ -342,29 +342,29 @@ chain.print()`}</Code>
                 <p style={S.p}>Create or edit <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '1px 5px', borderRadius: 3 }}>~/.cursor/mcp.json</code>:</p>
                 <Code lang="json">{`{
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
-        "AGENTDB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
     }
   }
 }`}</Code>
               </Step>
               <Step n={2} title="Reload Cursor">
-                <p style={S.p}>Open the Command Palette and run <strong>MCP: Reload servers</strong>. AgentDB tools are now available to Cursor agents.</p>
+                <p style={S.p}>Open the Command Palette and run <strong>MCP: Reload servers</strong>. ZizkaDB tools are now available to Cursor agents.</p>
               </Step>
 
-              <h2 style={S.h2}>Self-hosted AgentDB with MCP</h2>
-              <p style={S.p}>If you are running AgentDB locally, point the MCP server to your instance:</p>
+              <h2 style={S.h2}>Self-hosted ZizkaDB with MCP</h2>
+              <p style={S.p}>If you are running ZizkaDB locally, point the MCP server to your instance:</p>
               <Code lang="json">{`{
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
-        "AGENTDB_HOST": "http://localhost:8000"
+        "ZIZKADB_HOST": "http://localhost:8000"
       }
     }
   }
@@ -397,7 +397,7 @@ chain.print()`}</Code>
             <div>
               <h1 style={S.h1}>Self-Host</h1>
               <p style={S.lead}>
-                Run the full AgentDB stack on your own server. Free forever, no account needed, full feature set. Requires Docker and an OpenAI API key for embeddings.
+                Run the full ZizkaDB stack on your own server. Free forever, no account needed, full feature set. Requires Docker and an OpenAI API key for embeddings.
               </p>
 
               <Callout type="info">
@@ -406,7 +406,7 @@ chain.print()`}</Code>
 
               <Step n={1} title="Clone the repo">
                 <Code lang="bash">{`git clone https://github.com/Zizka-ai/agentdb
-cd agentdb`}</Code>
+cd zizkadb`}</Code>
               </Step>
 
               <Step n={2} title="Configure environment">
@@ -431,19 +431,19 @@ EMAIL_PASS=your-app-password`}</Code>
 
               <Step n={4} title="Connect the SDK to your instance">
                 <Code lang="python">{`import asyncio
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 
 # No API key needed for self-hosted
-db = AgentDB(host="http://localhost:8000")
+db = ZizkaDB(host="http://localhost:8000")
 
 async def main():
     await db.log(agent="my-bot", event="started", data={})
 
 asyncio.run(main())`}</Code>
                 <p style={S.p}>For TypeScript:</p>
-                <Code lang="typescript">{`import { AgentDB } from 'agentdb-sdk'
+                <Code lang="typescript">{`import { ZizkaDB } from 'zizkadb-sdk'
 
-const db = new AgentDB({ host: 'http://localhost:8000' })`}</Code>
+const db = new ZizkaDB({ host: 'http://localhost:8000' })`}</Code>
               </Step>
 
               <Step n={5} title="Open the dashboard">
@@ -474,7 +474,7 @@ npm install && npm run dev
             <div>
               <h1 style={S.h1}>Core Concepts</h1>
               <p style={S.lead}>
-                AgentDB is built around a few ideas that make debugging agents fundamentally different from debugging normal software.
+                ZizkaDB is built around a few ideas that make debugging agents fundamentally different from debugging normal software.
               </p>
               <Callout type="info">
                 Python snippets here are reference-style — wrap them in <code style={{ fontFamily: 'monospace' }}>async def main(): ...</code> with <code style={{ fontFamily: 'monospace' }}>asyncio.run(main())</code> at the bottom to make them runnable. See the <a href="#" onClick={(e) => { e.preventDefault(); setSection('managed'); setTab('python') }} style={{ color: '#111', fontWeight: 500 }}>Managed Service → Python</a> tab for the full template.
@@ -483,7 +483,7 @@ npm install && npm run dev
               {[
                 {
                   title: 'Events',
-                  body: 'Everything in AgentDB is an event. A user message, a tool call, a decision, a response. Each event has an agent name, an event type, a data payload, and a timestamp. You log what you care about and skip what you do not.',
+                  body: 'Everything in ZizkaDB is an event. A user message, a tool call, a decision, a response. Each event has an agent name, an event type, a data payload, and a timestamp. You log what you care about and skip what you do not.',
                   code: `await db.log(
     agent="support-bot",
     event="tool_call",
@@ -492,7 +492,7 @@ npm install && npm run dev
                 },
                 {
                   title: 'Causal lineage',
-                  body: 'When you pass a parent_id, you are saying "this event happened because of that one." After a few turns, AgentDB has a full decision tree. You can call db.why(event_id) at any time and walk back through every choice that led to a result.',
+                  body: 'When you pass a parent_id, you are saying "this event happened because of that one." After a few turns, ZizkaDB has a full decision tree. You can call db.why(event_id) at any time and walk back through every choice that led to a result.',
                   code: `msg  = await db.log(agent="bot", event="user_message", data={...})
 tool = await db.log(agent="bot", event="tool_call",    data={...}, parent_id=msg.event_id)
 resp = await db.log(agent="bot", event="response",     data={...}, parent_id=tool.event_id)
@@ -512,7 +512,7 @@ chain.print()
                 },
                 {
                   title: 'Time travel',
-                  body: 'Call db.at(agent, timestamp) and AgentDB reconstructs the exact state of that agent at that moment, based on all events logged up to that time. Every event is SHA-256 checksummed so the reconstruction is verifiable.',
+                  body: 'Call db.at(agent, timestamp) and ZizkaDB reconstructs the exact state of that agent at that moment, based on all events logged up to that time. Every event is SHA-256 checksummed so the reconstruction is verifiable.',
                   code: `from datetime import datetime
 
 state = await db.at("support-bot", datetime(2026, 5, 1, 15, 0))

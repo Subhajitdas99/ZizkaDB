@@ -1,5 +1,5 @@
 """
-AgentDB admin panel.
+ZizkaDB admin panel.
 
 A single-tenant admin dashboard for the operator (founder@zizka.ai).
 Reuses the existing passwordless OTP email flow but locks login to one

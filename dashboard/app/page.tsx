@@ -9,16 +9,16 @@ const SDK_TABS = ['Python', 'TypeScript', 'MCP', 'REST API'] as const
 type SdkTab = typeof SDK_TABS[number]
 
 const INSTALL: Record<SdkTab, string> = {
-  Python:      'pip install agentdb-sdk',
-  TypeScript:  'npm install agentdb-sdk',
-  MCP:         'uvx agentdb-mcp   # no install needed',
+  Python:      'pip install zizkadb-sdk',
+  TypeScript:  'npm install zizkadb-sdk',
+  MCP:         'uvx zizkadb-mcp   # no install needed',
   'REST API':  'curl (no install)',
 }
 
 const SDK_SNIPPETS: Record<SdkTab, string> = {
-  Python: `from agentdb import AgentDB
+  Python: `from zizkadb import ZizkaDB
 
-db = AgentDB("agdb_live_xxxx")   # your API key
+db = ZizkaDB("agdb_live_xxxx")   # your API key
 
 result = await db.log(
     agent="my-bot",
@@ -30,9 +30,9 @@ result = await db.log(
 chain = await db.why(result.event_id)
 chain.print()`,
 
-  TypeScript: `import { AgentDB } from 'agentdb-sdk'
+  TypeScript: `import { ZizkaDB } from 'zizkadb-sdk'
 
-const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
+const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
 
 const result = await db.log({
   agent: 'my-bot',
@@ -47,11 +47,11 @@ chain.print()`,
   MCP: `// Add to claude_desktop_config.json or ~/.cursor/mcp.json
 {
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
-        "AGENTDB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
     }
   }
@@ -63,7 +63,7 @@ chain.print()`,
 
   'REST API': `# Works in Python, Go, Ruby, Rust, Java, or anything with HTTP
 
-curl -X POST https://agentdb.zizka.ai/v1/events \\
+curl -X POST https://db.zizka.ai/v1/events \\
   -H "Authorization: Bearer agdb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -75,11 +75,11 @@ curl -X POST https://agentdb.zizka.ai/v1/events \\
 # → {"event_id":"...","timestamp":"...","checksum":"..."}`,
 }
 
-const INSTALL_CMD = 'pip install agentdb-sdk'
+const INSTALL_CMD = 'pip install zizkadb-sdk'
 
-const QUICKSTART = `from agentdb import AgentDB
+const QUICKSTART = `from zizkadb import ZizkaDB
 
-db = AgentDB("agdb_live_xxxx")   # your API key
+db = ZizkaDB("agdb_live_xxxx")   # your API key
 
 # 1. Log what your agent does
 msg = await db.log(agent="support-bot", event="user_message",
@@ -98,9 +98,9 @@ chain.print()
 #       └── response: "Found anomaly"       [14:32:03]`
 
 const CLAUDE_CODE = `import anthropic
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 
-db     = AgentDB("agdb_live_xxxx")
+db     = ZizkaDB("agdb_live_xxxx")
 client = anthropic.Anthropic()
 
 async def run(user_input: str):
@@ -127,10 +127,10 @@ async def run(user_input: str):
     return response`
 
 const OPENAI_CODE = `from openai import OpenAI
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 import json
 
-db     = AgentDB("agdb_live_xxxx")
+db     = ZizkaDB("agdb_live_xxxx")
 client = OpenAI()
 
 async def run(user_input: str):
@@ -184,7 +184,7 @@ export default function LandingPage() {
           <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>A</span>
           </div>
-          <span style={{ fontWeight: 700, fontSize: 15 }}>AgentDB</span>
+          <span style={{ fontWeight: 700, fontSize: 15 }}>ZizkaDB</span>
           <span style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
@@ -217,7 +217,7 @@ export default function LandingPage() {
         </h1>
 
         <p style={{ fontSize: 18, color: '#222', lineHeight: 1.55, margin: '0 0 36px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto', fontWeight: 500 }}>
-          AgentDB watches every session, builds a baseline, and flags the ones that drift. Before your users do.
+          ZizkaDB watches every session, builds a baseline, and flags the ones that drift. Before your users do.
         </p>
 
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
@@ -302,7 +302,7 @@ export default function LandingPage() {
             Three moments other tools miss
           </h2>
           <p style={{ textAlign: 'center', color: '#444', fontSize: 15, marginBottom: 56, maxWidth: 600, margin: '0 auto 56px' }}>
-            LangSmith and Langfuse show you traces after you go looking. AgentDB watches while you sleep.
+            LangSmith and Langfuse show you traces after you go looking. ZizkaDB watches while you sleep.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
@@ -311,7 +311,7 @@ export default function LandingPage() {
                 num: '01',
                 title: 'v2 quietly regressed',
                 pain: 'Subtle drops in quality. No errors. Eventually a user complains.',
-                fix: 'AgentDB compares each session against the baseline. See exactly where v2 diverged.',
+                fix: 'ZizkaDB compares each session against the baseline. See exactly where v2 diverged.',
               },
               {
                 num: '02',
@@ -404,7 +404,7 @@ export default function LandingPage() {
           {activeSdk === 'Python' && (
             <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
-                { label: 'Install', value: 'pip install agentdb-sdk' },
+                { label: 'Install', value: 'pip install zizkadb-sdk' },
                 { label: 'Requires', value: 'Python 3.10+' },
                 { label: 'Only dependency', value: 'httpx' },
               ].map(i => (
@@ -418,7 +418,7 @@ export default function LandingPage() {
           {activeSdk === 'TypeScript' && (
             <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
-                { label: 'Install', value: 'npm install agentdb-sdk' },
+                { label: 'Install', value: 'npm install zizkadb-sdk' },
                 { label: 'Works with', value: 'Node.js, Deno, Bun, Edge' },
                 { label: 'Only dependency', value: 'node-fetch / fetch' },
               ].map(i => (
@@ -446,7 +446,7 @@ export default function LandingPage() {
           {activeSdk === 'REST API' && (
             <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
-                { label: 'Base URL', value: 'https://agentdb.zizka.ai/v1/' },
+                { label: 'Base URL', value: 'https://db.zizka.ai/v1/' },
                 { label: 'Auth header', value: 'Authorization: Bearer agdb_live_...' },
                 { label: 'Works with', value: 'Go, Rust, Ruby, Java, PHP, any HTTP client' },
               ].map(i => (
@@ -500,7 +500,7 @@ export default function LandingPage() {
             Already using Claude or OpenAI?
           </h2>
           <p style={{ textAlign: 'center', color: '#333', fontSize: 15, marginBottom: 8, maxWidth: 580, margin: '0 auto 8px' }}>
-            Their memory is for the chat. AgentDB is for your code: every decision, every cause, every trigger.
+            Their memory is for the chat. ZizkaDB is for your code: every decision, every cause, every trigger.
           </p>
           <p style={{ textAlign: 'center', fontSize: 13, color: '#666', marginBottom: 40 }}>
             No wrappers. No monkey-patching. Just parent_id.
@@ -563,7 +563,7 @@ export default function LandingPage() {
             What vector DBs can&apos;t do
           </h2>
           <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 56 }}>
-            Vector DBs store embeddings. AgentDB stores what happened, why, and what came next.
+            Vector DBs store embeddings. ZizkaDB stores what happened, why, and what came next.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
@@ -594,7 +594,7 @@ export default function LandingPage() {
             Facts only. Verify every row in their docs.
           </p>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#bbb', marginBottom: 40 }}>
-            LangSmith · Mem0 · Pinecone · AgentDB · May 2026
+            LangSmith · Mem0 · Pinecone · ZizkaDB · May 2026
           </p>
 
           <div style={{ border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden' }}>
@@ -602,14 +602,14 @@ export default function LandingPage() {
               <thead>
                 <tr style={{ background: '#f7f7f7', borderBottom: '1px solid #e5e5e5' }}>
                   <th style={{ padding: '13px 18px', textAlign: 'left', fontWeight: 600, color: '#333', width: '36%' }}>Capability</th>
-                  {['LangSmith', 'Mem0', 'Pinecone', 'AgentDB'].map(h => (
+                  {['LangSmith', 'Mem0', 'Pinecone', 'ZizkaDB'].map(h => (
                     <th key={h} style={{
                       padding: '13px 14px', textAlign: 'center', fontWeight: 600,
-                      color: h === 'AgentDB' ? '#111' : '#999',
-                      background: h === 'AgentDB' ? '#f5fffe' : 'transparent',
+                      color: h === 'ZizkaDB' ? '#111' : '#999',
+                      background: h === 'ZizkaDB' ? '#f5fffe' : 'transparent',
                       fontSize: 13,
                     }}>
-                      {h}{h === 'AgentDB' && <span style={{ display: 'block', fontSize: 10, color: '#22c55e', fontWeight: 500 }}>← us</span>}
+                      {h}{h === 'ZizkaDB' && <span style={{ display: 'block', fontSize: 10, color: '#22c55e', fontWeight: 500 }}>← us</span>}
                     </th>
                   ))}
                 </tr>
@@ -748,7 +748,7 @@ export default function LandingPage() {
           <div style={{ width: 22, height: 22, borderRadius: 5, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>A</span>
           </div>
-          <span style={{ fontWeight: 500, color: '#333' }}>AgentDB</span>
+          <span style={{ fontWeight: 500, color: '#333' }}>ZizkaDB</span>
           <span style={{ color: '#ddd' }}>·</span>
           <span>by Zizka AI</span>
         </div>

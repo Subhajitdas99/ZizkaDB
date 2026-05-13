@@ -59,7 +59,7 @@ export default function SignupPage() {
             }}>
               <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
             </div>
-            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>AgentDB</span>
+            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>ZizkaDB</span>
           </Link>
           <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
             The operational database for AI agents

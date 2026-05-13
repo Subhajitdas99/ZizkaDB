@@ -2,15 +2,15 @@
 
 export function getToken(): string | null {
   if (typeof window === 'undefined') return null
-  return localStorage.getItem('agentdb_token')
+  return localStorage.getItem('zizkadb_token')
 }
 
 export function setToken(token: string) {
-  localStorage.setItem('agentdb_token', token)
+  localStorage.setItem('zizkadb_token', token)
 }
 
 export function clearToken() {
-  localStorage.removeItem('agentdb_token')
+  localStorage.removeItem('zizkadb_token')
 }
 
 export function requireAuth(): string {

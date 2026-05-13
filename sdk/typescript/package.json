@@ -1,7 +1,7 @@
 {
-  "name": "agentdb-sdk",
+  "name": "zizkadb-sdk",
   "version": "0.2.1",
-  "description": "AgentDB tells you when your agent stops behaving like itself. Causal lineage, time travel and behavioral baselines for any AI agent.",
+  "description": "ZizkaDB tells you when your agent stops behaving like itself. Causal lineage, time travel and behavioral baselines for any AI agent.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -29,11 +29,11 @@
     "llm",
     "observability",
     "drift",
-    "agentdb"
+    "zizkadb"
   ],
   "author": "Zizka AI",
   "license": "AGPL-3.0",
-  "homepage": "https://agentdb.zizka.ai",
+  "homepage": "https://db.zizka.ai",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Zizka-ai/agentdb.git"

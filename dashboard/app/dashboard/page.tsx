@@ -117,9 +117,9 @@ function EmptyState() {
         Log your first event to get started.
       </p>
       <pre className="text-left rounded-lg p-4 text-xs inline-block" style={{ background: '#0d0d0d' }}>
-{`from agentdb import AgentDB
+{`from zizkadb import ZizkaDB
 
-db = AgentDB("your-api-key")
+db = ZizkaDB("your-api-key")
 await db.log(
     agent="my-bot",
     event="started",

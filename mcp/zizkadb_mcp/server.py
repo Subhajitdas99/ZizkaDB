@@ -1,18 +1,18 @@
 """
-AgentDB MCP Server
+ZizkaDB MCP Server
 
-Exposes AgentDB as MCP tools so any MCP-compatible agent
+Exposes ZizkaDB as MCP tools so any MCP-compatible agent
 (Claude Desktop, Cursor, LangChain MCP, CrewAI, AutoGen, etc.)
 can log events, search memory, replay sessions, and debug decisions
 without installing any SDK.
 
 Configuration (env vars):
-  AGENTDB_HOST     — defaults to https://agentdb.zizka.ai
-  AGENTDB_API_KEY  — your API key (agdb_live_...)
+  ZIZKADB_HOST     — defaults to https://db.zizka.ai
+  ZIZKADB_API_KEY  — your API key (agdb_live_...)
 
 Usage:
-  uvx agentdb-mcp                          # managed service
-  AGENTDB_HOST=http://localhost:8000 uvx agentdb-mcp  # self-hosted
+  uvx zizkadb-mcp                          # managed service
+  ZIZKADB_HOST=http://localhost:8000 uvx zizkadb-mcp  # self-hosted
 """
 
 from __future__ import annotations
@@ -27,16 +27,16 @@ from pathlib import Path
 import httpx
 from mcp.server.fastmcp import FastMCP
 
-mcp = FastMCP("AgentDB")
+mcp = FastMCP("ZizkaDB")
 
-_HOST = os.getenv("AGENTDB_HOST", "https://agentdb.zizka.ai").rstrip("/")
-_KEY  = os.getenv("AGENTDB_API_KEY", "")
+_HOST = os.getenv("ZIZKADB_HOST", "https://db.zizka.ai").rstrip("/")
+_KEY  = os.getenv("ZIZKADB_API_KEY", "")
 
-# ── Anonymous telemetry (opt-out: AGENTDB_TELEMETRY=false) ────────────────────
+# ── Anonymous telemetry (opt-out: ZIZKADB_TELEMETRY=false) ────────────────────
 
 def _get_install_id() -> str:
     try:
-        path = Path.home() / ".agentdb" / "install_id"
+        path = Path.home() / ".zizkadb" / "install_id"
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists():
             iid = path.read_text().strip()
@@ -50,11 +50,11 @@ def _get_install_id() -> str:
 
 
 def _telemetry_ping() -> None:
-    if os.getenv("AGENTDB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
+    if os.getenv("ZIZKADB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
         return
     try:
         import urllib.request, json
-        mode = "self-hosted" if os.getenv("AGENTDB_HOST") else "cloud"
+        mode = "self-hosted" if os.getenv("ZIZKADB_HOST") else "cloud"
         payload = json.dumps({
             "install_id":  _get_install_id(),
             "sdk":         "mcp",
@@ -64,7 +64,7 @@ def _telemetry_ping() -> None:
             "mode":        mode,
         }).encode()
         req = urllib.request.Request(
-            "https://agentdb.zizka.ai/v1/telemetry",
+            "https://db.zizka.ai/v1/telemetry",
             data=payload,
             headers={"Content-Type": "application/json"},
             method="POST",
@@ -110,7 +110,7 @@ async def log_event(
     parent_id: str = "",
 ) -> dict:
     """
-    Log an event to AgentDB.
+    Log an event to ZizkaDB.
 
     Use this every time your agent takes an action: a tool call, a decision,
     a user message, or an agent response. Logging builds the causal graph

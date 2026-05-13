@@ -188,18 +188,18 @@ async def _send_otp_email(email: str, otp: str) -> None:
         return
 
     port = int(os.getenv("EMAIL_PORT", 587))
-    from_addr = os.getenv("EMAIL_FROM", f'"AgentDB" <{user}>')
+    from_addr = os.getenv("EMAIL_FROM", f'"ZizkaDB" <{user}>')
     is_ssl = port == 465
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"{otp} is your AgentDB login code"
+    msg["Subject"] = f"{otp} is your ZizkaDB login code"
     msg["From"] = from_addr
     msg["To"] = email
 
-    text = f"Your AgentDB login code: {otp}\n\nExpires in 15 minutes."
+    text = f"Your ZizkaDB login code: {otp}\n\nExpires in 15 minutes."
     html = f"""
     <div style="font-family:Arial,sans-serif;max-width:420px;margin:40px auto;padding:24px;background:#fff;border-radius:12px;">
-      <p style="font-size:14px;color:#555;margin:0 0 20px">Your AgentDB login code:</p>
+      <p style="font-size:14px;color:#555;margin:0 0 20px">Your ZizkaDB login code:</p>
       <div style="font-size:38px;font-weight:700;letter-spacing:10px;
                   background:#f5f5f5;padding:24px;text-align:center;
                   border-radius:8px;color:#111;font-family:monospace">

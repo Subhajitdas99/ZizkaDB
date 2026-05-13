@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    logger.info("AgentDB started")
+    logger.info("ZizkaDB started")
     yield
     await close_db()
-    logger.info("AgentDB stopped")
+    logger.info("ZizkaDB stopped")
 
 
 app = FastAPI(
-    title="AgentDB",
+    title="ZizkaDB",
     description="The operational database for AI agents",
     version="0.1.0",
     lifespan=lifespan,

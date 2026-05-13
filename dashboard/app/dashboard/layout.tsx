@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                  style={{ background: '#22c55e' }}>
               <Database size={14} className="text-black" />
             </div>
-            <span className="text-white font-semibold">AgentDB</span>
+            <span className="text-white font-semibold">ZizkaDB</span>
           </div>
         </div>
 

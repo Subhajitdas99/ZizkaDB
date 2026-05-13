@@ -27,7 +27,7 @@ export default function LoginPage() {
       setToken(data.access_token)
       router.push('/dashboard')
     } catch {
-      setError('Could not connect to AgentDB API. Is docker-compose running on port 8000?')
+      setError('Could not connect to ZizkaDB API. Is docker-compose running on port 8000?')
     } finally {
       setDevLoading(false)
     }
@@ -78,7 +78,7 @@ export default function LoginPage() {
             }}>
               <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
             </div>
-            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>AgentDB</span>
+            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>ZizkaDB</span>
           </a>
           <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
             The operational database for AI agents
@@ -99,7 +99,7 @@ export default function LoginPage() {
               <span style={{ fontSize: 13, fontWeight: 600, color: '#15803d' }}>Local dev mode</span>
             </div>
             <p style={{ fontSize: 13, color: '#166534', margin: '0 0 12px' }}>
-              Running your own AgentDB instance? Open the dashboard directly — no account needed.
+              Running your own ZizkaDB instance? Open the dashboard directly — no account needed.
             </p>
             <button
               onClick={handleDevLogin}

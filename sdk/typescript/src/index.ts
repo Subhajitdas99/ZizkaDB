@@ -1,14 +1,14 @@
 /**
- * AgentDB TypeScript SDK
+ * ZizkaDB TypeScript SDK
  *
  * @example
- * import { AgentDB } from 'agentdb-sdk'
+ * import { ZizkaDB } from 'zizkadb-sdk'
  *
  * // Cloud
- * const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
+ * const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
  *
  * // Self-hosted
- * const db = new AgentDB({ host: 'http://localhost:8000' })
+ * const db = new ZizkaDB({ host: 'http://localhost:8000' })
  *
  * // Log an event
  * const result = await db.log({
@@ -23,7 +23,7 @@
  */
 
 import type {
-  AgentDBConfig,
+  ZizkaDBConfig,
   AgentEvent,
   AgentInfo,
   AgentState,
@@ -34,12 +34,12 @@ import type {
   QueryOptions,
   SearchOptions,
 } from './types'
-import { AgentDBError, AuthError, NotFoundError } from './types'
+import { ZizkaDBError, AuthError, NotFoundError } from './types'
 
 export * from './types'
 
-const CLOUD_HOST = 'https://agentdb.zizka.ai'
-const TELEMETRY_URL = 'https://agentdb.zizka.ai/v1/telemetry'
+const CLOUD_HOST = 'https://db.zizka.ai'
+const TELEMETRY_URL = 'https://db.zizka.ai/v1/telemetry'
 const SDK_VERSION = '0.2.1'
 
 let _telemetrySent = false
@@ -48,7 +48,7 @@ function _sendTelemetry(mode: 'cloud' | 'self-hosted'): void {
   if (_telemetrySent) return
   if (
     typeof process !== 'undefined' &&
-    /^(false|0|no|off)$/i.test(process.env.AGENTDB_TELEMETRY ?? '')
+    /^(false|0|no|off)$/i.test(process.env.ZIZKADB_TELEMETRY ?? '')
   ) return
 
   _telemetrySent = true
@@ -77,11 +77,11 @@ function _sendTelemetry(mode: 'cloud' | 'self-hosted'): void {
 
 function _getInstallId(): string {
   try {
-    // Node.js environment — persist to ~/.agentdb/install_id
+    // Node.js environment — persist to ~/.zizkadb/install_id
     const { homedir } = require('os') as typeof import('os')
     const { mkdirSync, readFileSync, writeFileSync, existsSync } = require('fs') as typeof import('fs')
     const { join } = require('path') as typeof import('path')
-    const dir = join(homedir(), '.agentdb')
+    const dir = join(homedir(), '.zizkadb')
     const file = join(dir, 'install_id')
     mkdirSync(dir, { recursive: true })
     if (existsSync(file)) {
@@ -104,17 +104,17 @@ function _uuid(): string {
   })
 }
 
-export class AgentDB {
+export class ZizkaDB {
   private readonly baseUrl: string
   private readonly headers: Record<string, string>
   private readonly timeout: number
 
-  constructor(config: AgentDBConfig) {
+  constructor(config: ZizkaDBConfig) {
     if (!config.apiKey && !config.host) {
-      throw new AgentDBError(
+      throw new ZizkaDBError(
         'Provide an apiKey (cloud) or host (self-hosted).\n' +
-        '  Cloud:       new AgentDB({ apiKey: "agdb_live_..." })\n' +
-        '  Self-hosted: new AgentDB({ host: "http://localhost:8000" })',
+        '  Cloud:       new ZizkaDB({ apiKey: "agdb_live_..." })\n' +
+        '  Self-hosted: new ZizkaDB({ host: "http://localhost:8000" })',
       )
     }
 
@@ -470,7 +470,7 @@ export class AgentDB {
   private async handle(res: Response): Promise<unknown> {
     if (res.status === 401) {
       throw new AuthError(
-        'Invalid API key. Check your key at agentdb.zizka.ai/settings/api-keys',
+        'Invalid API key. Check your key at db.zizka.ai/settings/api-keys',
       )
     }
     if (res.status === 404) {
@@ -482,7 +482,7 @@ export class AgentDB {
         const json = await res.json() as Record<string, unknown>
         detail = (json.detail as string) ?? detail
       } catch {}
-      throw new AgentDBError(`AgentDB error (${res.status}): ${detail}`, res.status)
+      throw new ZizkaDBError(`ZizkaDB error (${res.status}): ${detail}`, res.status)
     }
     return res.json()
   }

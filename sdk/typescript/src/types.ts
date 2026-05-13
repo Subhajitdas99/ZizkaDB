@@ -1,4 +1,4 @@
-export interface AgentDBConfig {
+export interface ZizkaDBConfig {
   apiKey?: string
   host?: string
   timeout?: number
@@ -73,24 +73,24 @@ export interface AgentInfo {
   eventCount: number
 }
 
-export class AgentDBError extends Error {
+export class ZizkaDBError extends Error {
   constructor(
     message: string,
     public statusCode?: number,
   ) {
     super(message)
-    this.name = 'AgentDBError'
+    this.name = 'ZizkaDBError'
   }
 }
 
-export class AuthError extends AgentDBError {
+export class AuthError extends ZizkaDBError {
   constructor(message: string) {
     super(message, 401)
     this.name = 'AuthError'
   }
 }
 
-export class NotFoundError extends AgentDBError {
+export class NotFoundError extends ZizkaDBError {
   constructor(message: string) {
     super(message, 404)
     this.name = 'NotFoundError'

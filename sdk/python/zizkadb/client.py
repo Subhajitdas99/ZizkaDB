@@ -1,14 +1,14 @@
 """
-AgentDB Python SDK
+ZizkaDB Python SDK
 
 Usage:
-    from agentdb import AgentDB
+    from zizkadb import ZizkaDB
 
     # Managed (cloud)
-    db = AgentDB("agdb_live_xxxx")
+    db = ZizkaDB("agdb_live_xxxx")
 
     # Self-hosted
-    db = AgentDB(host="http://localhost:8000")
+    db = ZizkaDB(host="http://localhost:8000")
 
     # Log an event
     await db.log(agent="my-bot", event="tool_call", data={"tool": "search"})
@@ -29,21 +29,21 @@ from datetime import datetime
 from typing import Any
 
 from .models import Event, LogResult, CausalChain, AgentState, AgentInfo
-from .exceptions import AgentDBError, AuthError, NotFoundError, RateLimitError
+from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError
 from .telemetry import ping as _telemetry_ping
 
-CLOUD_HOST = "https://agentdb.zizka.ai"
+CLOUD_HOST = "https://db.zizka.ai"
 
 
-class AgentDB:
+class ZizkaDB:
     """
-    AgentDB client.
+    ZizkaDB client.
 
     Args:
-        api_key: Your AgentDB API key (starts with agdb_live_).
-                 Get one at agentdb.zizka.ai
+        api_key: Your ZizkaDB API key (starts with agdb_live_).
+                 Get one at db.zizka.ai
         host:    URL of your self-hosted instance.
-                 Defaults to AgentDB Cloud if api_key is provided.
+                 Defaults to ZizkaDB Cloud if api_key is provided.
         timeout: HTTP timeout in seconds. Default 10.
     """
 
@@ -54,10 +54,10 @@ class AgentDB:
         timeout: float = 10.0,
     ):
         if not api_key and not host:
-            raise AgentDBError(
+            raise ZizkaDBError(
                 "Provide an api_key (cloud) or host (self-hosted).\n"
-                "  Cloud:       AgentDB('agdb_live_...')\n"
-                "  Self-hosted: AgentDB(host='http://localhost:8000')"
+                "  Cloud:       ZizkaDB('agdb_live_...')\n"
+                "  Self-hosted: ZizkaDB(host='http://localhost:8000')"
             )
 
         self._api_key = api_key
@@ -465,7 +465,7 @@ class AgentDB:
     def _handle(self, resp: httpx.Response) -> Any:
         if resp.status_code == 401:
             raise AuthError(
-                "Invalid API key. Check your key at agentdb.zizka.ai/settings/api-keys",
+                "Invalid API key. Check your key at db.zizka.ai/settings/api-keys",
                 status_code=401,
             )
         if resp.status_code == 404:
@@ -477,8 +477,8 @@ class AgentDB:
                 detail = resp.json().get("detail", resp.text)
             except Exception:
                 detail = resp.text
-            raise AgentDBError(
-                f"AgentDB error ({resp.status_code}): {detail}",
+            raise ZizkaDBError(
+                f"ZizkaDB error ({resp.status_code}): {detail}",
                 status_code=resp.status_code,
             )
         return resp.json()

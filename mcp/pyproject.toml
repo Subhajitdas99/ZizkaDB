@@ -3,14 +3,14 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "agentdb-mcp"
+name = "zizkadb-mcp"
 version = "0.1.1"
-description = "MCP server for AgentDB — give any AI agent persistent memory and observability"
+description = "MCP server for ZizkaDB — give any AI agent persistent memory and observability"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
 authors = [{ name = "Zizka AI", email = "hello@zizka.ai" }]
-keywords = ["mcp", "ai", "agents", "memory", "observability", "agentdb", "claude", "cursor"]
+keywords = ["mcp", "ai", "agents", "memory", "observability", "zizkadb", "claude", "cursor"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -24,13 +24,13 @@ dependencies = [
 ]
 
 [project.scripts]
-agentdb-mcp = "agentdb_mcp.server:main"
+zizkadb-mcp = "zizkadb_mcp.server:main"
 
 [project.urls]
-Homepage = "https://agentdb.zizka.ai"
-Documentation = "https://agentdb.zizka.ai/docs"
+Homepage = "https://db.zizka.ai"
+Documentation = "https://db.zizka.ai/docs"
 Repository = "https://github.com/Zizka-ai/agentdb"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["agentdb_mcp*"]
+include = ["zizkadb_mcp*"]

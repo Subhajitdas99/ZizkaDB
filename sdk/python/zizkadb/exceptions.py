@@ -1,18 +1,18 @@
-class AgentDBError(Exception):
-    """Base exception for AgentDB SDK."""
+class ZizkaDBError(Exception):
+    """Base exception for ZizkaDB SDK."""
 
     def __init__(self, message: str, status_code: int | None = None):
         self.status_code = status_code
         super().__init__(message)
 
 
-class AuthError(AgentDBError):
+class AuthError(ZizkaDBError):
     """Invalid or missing API key."""
 
 
-class NotFoundError(AgentDBError):
+class NotFoundError(ZizkaDBError):
     """Event or agent not found."""
 
 
-class RateLimitError(AgentDBError):
+class RateLimitError(ZizkaDBError):
     """Too many requests."""

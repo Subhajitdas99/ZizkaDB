@@ -31,7 +31,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "uvx",
       "args": ["agentdb-mcp"],
       "env": {
-        "AGENTDB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
     }
   }
@@ -51,7 +51,7 @@ Edit your MCP config at `~/.cursor/mcp.json`:
       "command": "uvx",
       "args": ["agentdb-mcp"],
       "env": {
-        "AGENTDB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
     }
   }
@@ -67,8 +67,8 @@ Edit your MCP config at `~/.cursor/mcp.json`:
       "command": "uvx",
       "args": ["agentdb-mcp"],
       "env": {
-        "AGENTDB_HOST": "http://localhost:8000",
-        "AGENTDB_API_KEY": ""
+        "ZIZKADB_HOST": "http://localhost:8000",
+        "ZIZKADB_API_KEY": ""
       }
     }
   }
@@ -105,8 +105,8 @@ Once configured, Claude can call AgentDB tools in any conversation:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `AGENTDB_HOST` | `https://agentdb.zizka.ai` | API base URL (change for self-hosted) |
-| `AGENTDB_API_KEY` | _(empty)_ | Your API key from the dashboard |
+| `ZIZKADB_HOST` | `https://agentdb.zizka.ai` | API base URL (change for self-hosted) |
+| `ZIZKADB_API_KEY` | _(empty)_ | Your API key from the dashboard |
 
 ## License
 

@@ -1,5 +1,5 @@
 """
-Memory API — three endpoints that make AgentDB easy to use as a drop-in
+Memory API — three endpoints that make ZizkaDB easy to use as a drop-in
 replacement for LLM-provided memory:
 
   POST /v1/memory/context  →  get a prompt-ready context block
