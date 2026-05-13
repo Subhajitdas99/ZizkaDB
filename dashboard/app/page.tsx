@@ -1,7 +1,94 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+// ── Live user counters ─────────────────────────────────────────────────────
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://db.zizka.ai'
+
+interface Stats { managed: number; python_sdk: number; npm_sdk: number; mcp: number }
+
+function useAnimatedCount(target: number, duration = 800) {
+  const [display, setDisplay] = useState(target)
+  const prev = useRef(target)
+
+  useEffect(() => {
+    if (prev.current === target) return
+    const start = prev.current
+    const diff = target - start
+    const startTime = performance.now()
+    function step(now: number) {
+      const t = Math.min((now - startTime) / duration, 1)
+      const ease = 1 - Math.pow(1 - t, 3)
+      setDisplay(Math.round(start + diff * ease))
+      if (t < 1) requestAnimationFrame(step)
+      else prev.current = target
+    }
+    requestAnimationFrame(step)
+  }, [target, duration])
+
+  return display
+}
+
+function StatBox({ label, value, icon }: { label: string; value: number; icon: string }) {
+  const count = useAnimatedCount(value)
+  return (
+    <div style={{
+      flex: '1 1 160px', minWidth: 140, padding: '20px 16px', borderRadius: 14,
+      border: '1px solid #e8e8e8', background: '#fff', textAlign: 'center',
+      boxShadow: '0 1px 8px rgba(0,0,0,0.04)',
+    }}>
+      <div style={{ fontSize: 22, marginBottom: 6 }}>{icon}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, color: '#111', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.5px' }}>
+        {count.toLocaleString()}+
+      </div>
+      <div style={{ fontSize: 12, color: '#888', marginTop: 4, fontWeight: 500 }}>{label}</div>
+    </div>
+  )
+}
+
+function LiveStats() {
+  const [stats, setStats] = useState<Stats>({ managed: 50, python_sdk: 50, npm_sdk: 50, mcp: 50 })
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${API_URL}/v1/stats`)
+        if (res.ok) {
+          const data = await res.json() as Stats
+          setStats(data)
+          setLoaded(true)
+        }
+      } catch { /* silently fail — floors stay */ }
+    }
+    fetchStats()
+    const interval = setInterval(fetchStats, 30_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <section style={{ padding: '0 40px 72px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
+        <p style={{ fontSize: 12, color: '#bbb', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 24 }}>
+          Developers using ZizkaDB
+        </p>
+        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <StatBox label="Managed service" value={stats.managed}    icon="☁️" />
+          <StatBox label="Python SDK"       value={stats.python_sdk} icon="🐍" />
+          <StatBox label="npm SDK"          value={stats.npm_sdk}    icon="📦" />
+          <StatBox label="MCP server"       value={stats.mcp}        icon="🔌" />
+        </div>
+        {loaded && (
+          <p style={{ fontSize: 11, color: '#ccc', marginTop: 16 }}>
+            Live · updates every 30s
+          </p>
+        )}
+      </div>
+    </section>
+  )
+}
 
 // ── SDK snippets by language ───────────────────────────────────────────────
 
@@ -262,6 +349,9 @@ export default function LandingPage() {
           )}
         </div>
       </section>
+
+      {/* Live social proof counters */}
+      <LiveStats />
 
       {/* Works with */}
       <section style={{ padding: '0 40px 72px', textAlign: 'center' }}>

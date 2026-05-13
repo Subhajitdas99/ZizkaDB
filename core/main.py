@@ -11,6 +11,7 @@ from api.search import router as search_router
 from api.memory import router as memory_router
 from api.telemetry import router as telemetry_router
 from api.admin import router as admin_router
+from api.stats import router as stats_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,14 +20,14 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    logger.info("ZizkaDB started")
+    logger.info("AgentDB started")
     yield
     await close_db()
-    logger.info("ZizkaDB stopped")
+    logger.info("AgentDB stopped")
 
 
 app = FastAPI(
-    title="ZizkaDB",
+    title="AgentDB",
     description="The operational database for AI agents",
     version="0.1.0",
     lifespan=lifespan,
@@ -47,6 +48,7 @@ app.include_router(search_router,    prefix="/v1/search",    tags=["search"])
 app.include_router(memory_router,    prefix="/v1/memory",    tags=["memory"])
 app.include_router(telemetry_router, prefix="/v1/telemetry", tags=["telemetry"])
 app.include_router(admin_router,     prefix="/v1/admin",     include_in_schema=False)
+app.include_router(stats_router,     prefix="/v1/stats",     tags=["stats"])
 
 
 @app.get("/health")
