@@ -12,6 +12,7 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_DEV_MODE=true
 ENV NEXT_PUBLIC_DEV_MODE=$NEXT_PUBLIC_DEV_MODE
 ENV NEXT_TELEMETRY_DISABLED=1
+RUN mkdir -p ./public
 RUN npm run build
 
 FROM node:20-alpine AS runner
@@ -19,7 +20,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup -S agentdb && adduser -S agentdb -G agentdb
-RUN mkdir -p ./public
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
