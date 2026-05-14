@@ -788,13 +788,13 @@ export default function LandingPage() {
               {
                 name: 'Pro', price: '€29', sub: 'per month',
                 features: ['100M events', '90-day retention', '3 projects', 'Email support'],
-                cta: 'Start 14-day free trial →', href: '/signup', highlight: true,
+                cta: 'Start 1-month free trial →', href: '/signup', highlight: true,
                 note: 'No credit card needed',
               },
               {
                 name: 'Team', price: '€99', sub: 'per month',
                 features: ['1B events', '1-year retention', '10 seats', 'Priority support'],
-                cta: 'Start 14-day free trial →', href: '/signup', highlight: false,
+                cta: 'Start 1-month free trial →', href: '/signup', highlight: false,
                 note: 'No credit card needed',
               },
             ] as { name: string; price: string; sub: string; features: string[]; cta: string; href: string; highlight: boolean; note?: string }[]).map(plan => (
