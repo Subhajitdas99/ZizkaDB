@@ -69,12 +69,12 @@ function LiveStats() {
   }, [])
 
   return (
-    <section style={{ padding: '0 40px 72px' }}>
+    <section className="zdb-section" style={{ padding: '0 40px 72px' }}>
       <div style={{ maxWidth: 760, margin: '0 auto', textAlign: 'center' }}>
         <p style={{ fontSize: 12, color: '#bbb', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 24 }}>
           Developers using ZizkaDB
         </p>
-        <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="zdb-stat-grid" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
           <StatBox label="Managed service" value={stats.managed}    icon="☁️" />
           <StatBox label="Python SDK"       value={stats.python_sdk} icon="🐍" />
           <StatBox label="npm SDK"          value={stats.npm_sdk}    icon="📦" />
@@ -259,22 +259,44 @@ export default function LandingPage() {
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fff' }}>
+      <style>{`
+        @media (max-width: 640px) {
+          .zdb-nav-links { display: none !important; }
+          .zdb-nav-cta { display: flex !important; }
+          .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
+          .zdb-hero-h1 { font-size: 34px !important; letter-spacing: -0.5px !important; }
+          .zdb-hero-p { font-size: 15px !important; }
+          .zdb-grid-3 { grid-template-columns: 1fr !important; }
+          .zdb-grid-2 { grid-template-columns: 1fr !important; }
+          .zdb-price-grid { grid-template-columns: 1fr !important; }
+          .zdb-sdk-tabs { flex-wrap: wrap !important; }
+          .zdb-sdk-info { flex-direction: column !important; }
+          .zdb-table-wrap { overflow-x: auto !important; }
+          .zdb-footer { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
+          .zdb-footer-links { flex-wrap: wrap !important; gap: 16px !important; }
+          .zdb-self-host { padding: 36px 24px !important; }
+          .zdb-install-box { max-width: 100% !important; width: 100% !important; }
+          .zdb-stat-grid { gap: 10px !important; }
+          .zdb-hero-btns { flex-direction: column !important; align-items: stretch !important; }
+          .zdb-hero-btns a { text-align: center !important; }
+        }
+      `}</style>
 
       {/* Nav */}
       <nav style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 40px', height: 60, borderBottom: '1px solid #f0f0f0',
+        padding: '0 20px', height: 56, borderBottom: '1px solid #f0f0f0',
         position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(8px)', zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>A</span>
+            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 700, fontSize: 15 }}>ZizkaDB</span>
-          <span style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
+          <span className="zdb-nav-links" style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+        <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
           {[['Docs', '/docs'], ['Pricing', '#pricing']].map(([l, h]) => (
             <Link key={l} href={h} style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>{l}</Link>
           ))}
@@ -285,29 +307,38 @@ export default function LandingPage() {
             Start free →
           </Link>
         </div>
+        {/* Mobile nav — only CTAs */}
+        <div className="zdb-nav-cta" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
+          <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
+            Sign in
+          </Link>
+          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 8 }}>
+            Start free →
+          </Link>
+        </div>
       </nav>
 
       {/* Hero */}
-      <section style={{ padding: '96px 40px 72px', maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px 56px', maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 6,
           background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 100, padding: '5px 14px',
-          fontSize: 13, color: '#9a3412', marginBottom: 28, fontWeight: 500,
+          fontSize: 13, color: '#9a3412', marginBottom: 24, fontWeight: 500,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
           New: behavioral baselines on every agent
         </div>
 
-        <h1 style={{ fontSize: 56, fontWeight: 700, lineHeight: 1.05, margin: '0 0 22px', letterSpacing: -1.5 }}>
+        <h1 className="zdb-hero-h1" style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.08, margin: '0 0 20px', letterSpacing: -1.5 }}>
           Your agent stops behaving<br />
           <span style={{ color: '#f97316' }}>like itself. You know first.</span>
         </h1>
 
-        <p style={{ fontSize: 18, color: '#222', lineHeight: 1.55, margin: '0 0 36px', maxWidth: 580, marginLeft: 'auto', marginRight: 'auto', fontWeight: 500 }}>
+        <p className="zdb-hero-p" style={{ fontSize: 17, color: '#222', lineHeight: 1.55, margin: '0 0 32px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', fontWeight: 500 }}>
           ZizkaDB watches every session, builds a baseline, and flags the ones that drift. Before your users do.
         </p>
 
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
+        <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
           <Link href="/signup" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
             Start free →
           </Link>
@@ -317,11 +348,11 @@ export default function LandingPage() {
         </div>
 
         {/* SDK tab switcher */}
-        <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
-          <div style={{ display: 'flex', gap: 2, background: '#f0f0f0', borderRadius: 9, padding: 3, marginBottom: 10 }}>
+        <div className="zdb-install-box" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0, maxWidth: '100%' }}>
+          <div className="zdb-sdk-tabs" style={{ display: 'flex', gap: 2, background: '#f0f0f0', borderRadius: 9, padding: 3, marginBottom: 10 }}>
             {SDK_TABS.map(t => (
               <button key={t} onClick={() => setActiveSdk(t)} style={{
-                padding: '5px 14px', fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
+                padding: '5px 12px', fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
                 borderRadius: 7, background: activeSdk === t ? '#fff' : 'transparent',
                 color: activeSdk === t ? '#111' : '#888',
                 boxShadow: activeSdk === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
@@ -332,13 +363,13 @@ export default function LandingPage() {
             ))}
           </div>
           <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 10,
+            display: 'flex', alignItems: 'center', gap: 10, maxWidth: '100%', overflow: 'hidden',
             background: '#f5f5f5', borderRadius: 8, padding: '8px 14px',
             fontFamily: 'monospace', fontSize: 13, color: '#333',
           }}>
-            <span style={{ color: '#aaa' }}>$</span>
-            <span>{INSTALL[activeSdk]}</span>
-            <button onClick={() => copy(INSTALL[activeSdk], 'install')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: 0 }}>
+            <span style={{ color: '#aaa', flexShrink: 0 }}>$</span>
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{INSTALL[activeSdk]}</span>
+            <button onClick={() => copy(INSTALL[activeSdk], 'install')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: 0, flexShrink: 0 }}>
               {copied === 'install' ? '✓' : 'copy'}
             </button>
           </div>
@@ -354,7 +385,7 @@ export default function LandingPage() {
       <LiveStats />
 
       {/* Works with */}
-      <section style={{ padding: '0 40px 72px', textAlign: 'center' }}>
+      <section className="zdb-section" style={{ padding: '0 40px 72px', textAlign: 'center' }}>
         <p style={{ fontSize: 12, color: '#bbb', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 20 }}>
           Works with anything
         </p>
@@ -386,7 +417,7 @@ export default function LandingPage() {
       </section>
 
       {/* 3 moments */}
-      <section style={{ padding: '72px 40px', background: '#fafafa' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 style={{ fontSize: 32, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
             Three moments other tools miss
@@ -395,7 +426,7 @@ export default function LandingPage() {
             LangSmith and Langfuse show you traces after you go looking. ZizkaDB watches while you sleep.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               {
                 num: '01',
@@ -439,7 +470,7 @@ export default function LandingPage() {
       </section>
 
       {/* Connect your way */}
-      <section style={{ padding: '72px 40px' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
             Pick a stack
@@ -449,7 +480,7 @@ export default function LandingPage() {
           </p>
 
           {/* SDK tabs */}
-          <div style={{ display: 'flex', gap: 2, borderBottom: '1px solid #e5e5e5', marginBottom: 0 }}>
+          <div className="zdb-sdk-tabs" style={{ display: 'flex', gap: 2, borderBottom: '1px solid #e5e5e5', marginBottom: 0, overflowX: 'auto' }}>
             {SDK_TABS.map(t => (
               <button key={t} onClick={() => setActiveSdk(t)} style={{
                 padding: '10px 22px', fontSize: 13, fontWeight: 500, border: 'none',
@@ -492,7 +523,7 @@ export default function LandingPage() {
 
           {/* Per-tab callouts */}
           {activeSdk === 'Python' && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <div className="zdb-sdk-info" style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
                 { label: 'Install', value: 'pip install zizkadb-sdk' },
                 { label: 'Requires', value: 'Python 3.10+' },
@@ -506,7 +537,7 @@ export default function LandingPage() {
             </div>
           )}
           {activeSdk === 'TypeScript' && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <div className="zdb-sdk-info" style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
                 { label: 'Install', value: 'npm install zizkadb-sdk' },
                 { label: 'Works with', value: 'Node.js, Deno, Bun, Edge' },
@@ -520,7 +551,7 @@ export default function LandingPage() {
             </div>
           )}
           {activeSdk === 'MCP' && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <div className="zdb-sdk-info" style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
                 { label: 'Claude Desktop', value: '~/Library/Application Support/Claude/claude_desktop_config.json' },
                 { label: 'Cursor', value: '~/.cursor/mcp.json' },
@@ -534,7 +565,7 @@ export default function LandingPage() {
             </div>
           )}
           {activeSdk === 'REST API' && (
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <div className="zdb-sdk-info" style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
                 { label: 'Base URL', value: 'https://db.zizka.ai/v1/' },
                 { label: 'Auth header', value: 'Authorization: Bearer agdb_live_...' },
@@ -551,7 +582,7 @@ export default function LandingPage() {
       </section>
 
       {/* Quick demo */}
-      <section style={{ padding: '72px 40px' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, marginBottom: 8, letterSpacing: -0.5, textAlign: 'center' }}>
             Three lines. That&apos;s it.
@@ -584,7 +615,7 @@ export default function LandingPage() {
       </section>
 
       {/* Claude + OpenAI section */}
-      <section style={{ padding: '72px 40px', background: '#fafafa' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 880, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, marginBottom: 8, letterSpacing: -0.5, textAlign: 'center' }}>
             Already using Claude or OpenAI?
@@ -631,7 +662,7 @@ export default function LandingPage() {
           </div>
 
           {/* What you get callouts */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 24 }}>
+          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginTop: 24 }}>
             {[
               { label: 'Session 1',     value: 'Causal chain on every decision.' },
               { label: 'Session 10',    value: 'Semantic search. Time travel.' },
@@ -647,7 +678,7 @@ export default function LandingPage() {
       </section>
 
       {/* Features */}
-      <section style={{ padding: '72px 40px' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
             What vector DBs can&apos;t do
@@ -655,7 +686,7 @@ export default function LandingPage() {
           <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 56 }}>
             Vector DBs store embeddings. ZizkaDB stores what happened, why, and what came next.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               { icon: '🔍', title: 'Causal Lineage',   desc: 'Every event links to its cause. Trace any output to the input that triggered it.' },
               { icon: '⏪', title: 'Time Travel',      desc: "Replay your agent's exact state at any past moment." },
@@ -675,7 +706,7 @@ export default function LandingPage() {
       </section>
 
       {/* Comparison */}
-      <section style={{ padding: '72px 40px', background: '#fafafa' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 8, letterSpacing: -0.5 }}>
             How it compares
@@ -687,8 +718,8 @@ export default function LandingPage() {
             LangSmith · Mem0 · Pinecone · ZizkaDB · May 2026
           </p>
 
-          <div style={{ border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
+          <div className="zdb-table-wrap" style={{ border: '1px solid #e5e5e5', borderRadius: 12, overflow: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5, minWidth: 540 }}>
               <thead>
                 <tr style={{ background: '#f7f7f7', borderBottom: '1px solid #e5e5e5' }}>
                   <th style={{ padding: '13px 18px', textAlign: 'left', fontWeight: 600, color: '#333', width: '36%' }}>Capability</th>
@@ -741,13 +772,13 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" style={{ padding: '72px 40px' }}>
+      <section id="pricing" className="zdb-section" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>Pricing</h2>
           <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48 }}>
             Free if you self-host. Paid if you don&apos;t want to.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+          <div className="zdb-price-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {([
               {
                 name: 'Self-Hosted', price: 'Free', sub: 'forever',
@@ -813,15 +844,15 @@ export default function LandingPage() {
       </section>
 
       {/* Self-host CTA */}
-      <section style={{ padding: '72px 40px', background: '#fafafa' }}>
-        <div style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '56px 40px' }}>
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
+        <div className="zdb-self-host" style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '56px 40px' }}>
           <h2 style={{ fontSize: 30, fontWeight: 700, color: '#fff', marginBottom: 14, letterSpacing: -0.5 }}>
             Run it yourself
           </h2>
           <p style={{ color: '#888', fontSize: 15, marginBottom: 28 }}>
             Full feature set. No account. No limits. Forever.
           </p>
-          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 28, lineHeight: 1.9 }}>
+          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 28, lineHeight: 1.9, overflowX: 'auto' }}>
             <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/agentdb</div>
             <div><span style={{ color: '#555' }}>$ </span>cp .env.example .env &amp;&amp; nano .env</div>
             <div><span style={{ color: '#555' }}>$ </span>docker-compose -f infra/docker-compose.yml up</div>
@@ -833,16 +864,16 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid #f0f0f0', padding: '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: '#999' }}>
+      <footer className="zdb-footer" style={{ borderTop: '1px solid #f0f0f0', padding: '28px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: '#999' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ width: 22, height: 22, borderRadius: 5, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>A</span>
+            <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 500, color: '#333' }}>ZizkaDB</span>
           <span style={{ color: '#ddd' }}>·</span>
           <span>by Zizka AI</span>
         </div>
-        <div style={{ display: 'flex', gap: 24 }}>
+        <div className="zdb-footer-links" style={{ display: 'flex', gap: 24 }}>
           {[['Docs', '/docs'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
             <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
           ))}
