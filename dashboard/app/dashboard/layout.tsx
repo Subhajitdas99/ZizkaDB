@@ -23,8 +23,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: '#0a0a0a' }}>
 
-      {/* Sidebar */}
-      <aside className="w-56 flex flex-col shrink-0 border-r" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
+      {/* Sidebar — hidden on mobile */}
+      <aside className="hidden sm:flex w-56 flex-col shrink-0 border-r" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
         {/* Logo */}
         <div className="px-5 py-5 border-b" style={{ borderColor: '#1f1f1f' }}>
           <div className="flex items-center gap-2">
@@ -73,9 +73,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Mobile top bar */}
+        <div className="flex sm:hidden items-center justify-between px-4 py-3 border-b" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: '#22c55e' }}>
+              <Database size={12} className="text-black" />
+            </div>
+            <span className="text-white font-semibold text-sm">ZizkaDB</span>
+          </div>
+          <button onClick={signOut} style={{ color: '#737373' }}>
+            <LogOut size={16} />
+          </button>
+        </div>
+
+        <main className="flex-1 overflow-auto pb-16 sm:pb-0">
+          {children}
+        </main>
+
+        {/* Mobile bottom nav */}
+        <nav className="flex sm:hidden border-t" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
+          {nav.map(({ href, label, icon: Icon }) => {
+            const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="flex-1 flex flex-col items-center gap-1 py-3 text-xs"
+                style={{ color: active ? '#22c55e' : '#737373' }}
+              >
+                <Icon size={18} />
+                {label}
+              </Link>
+            )
+          })}
+        </nav>
+      </div>
     </div>
   )
 }

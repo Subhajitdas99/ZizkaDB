@@ -11,7 +11,7 @@ type ManagedTab = 'python' | 'typescript' | 'rest'
 const S = {
   page:    { fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fff', minHeight: '100vh' } as const,
   layout:  { display: 'flex', maxWidth: 1100, margin: '0 auto' } as const,
-  main:    { flex: 1, padding: '48px 56px 80px', maxWidth: 820, minWidth: 0 } as const,
+  main:    { flex: 1, padding: '32px 20px 80px', maxWidth: 820, minWidth: 0 } as const,
   h1:      { fontSize: 32, fontWeight: 700, margin: '0 0 8px', letterSpacing: -0.5 } as const,
   h2:      { fontSize: 22, fontWeight: 700, margin: '48px 0 6px', letterSpacing: -0.3 } as const,
   h3:      { fontSize: 15, fontWeight: 600, margin: '28px 0 8px', color: '#222' } as const,
@@ -87,28 +87,56 @@ export default function DocsPage() {
 
   return (
     <div style={S.page}>
+      <style>{`
+        @media (max-width: 640px) {
+          .docs-nav-links { display: none !important; }
+          .docs-sidebar { display: none !important; }
+          .docs-mobile-nav { display: flex !important; }
+          .docs-main { padding: 20px 16px 60px !important; }
+        }
+      `}</style>
 
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px', height: 56, borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 100 }}>
+      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', height: 52, borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 100 }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <div style={{ width: 26, height: 26, borderRadius: 6, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>A</span>
+            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 700, fontSize: 14, color: '#111' }}>ZizkaDB</span>
-          <span style={{ fontSize: 12, color: '#bbb' }}>/ Docs</span>
+          <span className="docs-nav-links" style={{ fontSize: 12, color: '#bbb' }}>/ Docs</span>
         </Link>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <a href="/api-explorer" target="_blank" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
-          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: '#111', borderRadius: 7 }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <a href="/api-explorer" target="_blank" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
+          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 7 }}>
             Get API key →
           </Link>
         </div>
       </nav>
 
+      {/* Mobile section switcher — hidden on desktop */}
+      <div className="docs-mobile-nav" style={{
+        display: 'none', overflowX: 'auto', borderBottom: '1px solid #f0f0f0',
+        padding: '0 16px', gap: 0, position: 'sticky', top: 52, background: '#fff', zIndex: 99,
+      }}>
+        {([
+          ['managed', 'Managed'],
+          ['mcp', 'MCP'],
+          ['selfhost', 'Self-host'],
+          ['concepts', 'Concepts'],
+        ] as [Section, string][]).map(([id, label]) => (
+          <button key={id} onClick={() => setSection(id)} style={{
+            padding: '10px 14px', fontSize: 13, fontWeight: 500, border: 'none', background: 'none',
+            cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
+            borderBottom: section === id ? '2px solid #111' : '2px solid transparent',
+            color: section === id ? '#111' : '#888',
+          }}>{label}</button>
+        ))}
+      </div>
+
       <div style={S.layout}>
 
-        {/* Sidebar */}
-        <aside style={{ width: 210, flexShrink: 0, padding: '32px 16px', position: 'sticky', top: 56, height: 'calc(100vh - 56px)', overflowY: 'auto', borderRight: '1px solid #f0f0f0' }}>
+        {/* Sidebar — hidden on mobile */}
+        <aside className="docs-sidebar" style={{ width: 210, flexShrink: 0, padding: '32px 16px', position: 'sticky', top: 56, height: 'calc(100vh - 56px)', overflowY: 'auto', borderRight: '1px solid #f0f0f0' }}>
           <div style={{ marginBottom: 24 }}>
             <div style={S.label}>Getting started</div>
             <NavItem active={section === 'managed'} onClick={() => setSection('managed')}>Managed service</NavItem>
@@ -125,7 +153,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Content */}
-        <main style={S.main}>
+        <main className="docs-main" style={S.main}>
 
           {/* ── MANAGED SERVICE ── */}
           {section === 'managed' && (
