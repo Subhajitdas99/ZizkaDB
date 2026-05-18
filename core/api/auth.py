@@ -1,4 +1,5 @@
 import os
+import time
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, EmailStr
 from services.auth import request_otp, verify_otp, generate_api_key, _issue_tokens
@@ -8,7 +9,24 @@ from db.connection import get_pool
 
 router = APIRouter()
 
-_rate_limit: dict[str, int] = {}
+# Per-email OTP request limits (in-memory; resets after window)
+_OTP_RATE_WINDOW_SEC = 15 * 60   # 15 minutes
+_OTP_RATE_MAX = 10               # max requests per email per window
+_otp_rate: dict[str, list[float]] = {}
+
+
+def _check_otp_rate_limit(email: str) -> None:
+    key = email.lower().strip()
+    now = time.time()
+    window_start = now - _OTP_RATE_WINDOW_SEC
+    hits = [t for t in _otp_rate.get(key, []) if t > window_start]
+    if len(hits) >= _OTP_RATE_MAX:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many code requests. Wait 15 minutes and try again.",
+        )
+    hits.append(now)
+    _otp_rate[key] = hits
 
 _DEV_TENANT_ID = "00000000-0000-0000-0000-000000000001"
 _DEV_USER_ID   = "00000000-0000-0000-0000-000000000001"
@@ -33,23 +51,22 @@ async def request_otp_route(body: RequestOTPBody):
     import logging
     log = logging.getLogger(__name__)
 
-    key = body.email.lower()
-    _rate_limit[key] = _rate_limit.get(key, 0) + 1
-    if _rate_limit[key] > 3:
-        raise HTTPException(status_code=429, detail="Too many requests")
+    email = body.email.lower().strip()
+    _check_otp_rate_limit(email)
 
     try:
-        await request_otp(body.email)
+        await request_otp(email)
         return {"message": "Code sent"}
     except Exception as e:
-        log.error(f"request_otp failed for {body.email}: {e}")
+        log.error(f"request_otp failed for {email}: {e}")
         raise HTTPException(status_code=500, detail="Failed to send code. Check server logs.")
 
 
 @router.post("/verify-otp")
 async def verify_otp_route(body: VerifyOTPBody, response: Response):
+    email = body.email.lower().strip()
     try:
-        tokens = await verify_otp(body.email, body.otp)
+        tokens = await verify_otp(email, body.otp)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 

@@ -59,6 +59,7 @@ async def verify_api_key(raw_key: str) -> dict | None:
 # ─────────────────────────────────────────
 
 async def request_otp(email: str) -> None:
+    email = email.lower().strip()
     otp = str(random.randint(100000, 999999))
     otp_hash = bcrypt.hashpw(otp.encode(), bcrypt.gensalt()).decode()
     expires_at = datetime.now(timezone.utc) + timedelta(minutes=15)
@@ -83,6 +84,7 @@ async def request_otp(email: str) -> None:
 
 
 async def verify_otp(email: str, otp: str) -> dict:
+    email = email.lower().strip()
     pool = get_pool()
 
     row = await pool.fetchrow(

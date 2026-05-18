@@ -135,8 +135,12 @@ export async function requestOtp(email: string) {
   const res = await fetch(`${API}/v1/auth/request-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email: email.toLowerCase().trim() }),
   })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(typeof err.detail === 'string' ? err.detail : 'Failed to send code')
+  }
   return res.json()
 }
 
