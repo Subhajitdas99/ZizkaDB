@@ -112,8 +112,22 @@ export async function adminTelemetryRecent(token: string, limit = 50) {
   return apiFetch(`/v1/admin/telemetry/recent?limit=${limit}`, token)
 }
 
-export async function adminManagedUsers(token: string) {
-  return apiFetch('/v1/admin/managed/users', token)
+export async function adminManagedOverview(token: string) {
+  return apiFetch('/v1/admin/managed/overview', token)
+}
+
+export async function adminManagedUsers(
+  token: string,
+  params: { search?: string; has_keys?: boolean; active_7d?: boolean } = {},
+) {
+  const qs = new URLSearchParams()
+  if (params.search?.trim()) qs.set('search', params.search.trim())
+  if (params.has_keys === true) qs.set('has_keys', 'true')
+  if (params.has_keys === false) qs.set('has_keys', 'false')
+  if (params.active_7d === true) qs.set('active_7d', 'true')
+  if (params.active_7d === false) qs.set('active_7d', 'false')
+  const q = qs.toString()
+  return apiFetch(`/v1/admin/managed/users${q ? `?${q}` : ''}`, token)
 }
 
 export async function adminManagedUsage(token: string) {

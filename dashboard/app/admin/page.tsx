@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   adminRequestOtp, adminVerifyOtp,
   adminOverview, adminTelemetrySummary, adminTelemetryRecent,
-  adminManagedUsers, adminManagedUsage,
+  adminManagedOverview, adminManagedUsers, adminManagedUsage,
 } from '@/lib/api'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -38,17 +38,41 @@ interface TelemetryPing {
   ping_count:  number
 }
 
+interface ManagedApiKey {
+  name: string
+  prefix: string
+  created_at: string | null
+  last_used: string | null
+}
+
 interface ManagedUser {
   user_id:      string
   email:        string
   tenant_id:    string | null
   tenant_name:  string | null
+  tenant_created_at: string | null
   created_at:   string | null
   last_login:   string | null
   active_keys:  number
+  agent_count:  number
   total_events: number
   events_7d:    number
   last_event:   string | null
+  api_keys:     ManagedApiKey[]
+  customer_status: 'active' | 'signed_up' | 'registered'
+  plan: string | null
+  subscription_status: string | null
+  stripe_customer_id: string | null
+  trial_ends_at: string | null
+}
+
+interface ManagedOverview {
+  total_users?: number
+  signups_7d?: number
+  signups_30d?: number
+  users_with_keys?: number
+  tenants_active_7d?: number
+  tenants_active_24h?: number
 }
 
 interface ManagedUsage {
@@ -177,6 +201,14 @@ function btnPrimary(disabled: boolean): React.CSSProperties {
     color: disabled ? '#525252' : '#fff',
     border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 500,
     cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s',
+  }
+}
+
+function btnSmall(): React.CSSProperties {
+  return {
+    padding: '8px 14px', background: '#1a1a1a', color: '#d4d4d4',
+    border: '1px solid #2a2a2a', borderRadius: 8, fontSize: 12, fontWeight: 500,
+    cursor: 'pointer',
   }
 }
 
@@ -378,14 +410,83 @@ function TelemetrySection({ token }: { token: string }) {
 function ManagedSection({ token }: { token: string }) {
   const [users, setUsers] = useState<ManagedUser[] | null>(null)
   const [usage, setUsage] = useState<ManagedUsage | null>(null)
+  const [overview, setOverview] = useState<ManagedOverview | null>(null)
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<'all' | 'keys' | 'active' | 'no_keys'>('all')
+
+  const loadUsers = () => {
+    const params: { search?: string; has_keys?: boolean; active_7d?: boolean } = { search }
+    if (filter === 'keys') params.has_keys = true
+    if (filter === 'no_keys') params.has_keys = false
+    if (filter === 'active') params.active_7d = true
+    adminManagedUsers(token, params).then(setUsers).catch(() => setUsers([]))
+  }
 
   useEffect(() => {
-    adminManagedUsers(token).then(setUsers).catch(() => {})
+    adminManagedOverview(token).then(setOverview).catch(() => {})
     adminManagedUsage(token).then(setUsage).catch(() => {})
-  }, [token])
+    loadUsers()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, filter])
+
+  const statusTag = (status: ManagedUser['customer_status']) => {
+    const colors = {
+      active: '#22c55e',
+      signed_up: '#3b82f6',
+      registered: '#737373',
+    }
+    const labels = {
+      active: 'Active (7d events)',
+      signed_up: 'Has API key',
+      registered: 'Registered only',
+    }
+    return <Tag color={colors[status]}>{labels[status]}</Tag>
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {overview && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+          <Stat label="Managed signups" value={fmt(overview.total_users)} sub={`+${fmt(overview.signups_7d)} last 7d`} accent="#22c55e" />
+          <Stat label="With API keys" value={fmt(overview.users_with_keys)} sub="started integration" />
+          <Stat label="Active tenants (7d)" value={fmt(overview.tenants_active_7d)} sub={`${fmt(overview.tenants_active_24h)} in 24h`} accent="#f97316" />
+        </div>
+      )}
+
+      <Card title="Billing note" subtitle="Pro/Team payments are handled in Stripe. Plan and subscription columns appear here once Stripe webhooks write to the database. Until then, use customer status and API usage below.">
+        <div style={{ fontSize: 12, color: '#a3a3a3', lineHeight: 1.6 }}>
+          Signup captures email (passwordless OTP). API keys are created in the customer dashboard Settings.
+        </div>
+      </Card>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && loadUsers()}
+          placeholder="Search email…"
+          style={{
+            flex: '1 1 200px', padding: '8px 12px', background: '#0a0a0a',
+            border: '1px solid #2a2a2a', borderRadius: 8, color: '#fff', fontSize: 13,
+          }}
+        />
+        <button type="button" onClick={loadUsers} style={btnSmall()}>Search</button>
+        {(['all', 'active', 'keys', 'no_keys'] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            style={{
+              ...btnSmall(),
+              background: filter === f ? '#f97316' : '#1a1a1a',
+              color: filter === f ? '#fff' : '#a3a3a3',
+            }}
+          >
+            {f === 'all' ? 'All' : f === 'active' ? 'Active 7d' : f === 'keys' ? 'Has keys' : 'No keys'}
+          </button>
+        ))}
+      </div>
+
       {usage && usage.daily.length > 0 && (
         <Card title="Events written (last 30 days)" subtitle="One event = one db.log() call from a managed customer.">
           <DailyBars data={usage.daily.map((d) => ({ day: d.day, value: d.events }))} accent="#22c55e" />
@@ -396,34 +497,84 @@ function ManagedSection({ token }: { token: string }) {
         </Card>
       )}
 
-      <Card title="Customers" subtitle="Every signed-up account on the managed service.">
+      <Card title="Customers & subscribers" subtitle="Managed cloud accounts (db.zizka.ai). Expand rows for API key prefixes and tenant IDs.">
         {!users ? <SkeletonBlock /> : users.length === 0 ? (
-          <Empty>No managed customers yet.</Empty>
+          <Empty>No customers match this filter.</Empty>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
-                <Th>Email</Th><Th>Joined</Th><Th align="right">Keys</Th>
-                <Th align="right">Events 7d</Th><Th align="right">Events total</Th>
-                <Th align="right">Last event</Th><Th align="right">Last login</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.user_id} style={{ borderBottom: '1px solid #161616' }}>
-                  <Td>{u.email}</Td>
-                  <Td subtle>{u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}</Td>
-                  <Td align="right" mono>{u.active_keys}</Td>
-                  <Td align="right" mono>
-                    <span style={{ color: u.events_7d > 0 ? '#22c55e' : '#525252' }}>{fmt(u.events_7d)}</span>
-                  </Td>
-                  <Td align="right" mono>{fmt(u.total_events)}</Td>
-                  <Td align="right" subtle>{u.last_event ? formatDistanceToNow(new Date(u.last_event), { addSuffix: true }) : '—'}</Td>
-                  <Td align="right" subtle>{u.last_login ? formatDistanceToNow(new Date(u.last_login), { addSuffix: true }) : '—'}</Td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5, minWidth: 900 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
+                  <Th>Email / tenant</Th>
+                  <Th>Status</Th>
+                  <Th>Plan</Th>
+                  <Th>Joined</Th>
+                  <Th align="right">Agents</Th>
+                  <Th align="right">Keys</Th>
+                  <Th align="right">Events 7d</Th>
+                  <Th align="right">Total events</Th>
+                  <Th align="right">Last activity</Th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.user_id} style={{ borderBottom: '1px solid #161616', verticalAlign: 'top' }}>
+                    <Td>
+                      <div style={{ fontWeight: 500 }}>{u.email}</div>
+                      <div style={{ fontSize: 11, color: '#525252', marginTop: 4, fontFamily: 'monospace' }}>
+                        {u.tenant_id ? u.tenant_id.slice(0, 8) + '…' : '—'}
+                        {u.tenant_name && u.tenant_name !== u.email ? ` · ${u.tenant_name}` : ''}
+                      </div>
+                      {u.api_keys.length > 0 && (
+                        <div style={{ marginTop: 6, fontSize: 11, color: '#737373' }}>
+                          {u.api_keys.map((k) => (
+                            <div key={k.prefix}>
+                              {k.name || 'Key'}: <span style={{ fontFamily: 'monospace' }}>{k.prefix}…</span>
+                              {k.last_used ? ` · used ${formatDistanceToNow(new Date(k.last_used), { addSuffix: true })}` : ''}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Td>
+                    <Td>{statusTag(u.customer_status)}</Td>
+                    <Td subtle>
+                      {u.plan ?? '—'}
+                      {u.subscription_status && (
+                        <div style={{ fontSize: 10, marginTop: 2 }}>{u.subscription_status}</div>
+                      )}
+                      {u.stripe_customer_id && (
+                        <a
+                          href={`https://dashboard.stripe.com/customers/${u.stripe_customer_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'block', fontSize: 10, color: '#f97316', marginTop: 4 }}
+                        >
+                          Stripe ↗
+                        </a>
+                      )}
+                    </Td>
+                    <Td subtle>
+                      {u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}
+                      {u.last_login && (
+                        <div style={{ fontSize: 10, marginTop: 2 }}>
+                          login {formatDistanceToNow(new Date(u.last_login), { addSuffix: true })}
+                        </div>
+                      )}
+                    </Td>
+                    <Td align="right" mono>{fmt(u.agent_count)}</Td>
+                    <Td align="right" mono>{u.active_keys}</Td>
+                    <Td align="right" mono>
+                      <span style={{ color: u.events_7d > 0 ? '#22c55e' : '#525252' }}>{fmt(u.events_7d)}</span>
+                    </Td>
+                    <Td align="right" mono>{fmt(u.total_events)}</Td>
+                    <Td align="right" subtle>
+                      {u.last_event ? formatDistanceToNow(new Date(u.last_event), { addSuffix: true }) : '—'}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </Card>
 

@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   description:
     'ZizkaDB watches every agent session, builds a behavioral baseline, and flags the ones that drift. Causal lineage, time travel and semantic search for any AI agent.',
   metadataBase: new URL('https://db.zizka.ai'),
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-32.png', type: 'image/png', sizes: '32x32' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'ZizkaDB — your agent stops behaving like itself, you know first',
     description:
@@ -16,12 +24,14 @@ export const metadata: Metadata = {
     url: 'https://db.zizka.ai',
     siteName: 'ZizkaDB',
     type: 'website',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ZizkaDB' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'ZizkaDB',
     description:
       'ZizkaDB watches every agent session, builds a behavioral baseline, and flags the ones that drift.',
+    images: ['/opengraph-image'],
   },
 }
 

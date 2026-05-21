@@ -1,4 +1,4 @@
-version: '3.8'
+# API + data services only. Dashboard runs on the host via PM2 (see dashboard/ecosystem.config.js).
 
 services:
   postgres:
@@ -75,24 +75,6 @@ services:
     volumes:
       - ../core:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
-  dashboard:
-    build:
-      context: ../dashboard
-      dockerfile: Dockerfile
-      args:
-        # Browser calls the API at this URL — defaults to localhost for self-hosted
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-        # Dev mode: show bypass login button (no email required)
-        NEXT_PUBLIC_DEV_MODE: ${NEXT_PUBLIC_DEV_MODE:-true}
-    container_name: agentdb_dashboard
-    ports:
-      # Host 3001 avoids conflict with stray next-server on :3000 (see nginx.conf)
-      - "127.0.0.1:3001:3000"
-    environment:
-      NODE_ENV: production
-    depends_on:
-      - api
 
 volumes:
   postgres_data:

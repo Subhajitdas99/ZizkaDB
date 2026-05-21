@@ -1,5 +1,5 @@
 """
-ZizkaDB admin panel.
+AgentDB admin panel.
 
 A single-tenant admin dashboard for the operator (founder@zizka.ai).
 Reuses the existing passwordless OTP email flow but locks login to one
@@ -22,7 +22,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Query, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr
 
@@ -230,38 +230,135 @@ async def admin_telemetry_recent(
 
 # ── Managed service (signed-up customers) ────────────────────────────────────
 
-@router.get("/managed/users")
-async def admin_managed_users(_: dict = Depends(require_admin)):
+@router.get("/managed/overview")
+async def admin_managed_overview(_: dict = Depends(require_admin)):
+    """Signup and activity counts for managed-cloud customers (billing via Stripe when linked)."""
     pool = get_pool()
-    rows = await pool.fetch(
+    row = await pool.fetchrow(
         """
         SELECT
+            (SELECT COUNT(*) FROM users) AS total_users,
+            (SELECT COUNT(*) FROM users
+                WHERE created_at > NOW() - INTERVAL '7 days') AS signups_7d,
+            (SELECT COUNT(*) FROM users
+                WHERE created_at > NOW() - INTERVAL '30 days') AS signups_30d,
+            (SELECT COUNT(DISTINCT u.user_id) FROM users u
+                JOIN api_keys ak ON ak.tenant_id = u.tenant_id AND ak.revoked = FALSE) AS users_with_keys,
+            (SELECT COUNT(DISTINCT tenant_id) FROM events
+                WHERE timestamp > NOW() - INTERVAL '7 days') AS tenants_active_7d,
+            (SELECT COUNT(DISTINCT tenant_id) FROM events
+                WHERE timestamp > NOW() - INTERVAL '24 hours') AS tenants_active_24h
+        """
+    )
+    return dict(row) if row else {}
+
+
+@router.get("/managed/users")
+async def admin_managed_users(
+    search: str = "",
+    has_keys: bool | None = Query(default=None),
+    active_7d: bool | None = Query(default=None),
+    _: dict = Depends(require_admin),
+):
+    pool = get_pool()
+    clauses: list[str] = []
+    params: list[object] = []
+    n = 1
+
+    if search.strip():
+        clauses.append(f"u.email ILIKE ${n}")
+        params.append(f"%{search.strip()}%")
+        n += 1
+
+    if has_keys is True:
+        clauses.append(
+            f"EXISTS (SELECT 1 FROM api_keys ak WHERE ak.tenant_id = t.tenant_id AND ak.revoked = FALSE)"
+        )
+    elif has_keys is False:
+        clauses.append(
+            "NOT EXISTS (SELECT 1 FROM api_keys ak WHERE ak.tenant_id = t.tenant_id AND ak.revoked = FALSE)"
+        )
+
+    if active_7d is True:
+        clauses.append(
+            f"""EXISTS (
+                SELECT 1 FROM events e
+                WHERE e.tenant_id = t.tenant_id
+                  AND e.timestamp > NOW() - INTERVAL '7 days'
+            )"""
+        )
+    elif active_7d is False:
+        clauses.append(
+            """NOT EXISTS (
+                SELECT 1 FROM events e
+                WHERE e.tenant_id = t.tenant_id
+                  AND e.timestamp > NOW() - INTERVAL '7 days'
+            )"""
+        )
+
+    where_sql = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+
+    rows = await pool.fetch(
+        f"""
+        SELECT
             u.user_id, u.email, u.created_at, u.last_login,
-            t.tenant_id, t.name AS tenant_name,
-            (SELECT COUNT(*) FROM api_keys WHERE tenant_id = t.tenant_id AND revoked = FALSE) AS active_keys,
-            (SELECT COUNT(*) FROM events    WHERE tenant_id = t.tenant_id) AS total_events,
+            t.tenant_id, t.name AS tenant_name, t.created_at AS tenant_created_at,
+            (SELECT COUNT(*) FROM api_keys
+                WHERE tenant_id = t.tenant_id AND revoked = FALSE) AS active_keys,
+            (SELECT COUNT(*) FROM agents WHERE tenant_id = t.tenant_id) AS agent_count,
+            (SELECT COUNT(*) FROM events WHERE tenant_id = t.tenant_id) AS total_events,
             (SELECT COUNT(*) FROM events
                 WHERE tenant_id = t.tenant_id
-                  AND timestamp > NOW() - INTERVAL '7 days')               AS events_7d,
-            (SELECT MAX(timestamp) FROM events WHERE tenant_id = t.tenant_id) AS last_event
+                  AND timestamp > NOW() - INTERVAL '7 days') AS events_7d,
+            (SELECT MAX(timestamp) FROM events WHERE tenant_id = t.tenant_id) AS last_event,
+            (
+                SELECT COALESCE(
+                    json_agg(
+                        json_build_object(
+                            'name', ak.name,
+                            'prefix', ak.key_prefix,
+                            'created_at', ak.created_at,
+                            'last_used', ak.last_used
+                        )
+                        ORDER BY ak.created_at DESC
+                    ),
+                    '[]'::json
+                )
+                FROM api_keys ak
+                WHERE ak.tenant_id = t.tenant_id AND ak.revoked = FALSE
+            ) AS api_keys
         FROM users u
         LEFT JOIN tenants t ON u.tenant_id = t.tenant_id
+        {where_sql}
         ORDER BY u.created_at DESC
         LIMIT 500
-        """
+        """,
+        *params,
     )
     return [
         {
-            "user_id":      str(r["user_id"]),
-            "email":        r["email"],
-            "tenant_id":    str(r["tenant_id"]) if r["tenant_id"] else None,
-            "tenant_name":  r["tenant_name"],
-            "created_at":   r["created_at"].isoformat() if r["created_at"] else None,
-            "last_login":   r["last_login"].isoformat() if r["last_login"] else None,
-            "active_keys":  r["active_keys"],
-            "total_events": r["total_events"],
-            "events_7d":    r["events_7d"],
-            "last_event":   r["last_event"].isoformat() if r["last_event"] else None,
+            "user_id":           str(r["user_id"]),
+            "email":             r["email"],
+            "tenant_id":         str(r["tenant_id"]) if r["tenant_id"] else None,
+            "tenant_name":       r["tenant_name"],
+            "tenant_created_at": r["tenant_created_at"].isoformat() if r["tenant_created_at"] else None,
+            "created_at":        r["created_at"].isoformat() if r["created_at"] else None,
+            "last_login":        r["last_login"].isoformat() if r["last_login"] else None,
+            "active_keys":       r["active_keys"],
+            "agent_count":       r["agent_count"],
+            "total_events":      r["total_events"],
+            "events_7d":         r["events_7d"],
+            "last_event":        r["last_event"].isoformat() if r["last_event"] else None,
+            "api_keys":          r["api_keys"] if isinstance(r["api_keys"], list) else [],
+            "customer_status":   (
+                "active" if r["events_7d"] and r["events_7d"] > 0
+                else "signed_up" if r["active_keys"] and r["active_keys"] > 0
+                else "registered"
+            ),
+            "plan":              None,
+            "subscription_status": None,
+            "stripe_customer_id": None,
+            "trial_ends_at":     None,
         }
         for r in rows
     ]

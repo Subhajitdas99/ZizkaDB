@@ -1,0 +1,19 @@
+# Optional: run dashboard in Docker (dev/CI only). Production uses PM2 on :3001.
+# Usage: docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml up -d dashboard
+
+services:
+  dashboard:
+    build:
+      context: ../dashboard
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_DEV_MODE: ${NEXT_PUBLIC_DEV_MODE:-true}
+    container_name: agentdb_dashboard
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: "0.0.0.0"
+    depends_on:
+      - api
