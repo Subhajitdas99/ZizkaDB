@@ -116,6 +116,17 @@ export async function adminManagedOverview(token: string) {
   return apiFetch('/v1/admin/managed/overview', token)
 }
 
+export async function adminManagedSubscribers(
+  token: string,
+  params: { search?: string; status?: string } = {},
+) {
+  const qs = new URLSearchParams()
+  if (params.search?.trim()) qs.set('search', params.search.trim())
+  if (params.status?.trim()) qs.set('status', params.status.trim())
+  const q = qs.toString()
+  return apiFetch(`/v1/admin/managed/subscribers${q ? `?${q}` : ''}`, token)
+}
+
 export async function adminManagedUsers(
   token: string,
   params: { search?: string; has_keys?: boolean; active_7d?: boolean } = {},

@@ -232,7 +232,7 @@ async def admin_telemetry_recent(
 
 @router.get("/managed/overview")
 async def admin_managed_overview(_: dict = Depends(require_admin)):
-    """Signup and activity counts for managed-cloud customers (billing via Stripe when linked)."""
+    """Signup and subscription counts for managed-cloud customers."""
     pool = get_pool()
     row = await pool.fetchrow(
         """
@@ -241,16 +241,87 @@ async def admin_managed_overview(_: dict = Depends(require_admin)):
             (SELECT COUNT(*) FROM users
                 WHERE created_at > NOW() - INTERVAL '7 days') AS signups_7d,
             (SELECT COUNT(*) FROM users
-                WHERE created_at > NOW() - INTERVAL '30 days') AS signups_30d,
+                WHERE subscription_status IN ('trialing', 'active', 'past_due')) AS subscribers,
+            (SELECT COUNT(*) FROM users
+                WHERE subscription_status = 'trialing') AS trialing,
+            (SELECT COUNT(*) FROM users
+                WHERE subscription_status = 'active') AS active_paid,
+            (SELECT COUNT(*) FROM users
+                WHERE stripe_customer_id IS NOT NULL) AS stripe_linked,
             (SELECT COUNT(DISTINCT u.user_id) FROM users u
                 JOIN api_keys ak ON ak.tenant_id = u.tenant_id AND ak.revoked = FALSE) AS users_with_keys,
             (SELECT COUNT(DISTINCT tenant_id) FROM events
-                WHERE timestamp > NOW() - INTERVAL '7 days') AS tenants_active_7d,
-            (SELECT COUNT(DISTINCT tenant_id) FROM events
-                WHERE timestamp > NOW() - INTERVAL '24 hours') AS tenants_active_24h
+                WHERE timestamp > NOW() - INTERVAL '7 days') AS tenants_active_7d
         """
     )
     return dict(row) if row else {}
+
+
+@router.get("/managed/subscribers")
+async def admin_managed_subscribers(
+    search: str = "",
+    status: str = "",
+    _: dict = Depends(require_admin),
+):
+    """Users with an active subscription or trial (what marketing means by subscribed)."""
+    pool = get_pool()
+    clauses = ["u.subscription_status IS NOT NULL", "u.subscription_status != ''"]
+    params: list[object] = []
+    n = 1
+
+    if status.strip():
+        clauses.append(f"u.subscription_status = ${n}")
+        params.append(status.strip())
+        n += 1
+    else:
+        clauses.append("u.subscription_status IN ('trialing', 'active', 'past_due')")
+
+    if search.strip():
+        clauses.append(f"u.email ILIKE ${n}")
+        params.append(f"%{search.strip()}%")
+        n += 1
+
+    where_sql = "WHERE " + " AND ".join(clauses)
+
+    rows = await pool.fetch(
+        f"""
+        SELECT
+            u.user_id, u.email, u.plan, u.subscription_status, u.trial_ends_at,
+            u.stripe_customer_id, u.stripe_subscription_id,
+            u.created_at, u.last_login,
+            t.tenant_id, t.name AS tenant_name,
+            (SELECT COUNT(*) FROM api_keys
+                WHERE tenant_id = t.tenant_id AND revoked = FALSE) AS active_keys,
+            (SELECT COUNT(*) FROM events
+                WHERE tenant_id = t.tenant_id
+                  AND timestamp > NOW() - INTERVAL '7 days') AS events_7d
+        FROM users u
+        LEFT JOIN tenants t ON u.tenant_id = t.tenant_id
+        {where_sql}
+        ORDER BY u.created_at DESC
+        LIMIT 500
+        """,
+        *params,
+    )
+    return [
+        {
+            "user_id":                str(r["user_id"]),
+            "email":                  r["email"],
+            "plan":                   r["plan"],
+            "subscription_status":    r["subscription_status"],
+            "trial_ends_at":          r["trial_ends_at"].isoformat() if r["trial_ends_at"] else None,
+            "stripe_customer_id":     r["stripe_customer_id"],
+            "stripe_subscription_id": r["stripe_subscription_id"],
+            "created_at":             r["created_at"].isoformat() if r["created_at"] else None,
+            "last_login":             r["last_login"].isoformat() if r["last_login"] else None,
+            "tenant_id":              str(r["tenant_id"]) if r["tenant_id"] else None,
+            "tenant_name":            r["tenant_name"],
+            "active_keys":            r["active_keys"],
+            "events_7d":              r["events_7d"],
+            "billing_source":         "stripe" if r["stripe_customer_id"] else "local_trial",
+        }
+        for r in rows
+    ]
 
 
 @router.get("/managed/users")
@@ -301,7 +372,9 @@ async def admin_managed_users(
     rows = await pool.fetch(
         f"""
         SELECT
-            u.user_id, u.email, u.created_at, u.last_login,
+            u.user_id, u.email, u.plan, u.subscription_status, u.trial_ends_at,
+            u.stripe_customer_id, u.stripe_subscription_id,
+            u.created_at, u.last_login,
             t.tenant_id, t.name AS tenant_name, t.created_at AS tenant_created_at,
             (SELECT COUNT(*) FROM api_keys
                 WHERE tenant_id = t.tenant_id AND revoked = FALSE) AS active_keys,
@@ -355,10 +428,15 @@ async def admin_managed_users(
                 else "signed_up" if r["active_keys"] and r["active_keys"] > 0
                 else "registered"
             ),
-            "plan":              None,
-            "subscription_status": None,
-            "stripe_customer_id": None,
-            "trial_ends_at":     None,
+            "plan":              r["plan"],
+            "subscription_status": r["subscription_status"],
+            "stripe_customer_id": r["stripe_customer_id"],
+            "trial_ends_at":     r["trial_ends_at"].isoformat() if r["trial_ends_at"] else None,
+            "billing_source":    (
+                "stripe" if r["stripe_customer_id"]
+                else "local_trial" if r["subscription_status"]
+                else "none"
+            ),
         }
         for r in rows
     ]

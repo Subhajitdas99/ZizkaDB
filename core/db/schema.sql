@@ -32,12 +32,19 @@ CREATE INDEX idx_api_keys_hash ON api_keys (key_hash);
 -- USERS
 -- ─────────────────────────────────────────
 CREATE TABLE users (
-    user_id     UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email       VARCHAR(255) UNIQUE NOT NULL,
-    tenant_id   UUID REFERENCES tenants(tenant_id),
-    created_at  TIMESTAMPTZ DEFAULT NOW(),
-    last_login  TIMESTAMPTZ
+    user_id                 UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email                   VARCHAR(255) UNIQUE NOT NULL,
+    tenant_id               UUID REFERENCES tenants(tenant_id),
+    plan                    VARCHAR(50),   -- pro | team | starter
+    subscription_status     VARCHAR(50),   -- trialing | active | past_due | canceled
+    trial_ends_at           TIMESTAMPTZ,
+    stripe_customer_id      VARCHAR(255) UNIQUE,
+    stripe_subscription_id  VARCHAR(255) UNIQUE,
+    created_at              TIMESTAMPTZ DEFAULT NOW(),
+    last_login              TIMESTAMPTZ
 );
+
+CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users (subscription_status);
 
 -- ─────────────────────────────────────────
 -- AUTH OTPs (passwordless login)

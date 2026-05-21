@@ -4,14 +4,14 @@ import { useEffect, useState } from 'react'
 import {
   adminRequestOtp, adminVerifyOtp,
   adminOverview, adminTelemetrySummary, adminTelemetryRecent,
-  adminManagedOverview, adminManagedUsers, adminManagedUsage,
+  adminManagedOverview, adminManagedSubscribers, adminManagedUsers, adminManagedUsage,
 } from '@/lib/api'
 import { format, formatDistanceToNow } from 'date-fns'
 
 const ADMIN_EMAIL = 'founder@zizka.ai'
 const TOKEN_KEY   = 'zizkadb_admin_token'
 
-type Section = 'telemetry' | 'managed'
+type Section = 'subscribers' | 'managed' | 'telemetry'
 
 interface Overview {
   telemetry: { total_installs?: number; active_7d?: number; active_24h?: number; total_pings?: number }
@@ -69,10 +69,29 @@ interface ManagedUser {
 interface ManagedOverview {
   total_users?: number
   signups_7d?: number
-  signups_30d?: number
+  subscribers?: number
+  trialing?: number
+  active_paid?: number
+  stripe_linked?: number
   users_with_keys?: number
   tenants_active_7d?: number
-  tenants_active_24h?: number
+}
+
+interface Subscriber {
+  user_id: string
+  email: string
+  plan: string | null
+  subscription_status: string | null
+  trial_ends_at: string | null
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  created_at: string | null
+  last_login: string | null
+  tenant_id: string | null
+  tenant_name: string | null
+  active_keys: number
+  events_7d: number
+  billing_source: string
 }
 
 interface ManagedUsage {
@@ -216,7 +235,7 @@ function btnSmall(): React.CSSProperties {
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
-  const [section, setSection]   = useState<Section>('telemetry')
+  const [section, setSection]   = useState<Section>('subscribers')
   const [overview, setOverview] = useState<Overview | null>(null)
   const [err, setErr]           = useState('')
 
@@ -263,8 +282,9 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         <div style={{ display: 'flex', gap: 4, padding: 4, background: '#111',
                       border: '1px solid #1f1f1f', borderRadius: 12, marginTop: 28, marginBottom: 24 }}>
           {([
-            { key: 'telemetry', label: 'Self-hosted, SDKs & MCP' },
-            { key: 'managed',   label: 'Managed service' },
+            { key: 'subscribers', label: 'Subscribers' },
+            { key: 'managed',     label: 'All customers' },
+            { key: 'telemetry',   label: 'SDKs & telemetry' },
           ] as { key: Section; label: string }[]).map((t) => (
             <button key={t.key} onClick={() => setSection(t.key)}
                     style={{
@@ -286,8 +306,9 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           </div>
         )}
 
-        {section === 'telemetry' && <TelemetrySection token={token} />}
-        {section === 'managed'   && <ManagedSection   token={token} />}
+        {section === 'subscribers' && <SubscribersSection token={token} />}
+        {section === 'managed'     && <ManagedSection   token={token} />}
+        {section === 'telemetry'   && <TelemetrySection token={token} />}
       </div>
     </div>
   )
@@ -405,6 +426,141 @@ function TelemetrySection({ token }: { token: string }) {
 }
 
 
+// ── Subscribers (trialing / active / past_due) ───────────────────────────────
+
+function SubscribersSection({ token }: { token: string }) {
+  const [rows, setRows] = useState<Subscriber[] | null>(null)
+  const [overview, setOverview] = useState<ManagedOverview | null>(null)
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+
+  const load = () => {
+    adminManagedSubscribers(token, { search, status: statusFilter }).then(setRows).catch(() => setRows([]))
+  }
+
+  useEffect(() => {
+    adminManagedOverview(token).then(setOverview).catch(() => {})
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, statusFilter])
+
+  const subBadge = (status: string | null) => {
+    if (!status) return <Tag color="#737373">unknown</Tag>
+    const colors: Record<string, string> = {
+      trialing: '#3b82f6',
+      active: '#22c55e',
+      past_due: '#f59e0b',
+      canceled: '#737373',
+    }
+    return <Tag color={colors[status] ?? '#a3a3a3'}>{status.replace('_', ' ')}</Tag>
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {overview && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <Stat label="Subscribers" value={fmt(overview.subscribers)} sub="trial + active + past due" accent="#22c55e" />
+          <Stat label="Trialing" value={fmt(overview.trialing)} sub="free trial period" accent="#3b82f6" />
+          <Stat label="Active paid" value={fmt(overview.active_paid)} sub="Stripe active" />
+          <Stat label="Stripe linked" value={fmt(overview.stripe_linked)} sub="has customer id in Stripe" accent="#f97316" />
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && load()}
+          placeholder="Search subscriber email…"
+          style={{
+            flex: '1 1 220px', padding: '8px 12px', background: '#0a0a0a',
+            border: '1px solid #2a2a2a', borderRadius: 8, color: '#fff', fontSize: 13,
+          }}
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          style={{
+            padding: '8px 12px', background: '#0a0a0a', border: '1px solid #2a2a2a',
+            borderRadius: 8, color: '#fff', fontSize: 13,
+          }}
+        >
+          <option value="">All subscribed</option>
+          <option value="trialing">Trialing only</option>
+          <option value="active">Active only</option>
+          <option value="past_due">Past due</option>
+        </select>
+        <button type="button" onClick={load} style={btnSmall()}>Refresh</button>
+      </div>
+
+      <Card title="Who has subscribed" subtitle="Everyone on a Pro/Team trial or paid plan. Email = signup identity. Stripe column links to Stripe Dashboard when checkout has run.">
+        {!rows ? <SkeletonBlock /> : rows.length === 0 ? (
+          <Empty>
+            No subscribers yet. Run DB migration 002_user_billing.sql on the server, then restart API.
+            New signups get a 30-day Pro trial automatically.
+          </Empty>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 880 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
+                  <Th>Email</Th>
+                  <Th>Plan</Th>
+                  <Th>Status</Th>
+                  <Th>Trial ends</Th>
+                  <Th>Billing</Th>
+                  <Th>Joined</Th>
+                  <Th align="right">Keys</Th>
+                  <Th align="right">Events 7d</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((u) => (
+                  <tr key={u.user_id} style={{ borderBottom: '1px solid #161616' }}>
+                    <Td>
+                      <div style={{ fontWeight: 500 }}>{u.email}</div>
+                      <div style={{ fontSize: 10, color: '#525252', fontFamily: 'monospace', marginTop: 4 }}>
+                        {u.tenant_id?.slice(0, 8)}…
+                      </div>
+                    </Td>
+                    <Td mono>{(u.plan ?? '—').toUpperCase()}</Td>
+                    <Td>{subBadge(u.subscription_status)}</Td>
+                    <Td subtle>
+                      {u.trial_ends_at
+                        ? format(new Date(u.trial_ends_at), 'MMM d, yyyy HH:mm')
+                        : '—'}
+                    </Td>
+                    <Td>
+                      <Tag color={u.billing_source === 'stripe' ? '#f97316' : '#3b82f6'}>
+                        {u.billing_source === 'stripe' ? 'Stripe' : 'Local trial'}
+                      </Tag>
+                      {u.stripe_customer_id && (
+                        <a
+                          href={`https://dashboard.stripe.com/customers/${u.stripe_customer_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ display: 'block', fontSize: 10, color: '#f97316', marginTop: 6 }}
+                        >
+                          Open Stripe ↗
+                        </a>
+                      )}
+                    </Td>
+                    <Td subtle>
+                      {u.created_at ? format(new Date(u.created_at), 'MMM d, yyyy') : '—'}
+                    </Td>
+                    <Td align="right" mono>{u.active_keys}</Td>
+                    <Td align="right" mono>{fmt(u.events_7d)}</Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  )
+}
+
 // ── Managed section ──────────────────────────────────────────────────────────
 
 function ManagedSection({ token }: { token: string }) {
@@ -447,17 +603,11 @@ function ManagedSection({ token }: { token: string }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {overview && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-          <Stat label="Managed signups" value={fmt(overview.total_users)} sub={`+${fmt(overview.signups_7d)} last 7d`} accent="#22c55e" />
+          <Stat label="All accounts" value={fmt(overview.total_users)} sub={`${fmt(overview.subscribers)} subscribed`} />
           <Stat label="With API keys" value={fmt(overview.users_with_keys)} sub="started integration" />
-          <Stat label="Active tenants (7d)" value={fmt(overview.tenants_active_7d)} sub={`${fmt(overview.tenants_active_24h)} in 24h`} accent="#f97316" />
+          <Stat label="Active tenants (7d)" value={fmt(overview.tenants_active_7d)} sub="logged events" accent="#f97316" />
         </div>
       )}
-
-      <Card title="Billing note" subtitle="Pro/Team payments are handled in Stripe. Plan and subscription columns appear here once Stripe webhooks write to the database. Until then, use customer status and API usage below.">
-        <div style={{ fontSize: 12, color: '#a3a3a3', lineHeight: 1.6 }}>
-          Signup captures email (passwordless OTP). API keys are created in the customer dashboard Settings.
-        </div>
-      </Card>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
         <input

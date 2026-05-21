@@ -26,6 +26,22 @@ async def init_db():
     )
     logger.info("Postgres connected")
 
+    # Billing columns for admin subscriber view (idempotent)
+    await _pg_pool.execute("""
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(50);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status VARCHAR(50);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255);
+    """)
+    await _pg_pool.execute("""
+        UPDATE users
+        SET plan = 'pro',
+            subscription_status = 'trialing',
+            trial_ends_at = COALESCE(trial_ends_at, created_at + INTERVAL '30 days')
+        WHERE plan IS NULL OR subscription_status IS NULL
+    """)
+
     await _pg_pool.execute("""
         CREATE TABLE IF NOT EXISTS sdk_telemetry (
             install_id   TEXT PRIMARY KEY,

@@ -12,6 +12,7 @@ from api.memory import router as memory_router
 from api.telemetry import router as telemetry_router
 from api.admin import router as admin_router
 from api.stats import router as stats_router
+from api.billing import router as billing_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ app.include_router(memory_router,    prefix="/v1/memory",    tags=["memory"])
 app.include_router(telemetry_router, prefix="/v1/telemetry", tags=["telemetry"])
 app.include_router(admin_router,     prefix="/v1/admin",     include_in_schema=False)
 app.include_router(stats_router,     prefix="/v1/stats",     tags=["stats"])
+app.include_router(billing_router,   prefix="/v1/webhooks",  include_in_schema=False)
 
 
 @app.get("/health")

@@ -132,7 +132,24 @@ async def verify_otp(email: str, otp: str) -> dict:
         email,
     )
 
-    return _issue_tokens(str(user["user_id"]), email, str(user["tenant_id"]))
+    user_id = str(user["user_id"])
+    tenant_id = str(user["tenant_id"])
+
+    # New signups get a 30-day Pro trial (local until Stripe checkout is wired)
+    await pool.execute(
+        """
+        UPDATE users
+        SET plan = COALESCE(plan, 'pro'),
+            subscription_status = COALESCE(subscription_status, 'trialing'),
+            trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
+        WHERE user_id = $1::uuid
+          AND plan IS NULL
+          AND subscription_status IS NULL
+        """,
+        user_id,
+    )
+
+    return _issue_tokens(user_id, email, tenant_id)
 
 
 def _issue_tokens(user_id: str, email: str, tenant_id: str) -> dict:
