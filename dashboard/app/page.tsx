@@ -296,10 +296,15 @@ export default function LandingPage() {
           <span style={{ fontWeight: 700, fontSize: 15 }}>ZizkaDB</span>
           <span className="zdb-nav-links" style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
         </div>
-        <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          {[['Docs', '/docs'], ['Community', '/community'], ['Pricing', '#pricing']].map(([l, h]) => (
-            <Link key={l} href={h} style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>{l}</Link>
-          ))}
+        <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
+          <Link href="#pricing" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Pricing</Link>
+          <Link href="/community" style={{
+            fontSize: 14, fontWeight: 600, color: '#9a3412', textDecoration: 'none',
+            padding: '7px 16px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8,
+          }}>
+            Community
+          </Link>
           <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
