@@ -43,6 +43,29 @@ async def init_db():
     """)
 
     await _pg_pool.execute("""
+        CREATE TABLE IF NOT EXISTS community_posts (
+            post_id       UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            author_name   VARCHAR(120) NOT NULL,
+            author_email  VARCHAR(255),
+            category      VARCHAR(32) NOT NULL DEFAULT 'question',
+            title         VARCHAR(300) NOT NULL,
+            body          TEXT NOT NULL,
+            image_urls    JSONB NOT NULL DEFAULT '[]'::jsonb,
+            reply_count   INTEGER NOT NULL DEFAULT 0,
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+            updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS community_replies (
+            reply_id      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+            post_id       UUID NOT NULL REFERENCES community_posts(post_id) ON DELETE CASCADE,
+            author_name   VARCHAR(120) NOT NULL,
+            author_email  VARCHAR(255),
+            body          TEXT NOT NULL,
+            created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+    """)
+
+    await _pg_pool.execute("""
         CREATE TABLE IF NOT EXISTS sdk_telemetry (
             install_id   TEXT PRIMARY KEY,
             sdk          TEXT    NOT NULL DEFAULT 'unknown',

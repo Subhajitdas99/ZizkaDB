@@ -297,7 +297,7 @@ export default function LandingPage() {
           <span className="zdb-nav-links" style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
         </div>
         <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
-          {[['Docs', '/docs'], ['Pricing', '#pricing']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Community', '/community'], ['Pricing', '#pricing']].map(([l, h]) => (
             <Link key={l} href={h} style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>{l}</Link>
           ))}
           <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
@@ -309,6 +309,9 @@ export default function LandingPage() {
         </div>
         {/* Mobile nav — only CTAs */}
         <div className="zdb-nav-cta" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
+          <Link href="/community" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
+            Community
+          </Link>
           <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
@@ -874,7 +877,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24 }}>
-          {[['Docs', '/docs'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
             <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>

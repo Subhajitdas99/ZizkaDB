@@ -106,6 +106,7 @@ export default function DocsPage() {
           <span className="docs-nav-links" style={{ fontSize: 12, color: '#bbb' }}>/ Docs</span>
         </Link>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Link href="/community" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>Community</Link>
           <a href="/api-explorer" target="_blank" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
           <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 7 }}>
             Get API key →
