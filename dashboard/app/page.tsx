@@ -794,7 +794,7 @@ export default function LandingPage() {
                 cta: 'Setup guide →', href: '/docs', highlight: false,
               },
               {
-                name: 'Pro', price: '€29', sub: 'per month',
+                name: 'Pro', price: '€39', sub: 'per month',
                 features: ['100M events', '90-day retention', '3 projects', 'Email support'],
                 cta: 'Start 1-month free trial →', href: '/signup', highlight: true,
                 note: 'No credit card needed',
