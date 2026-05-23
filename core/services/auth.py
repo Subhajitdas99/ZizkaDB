@@ -1,3 +1,4 @@
+import asyncio
 import hashlib
 import secrets
 import os
@@ -192,13 +193,15 @@ def decode_access_token(token: str) -> dict:
 # EMAIL
 # ─────────────────────────────────────────
 
-async def _send_otp_email(email: str, otp: str) -> None:
-    # Uses the same env var names as zizka.ai (EMAIL_HOST, EMAIL_USER, EMAIL_PASS, EMAIL_FROM)
+SMTP_TIMEOUT_SEC = int(os.getenv("EMAIL_SMTP_TIMEOUT", "15"))
+
+
+def _send_otp_email_sync(email: str, otp: str) -> None:
+    """Blocking SMTP — always call via asyncio.to_thread so the API stays responsive."""
     host = os.getenv("EMAIL_HOST")
     user = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
 
-    # If SMTP is not configured, print the OTP to server logs for testing.
     if not host or not user or not password:
         print(f"\n{'='*50}")
         print(f"OTP FOR {email}: {otp}")
@@ -237,11 +240,17 @@ async def _send_otp_email(email: str, otp: str) -> None:
     if is_ssl:
         import ssl
         context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(host, port, context=context) as server:
+        with smtplib.SMTP_SSL(
+            host, port, context=context, timeout=SMTP_TIMEOUT_SEC,
+        ) as server:
             server.login(user, password)
             server.sendmail(from_addr, email, msg.as_string())
     else:
-        with smtplib.SMTP(host, port) as server:
+        with smtplib.SMTP(host, port, timeout=SMTP_TIMEOUT_SEC) as server:
             server.starttls()
             server.login(user, password)
             server.sendmail(from_addr, email, msg.as_string())
+
+
+async def _send_otp_email(email: str, otp: str) -> None:
+    await asyncio.to_thread(_send_otp_email_sync, email, otp)

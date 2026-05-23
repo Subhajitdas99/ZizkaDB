@@ -27,6 +27,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, EmailStr
 
 from db.connection import get_pool
+from api.auth import _check_otp_rate_limit
 from services.auth import JWT_SECRET, request_otp, verify_otp
 
 router = APIRouter()
@@ -90,6 +91,7 @@ async def require_admin(
 async def admin_request_otp(body: AdminOTPRequest):
     if not _is_admin_email(body.email):
         raise HTTPException(status_code=404, detail="Not Found")
+    _check_otp_rate_limit(ADMIN_EMAIL)
     try:
         await request_otp(ADMIN_EMAIL)
     except Exception as e:

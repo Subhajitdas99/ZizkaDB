@@ -33,6 +33,10 @@ app = FastAPI(
     description="The operational database for AI agents",
     version="0.1.0",
     lifespan=lifespan,
+    # Served at https://db.zizka.ai/api-explorer (nginx proxies to this path)
+    docs_url="/api-explorer",
+    redoc_url=None,
+    openapi_url="/openapi.json",
 )
 
 app.add_middleware(

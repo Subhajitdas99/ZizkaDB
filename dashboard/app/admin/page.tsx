@@ -130,10 +130,17 @@ function Login({ onAuthed }: { onAuthed: (t: string) => void }) {
   const send = async () => {
     setBusy(true); setErr('')
     try {
-      await adminRequestOtp(ADMIN_EMAIL)
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 30_000)
+      await adminRequestOtp(ADMIN_EMAIL, controller.signal)
+      clearTimeout(timer)
       setStep('verify')
     } catch (e) {
-      setErr(e instanceof Error ? e.message : 'Failed')
+      if (e instanceof Error && e.name === 'AbortError') {
+        setErr('Request timed out. The API may be down — check docker logs for agentdb_api.')
+      } else {
+        setErr(e instanceof Error ? e.message : 'Failed')
+      }
     } finally { setBusy(false) }
   }
 

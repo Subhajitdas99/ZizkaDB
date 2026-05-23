@@ -77,11 +77,12 @@ export async function getAgentBaseline(
 // Admin (single-tenant; locked to founder@zizka.ai by the backend)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export async function adminRequestOtp(email: string) {
+export async function adminRequestOtp(email: string, signal?: AbortSignal) {
   const res = await fetch(`${API}/v1/admin/auth/request-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
+    signal,
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))

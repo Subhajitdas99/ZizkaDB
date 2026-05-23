@@ -7,6 +7,9 @@ import { useState } from 'react'
 type Section = 'managed' | 'mcp' | 'selfhost' | 'concepts'
 type ManagedTab = 'python' | 'typescript' | 'rest'
 
+const API_EXPLORER_URL =
+  `${(process.env.NEXT_PUBLIC_API_URL || 'https://db.zizka.ai').replace(/\/$/, '')}/api-explorer`
+
 // ── Styles ─────────────────────────────────────────────────────────────────
 const S = {
   page:    { fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fff', minHeight: '100vh' } as const,
@@ -107,7 +110,7 @@ export default function DocsPage() {
         </Link>
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <Link href="/community" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>Community</Link>
-          <a href="/api-explorer" target="_blank" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
+          <a href={API_EXPLORER_URL} className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
           <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 7 }}>
             Get API key →
           </Link>
@@ -147,7 +150,7 @@ export default function DocsPage() {
           <div>
             <div style={S.label}>Reference</div>
             <NavItem active={section === 'concepts'} onClick={() => setSection('concepts')}>Core concepts</NavItem>
-            <a href="/api-explorer" target="_blank" style={{ display: 'block', fontSize: 13.5, color: '#666', textDecoration: 'none', padding: '7px 12px', marginBottom: 2 }}>
+            <a href={API_EXPLORER_URL} style={{ display: 'block', fontSize: 13.5, color: '#666', textDecoration: 'none', padding: '7px 12px', marginBottom: 2 }}>
               API Explorer ↗
             </a>
           </div>
