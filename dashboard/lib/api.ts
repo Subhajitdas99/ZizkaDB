@@ -2,6 +2,15 @@
 // Falls back to '' (relative URL) so Nginx can route /v1/ → FastAPI.
 const API = process.env.NEXT_PUBLIC_API_URL ?? ''
 
+function formatApiError(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    return detail.map((d) => (typeof d === 'object' && d && 'msg' in d ? String((d as { msg: string }).msg) : String(d))).join('; ')
+  }
+  if (detail && typeof detail === 'object' && 'msg' in detail) return String((detail as { msg: string }).msg)
+  return fallback
+}
+
 async function apiFetch(path: string, token: string, options: RequestInit = {}) {
   const res = await fetch(`${API}${path}`, {
     ...options,
@@ -13,7 +22,7 @@ async function apiFetch(path: string, token: string, options: RequestInit = {}) 
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(err.detail ?? 'API error')
+    throw new Error(formatApiError(err.detail, res.statusText || 'API error'))
   }
   return res.json()
 }
@@ -86,7 +95,7 @@ export async function adminRequestOtp(email: string, signal?: AbortSignal) {
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(err.detail ?? 'Request failed')
+    throw new Error(formatApiError(err.detail, 'Request failed'))
   }
   return res.json()
 }
@@ -97,8 +106,13 @@ export async function adminVerifyOtp(email: string, otp: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp }),
   })
-  if (!res.ok) throw new Error('Invalid code')
-  return res.json()
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(formatApiError(err.detail, 'Invalid code'))
+  }
+  const data = await res.json()
+  if (!data?.access_token) throw new Error('No access token returned from server')
+  return data
 }
 
 export async function adminOverview(token: string) {
