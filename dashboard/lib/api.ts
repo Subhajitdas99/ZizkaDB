@@ -95,7 +95,7 @@ export async function adminRequestOtp(email: string, signal?: AbortSignal) {
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(formatApiError(err.detail, 'Request failed'))
+    throw new Error(err.detail ?? 'Request failed')
   }
   return res.json()
 }
@@ -106,13 +106,8 @@ export async function adminVerifyOtp(email: string, otp: string) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp }),
   })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(formatApiError(err.detail, 'Invalid code'))
-  }
-  const data = await res.json()
-  if (!data?.access_token) throw new Error('No access token returned from server')
-  return data
+  if (!res.ok) throw new Error('Invalid code')
+  return res.json()
 }
 
 export async function adminOverview(token: string) {

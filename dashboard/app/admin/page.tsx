@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   adminRequestOtp, adminVerifyOtp,
   adminOverview, adminTelemetrySummary, adminTelemetryRecent,
@@ -104,16 +104,6 @@ export default function AdminPage() {
   const [token, setToken]       = useState<string | null>(null)
   const [bootDone, setBootDone] = useState(false)
 
-  const onLogout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY)
-    setToken(null)
-  }, [])
-
-  const onAuthed = useCallback((t: string) => {
-    localStorage.setItem(TOKEN_KEY, t)
-    setToken(t)
-  }, [])
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setToken(localStorage.getItem(TOKEN_KEY))
@@ -121,15 +111,11 @@ export default function AdminPage() {
     setBootDone(true)
   }, [])
 
-  if (!bootDone) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#0a0a0a' }} />
-    )
-  }
+  if (!bootDone) return null
   if (!token) {
-    return <Login onAuthed={onAuthed} />
+    return <Login onAuthed={(t) => { localStorage.setItem(TOKEN_KEY, t); setToken(t) }} />
   }
-  return <Dashboard token={token} onLogout={onLogout} />
+  return <Dashboard token={token} onLogout={() => { localStorage.removeItem(TOKEN_KEY); setToken(null) }} />
 }
 
 
@@ -258,30 +244,15 @@ function btnSmall(): React.CSSProperties {
 function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   const [section, setSection]   = useState<Section>('subscribers')
   const [overview, setOverview] = useState<Overview | null>(null)
-  const [loading, setLoading]   = useState(true)
   const [err, setErr]           = useState('')
 
   useEffect(() => {
-    let cancelled = false
-    setLoading(true)
-    setErr('')
     adminOverview(token)
-      .then((data) => {
-        if (!cancelled) setOverview(data)
-      })
+      .then(setOverview)
       .catch((e) => {
-        if (cancelled) return
-        const msg = e instanceof Error ? e.message : 'Failed to load admin data'
-        setErr(
-          msg.includes('Not Found')
-            ? 'Admin API returned 404. Redeploy API (docker compose up -d api) and confirm JWT_SECRET is stable.'
-            : msg,
-        )
+        if (String(e?.message).includes('Not Found')) onLogout()
+        else setErr(e instanceof Error ? e.message : 'Failed to load')
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => { cancelled = true }
   }, [token, onLogout])
 
   return (
@@ -313,9 +284,6 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
       </header>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px' }}>
-        {loading && !overview && !err && (
-          <div style={{ padding: 24, color: '#737373', fontSize: 14 }}>Loading admin data…</div>
-        )}
         <OverviewRow overview={overview} />
 
         <div style={{ display: 'flex', gap: 4, padding: 4, background: '#111',
