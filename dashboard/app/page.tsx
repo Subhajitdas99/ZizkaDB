@@ -452,7 +452,7 @@ export default function LandingPage() {
                 num: '03',
                 title: 'Complaint about Tuesday',
                 pain: "Customer says you told them something wrong three days ago.",
-                fix: 'db.at(timestamp). Exact agent state at that moment. Checksummed.',
+                fix: 'db.at(timestamp). Reconstruct logged state at that moment. Each event checksummed.',
               },
             ].map((s, i) => (
               <div key={s.num} style={{
@@ -697,11 +697,11 @@ export default function LandingPage() {
           <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               { icon: '🔍', title: 'Causal Lineage',   desc: 'Every event links to its cause. Trace any output to the input that triggered it.' },
-              { icon: '⏪', title: 'Time Travel',      desc: "Replay your agent's exact state at any past moment." },
+              { icon: '⏪', title: 'Time Travel',      desc: "Reconstruct your agent's logged state at any past timestamp." },
               { icon: '🧠', title: 'Semantic Search',  desc: 'Search history in plain English. No schema. No keywords.' },
               { icon: '🚨', title: 'Behavioral Baseline', desc: 'See when an agent stops looking like itself. Investigate before users notice.' },
               { icon: '🤝', title: 'Agent Handoff',    desc: 'Pass only the causally relevant context. Stops full-history-in-prompt.' },
-              { icon: '📋', title: 'Audit Log',        desc: 'SHA-256 checksummed. Append-only. Export a signed trail anytime.' },
+              { icon: '📋', title: 'Audit Log',        desc: 'SHA-256 checksum per event. Append-only by default. GDPR forget supported.' },
             ].map(f => (
               <div key={f.title} style={{ borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5' }}>
                 <div style={{ fontSize: 26, marginBottom: 12 }}>{f.icon}</div>
@@ -752,7 +752,7 @@ export default function LandingPage() {
                   ['Works with any framework/model',         '~', '✓', '✓', '✓'],
                   ['Behavioral baseline per agent',          '✗', '✗', '✗', '✓'],
                   ['Cross-agent fleet queries',              '✗', '✗', '✗', '✓'],
-                  ['Tamper-evident audit export',            '✗', '✗', '✗', '✓'],
+                  ['Per-event checksum on export',           '✗', '✗', '✗', '✓'],
                   ['Self-hostable for free',                 '✓', '✓', '✗', '✓'],
                 ].map(([cap, ...vals], i) => (
                   <tr key={cap} style={{ borderBottom: i < 8 ? '1px solid #f0f0f0' : 'none' }}>
@@ -773,8 +773,9 @@ export default function LandingPage() {
               </tbody>
             </table>
           </div>
-          <p style={{ textAlign: 'center', fontSize: 12, color: '#ccc', marginTop: 10 }}>
+          <p style={{ textAlign: 'center', fontSize: 12, color: '#999', marginTop: 10 }}>
             ~ = partial support &nbsp;·&nbsp; LangSmith works mainly within the LangChain ecosystem
+            &nbsp;·&nbsp; <Link href="/trust" style={{ color: '#888' }}>Claims & positioning</Link>
           </p>
         </div>
       </section>
@@ -801,7 +802,7 @@ export default function LandingPage() {
               },
               {
                 name: 'Team', price: '€99', sub: 'per month',
-                features: ['1B events', '1-year retention', '10 seats', 'Priority support'],
+                features: ['Up to 1B events/mo (plan limit)', '1-year retention', '10 seats', 'Priority support'],
                 cta: 'Start 1-month free trial →', href: '/signup', highlight: false,
                 note: 'No credit card needed',
               },
@@ -882,7 +883,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24 }}>
-          {[['Docs', '/docs'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Trust', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
             <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>

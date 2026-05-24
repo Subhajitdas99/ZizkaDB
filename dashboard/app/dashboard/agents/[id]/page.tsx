@@ -563,7 +563,7 @@ export default function AgentPage() {
               <Rewind size={14} style={{ color: '#22c55e' }} />
               <span className="text-white font-medium">Time Travel</span>
             </div>
-            Reconstruct the exact state of <span className="font-mono text-white">{agentId}</span> at any point in time.
+            Reconstruct logged state for <span className="font-mono text-white">{agentId}</span> at any point in time.
             See every event that had happened up to that moment.
           </div>
 

@@ -84,7 +84,7 @@ Edit your MCP config at `~/.cursor/mcp.json`:
 | `get_context` | Get a formatted memory block ready to paste into a system prompt |
 | `why` | Trace the causal chain that led to any event |
 | `query_events` | List recent events for an agent, optionally filtered by type |
-| `time_travel` | Replay exact agent state at any past timestamp |
+| `time_travel` | Reconstruct logged agent state at a past timestamp |
 | `memory_diff` | Summarise what happened in a session |
 | `forget` | GDPR erasure — delete all events matching a filter |
 

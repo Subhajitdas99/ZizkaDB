@@ -323,7 +323,7 @@ Use the comparison on the homepage; verify competitors’ docs before live debat
 | Any framework/model | ~ | ✓ | ✓ | ✓ |
 | Behavioral baseline / drift | ✗ | ✗ | ✗ | ✓ |
 | Cross-agent fleet queries | ✗ | ✗ | ✗ | ✓ |
-| Tamper-evident audit | ✗ | ✗ | ✗ | ✓ |
+| Per-event checksum on export | ✗ | ✗ | ✗ | ✓ |
 | Self-host free | ✓ | ✓ | ✗ | ✓ |
 
 **~** = partial (e.g. LangSmith is strongest inside LangChain ecosystem).

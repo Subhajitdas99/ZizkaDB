@@ -1,13 +1,13 @@
-# zizkadb-sdk
+# agentdb-sdk
 
-TypeScript SDK for [ZizkaDB](https://db.zizka.ai) — the database that tells you when your agent stops behaving like itself.
+TypeScript SDK for [AgentDB](https://agentdb.zizka.ai) — the database that tells you when your agent stops behaving like itself.
 
-ZizkaDB watches every session, builds a behavioral baseline, and flags the ones that drift. Plus causal lineage, time travel, and semantic search over your agent's full history. Works with any agent framework or model.
+AgentDB watches every session, builds a behavioral baseline, and flags the ones that drift. Plus causal lineage, time travel, and semantic search over your agent's full history. Works with any agent framework or model.
 
 ## Install
 
 ```bash
-npm install zizkadb-sdk
+npm install agentdb-sdk
 ```
 
 Works in Node.js, Deno, Bun, and edge runtimes.
@@ -17,9 +17,9 @@ Works in Node.js, Deno, Bun, and edge runtimes.
 ### Cloud (managed)
 
 ```ts
-import { ZizkaDB } from 'zizkadb-sdk'
+import { AgentDB } from 'agentdb-sdk'
 
-const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
+const db = new AgentDB({ apiKey: 'agdb_live_xxxx' })
 
 const result = await db.log({
   agent: 'my-bot',
@@ -32,7 +32,7 @@ console.log(result.eventId)
 ### Self-hosted
 
 ```ts
-const db = new ZizkaDB({ host: 'http://localhost:8000' })
+const db = new AgentDB({ host: 'http://localhost:8000' })
 ```
 
 ## Causal lineage
@@ -63,7 +63,7 @@ chain.print()
 | `db.baseline({ agent, recentWindow? })` | Behavioral baseline + drift score for the agent. |
 | `db.why(eventId)` | Causal chain back from any event to the root cause. |
 | `db.search({ query, agent?, limit? })` | Semantic search across all logged events. |
-| `db.at({ agent, timestamp })` | Reconstruct exact agent state at any past moment. |
+| `db.at({ agent, timestamp })` | Reconstruct logged agent state at a past timestamp. |
 | `db.query({ agent, limit?, eventType?, sessionId? })` | List recent events. |
 | `db.contextFor({ agent, task, maxTokens? })` | Prompt-ready memory block for system prompts. |
 | `db.memoryDiff(sessionId)` | Summary of what changed in a session. |
@@ -75,13 +75,13 @@ chain.print()
 The SDK sends one anonymous ping when first instantiated: SDK name, version, runtime, OS, and whether you're in cloud or self-hosted mode. No event data, no API keys, no user identifiers. Disable with:
 
 ```bash
-ZIZKADB_TELEMETRY=false
+AGENTDB_TELEMETRY=false
 ```
 
 ## Links
 
-- [Docs](https://db.zizka.ai/docs)
-- [API explorer](https://db.zizka.ai/api-explorer)
+- [Docs](https://agentdb.zizka.ai/docs)
+- [API explorer](https://agentdb.zizka.ai/api-explorer)
 - [GitHub](https://github.com/Zizka-ai/agentdb)
 
 ## License

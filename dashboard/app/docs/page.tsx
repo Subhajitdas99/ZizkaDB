@@ -152,6 +152,9 @@ export default function DocsPage() {
             <a href={API_EXPLORER_URL} style={{ display: 'block', fontSize: 13.5, color: '#666', textDecoration: 'none', padding: '7px 12px', marginBottom: 2 }}>
               API Explorer ↗
             </a>
+            <Link href="/trust" style={{ display: 'block', fontSize: 13.5, color: '#666', textDecoration: 'none', padding: '7px 12px' }}>
+              Claims & positioning
+            </Link>
           </div>
         </aside>
 
@@ -313,7 +316,7 @@ chain.print()`}</Code>
                     { method: 'db.baseline(agent)', desc: 'Get the behavioral baseline for an agent: event distribution, decision-tree shapes, error rate, and how recent sessions compare.' },
                     { method: 'db.why(event_id)', desc: 'Trace the full causal chain from any event back to the root cause.' },
                     { method: 'db.search(query)', desc: 'Semantic search across all agent history. Find events by meaning, not keywords.' },
-                    { method: 'db.at(agent, timestamp)', desc: 'Replay exact agent state at any past moment. Every event is checksummed.' },
+                    { method: 'db.at(agent, timestamp)', desc: 'Reconstruct logged agent state at a past timestamp. Each event has a SHA-256 checksum.' },
                     { method: 'db.query(agent)', desc: 'List recent events for an agent, optionally filtered by event type.' },
                     { method: 'db.context_for(agent, task)', desc: 'Get a formatted memory block ready to inject into a system prompt.' },
                     { method: 'db.memory_diff(session_id)', desc: 'Summarise what happened in a session: event counts, errors, new behaviors.' },
@@ -410,7 +413,7 @@ chain.print()`}</Code>
                   { tool: 'get_context', desc: 'Get a memory block formatted for system prompt injection' },
                   { tool: 'why', desc: 'Trace the causal chain that led to any event' },
                   { tool: 'query_events', desc: 'List recent events for an agent' },
-                  { tool: 'time_travel', desc: 'Replay exact agent state at any past timestamp' },
+                  { tool: 'time_travel', desc: 'Reconstruct logged agent state at a past timestamp' },
                   { tool: 'memory_diff', desc: 'Summarise what happened in a session' },
                   { tool: 'forget', desc: 'Delete all events matching a filter (GDPR)' },
                 ].map(item => (
@@ -543,7 +546,7 @@ chain.print()
                 },
                 {
                   title: 'Time travel',
-                  body: 'Call db.at(agent, timestamp) and ZizkaDB reconstructs the exact state of that agent at that moment, based on all events logged up to that time. Every event is SHA-256 checksummed so the reconstruction is verifiable.',
+                  body: 'Call db.at(agent, timestamp) and ZizkaDB reconstructs logged state from events up to that time. This replays what was recorded — not a guarantee that the LLM will produce identical outputs again. Each event has a SHA-256 checksum for integrity checking.',
                   code: `from datetime import datetime
 
 state = await db.at("support-bot", datetime(2026, 5, 1, 15, 0))

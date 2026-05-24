@@ -1,21 +1,21 @@
-# AgentDB
+# ZizkaDB
 
 The operational database for AI agents.
 
-> Causal lineage, time-travel, semantic search, and fleet intelligence — open source, self-hostable, model-agnostic.
+> Causal lineage, time-travel over logged state, semantic search, and fleet intelligence — open source, self-hostable, model-agnostic.
 
 ## Quickstart
 
 ```bash
-pip install agentdb-sdk
+pip install zizkadb-sdk
 ```
 
-> **Important:** There is an unrelated package called `agentdb` on PyPI. Install `agentdb-sdk` — the import is still `from agentdb import AgentDB`.
+> **Note:** Install `zizkadb-sdk` on PyPI. The import is `from zizkadb import ZizkaDB`.
 
 ```python
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 
-db = AgentDB("your-api-key")  # or host="http://localhost:8000" for self-hosted
+db = ZizkaDB("your-api-key")  # or host="http://localhost:8000" for self-hosted
 
 await db.log(agent="my-bot", event="tool_call", data={"tool": "search", "query": "..."})
 
@@ -25,17 +25,13 @@ print(await db.why("my-bot"))
 
 ## Self-Host
 
-**One-click deploy (Railway):**
-
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/agentdb)
-
 **Docker Compose (any VPS or local):**
 
 ```bash
-git clone https://github.com/Zizka-ai/agentdb
-cd agentdb
+git clone https://github.com/Zizka-ai/Agentdb
+cd Agentdb
 cp .env.example infra/.env        # add OPENAI_API_KEY at minimum
-docker-compose -f infra/docker-compose.yml up -d
+docker compose -f infra/docker-compose.yml up -d
 ```
 
 Then open:
@@ -44,11 +40,15 @@ Then open:
 
 No signup required. Your data stays on your machine.
 
-> **Opt out of anonymous telemetry:** `export AGENTDB_TELEMETRY=false`
+> **Opt out of anonymous telemetry:** `export ZIZKADB_TELEMETRY=false`
 
 ## Managed Service
 
-[agentdb.zizka.ai](https://agentdb.zizka.ai) — sign up, get API key, done.
+[db.zizka.ai](https://db.zizka.ai) — sign up, get API key, done.
+
+## Positioning
+
+See [db.zizka.ai/trust](https://db.zizka.ai/trust) for what ZizkaDB is and is not (claims, comparisons, compliance scope).
 
 ## License
 
