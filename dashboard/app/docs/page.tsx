@@ -153,7 +153,7 @@ export default function DocsPage() {
               API Explorer ↗
             </a>
             <Link href="/trust" style={{ display: 'block', fontSize: 13.5, color: '#666', textDecoration: 'none', padding: '7px 12px' }}>
-              Claims & positioning
+              Technical reference
             </Link>
           </div>
         </aside>

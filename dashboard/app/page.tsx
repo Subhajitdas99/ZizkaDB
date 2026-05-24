@@ -775,7 +775,7 @@ export default function LandingPage() {
           </div>
           <p style={{ textAlign: 'center', fontSize: 12, color: '#999', marginTop: 10 }}>
             ~ = partial support &nbsp;·&nbsp; LangSmith works mainly within the LangChain ecosystem
-            &nbsp;·&nbsp; <Link href="/trust" style={{ color: '#888' }}>Claims & positioning</Link>
+            &nbsp;·&nbsp; <Link href="/trust" style={{ color: '#888' }}>Technical reference</Link>
           </p>
         </div>
       </section>
@@ -883,7 +883,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24 }}>
-          {[['Docs', '/docs'], ['Trust', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Technical', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
             <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
           ))}
         </div>

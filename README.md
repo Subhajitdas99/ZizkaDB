@@ -48,7 +48,7 @@ No signup required. Your data stays on your machine.
 
 ## Positioning
 
-See [db.zizka.ai/trust](https://db.zizka.ai/trust) for what ZizkaDB is and is not (claims, comparisons, compliance scope).
+See [db.zizka.ai/trust](https://db.zizka.ai/trust) for architecture, APIs, and technical reference.
 
 ## License
 
