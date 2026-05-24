@@ -134,7 +134,21 @@ async def verify_otp(email: str, otp: str) -> dict:
     )
 
     user_id = str(user["user_id"])
-    tenant_id = str(user["tenant_id"])
+    tenant_id = user["tenant_id"]
+
+    # Legacy rows: user without tenant breaks /v1/agents (JWT has no valid tenant_id)
+    if not tenant_id:
+        tenant_id = await pool.fetchval(
+            "INSERT INTO tenants (name) VALUES ($1) RETURNING tenant_id",
+            email,
+        )
+        await pool.execute(
+            "UPDATE users SET tenant_id = $1::uuid WHERE user_id = $2::uuid",
+            tenant_id,
+            user_id,
+        )
+
+    tenant_id = str(tenant_id)
 
     # New signups get a 30-day Pro trial (local until Stripe checkout is wired)
     await pool.execute(

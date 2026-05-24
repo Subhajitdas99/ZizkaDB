@@ -54,9 +54,9 @@ export default function LoginPage() {
     try {
       const data = await verifyOtp(email, otp)
       setToken(data.access_token)
-      router.push('/dashboard')
-    } catch {
-      setError('Invalid or expired code.')
+      router.replace('/dashboard')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Invalid or expired code.')
     } finally {
       setLoading(false)
     }

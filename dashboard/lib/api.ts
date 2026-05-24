@@ -183,8 +183,13 @@ export async function verifyOtp(email: string, otp: string) {
   const res = await fetch(`${API}/v1/auth/verify-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, otp }),
+    body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otp.trim() }),
   })
-  if (!res.ok) throw new Error('Invalid code')
-  return res.json()
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(formatApiError(err.detail, 'Invalid or expired code'))
+  }
+  const data = await res.json()
+  if (!data?.access_token) throw new Error('Sign-in succeeded but no session token was returned')
+  return data
 }

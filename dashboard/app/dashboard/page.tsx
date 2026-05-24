@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getAgents } from '@/lib/api'
-import { requireAuth } from '@/lib/auth'
+import { getToken } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
 import { Activity, Clock, Zap } from 'lucide-react'
 
@@ -18,18 +18,48 @@ export default function DashboardPage() {
   const router = useRouter()
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    let token: string
-    try { token = requireAuth() } catch { return }
+    const token = getToken()
+    if (!token) {
+      router.replace('/login')
+      return
+    }
 
     getAgents(token)
-      .then(setAgents)
-      .catch(() => router.push('/login'))
+      .then((data) => setAgents(Array.isArray(data) ? data : []))
+      .catch((e) => {
+        const msg = e instanceof Error ? e.message : 'Could not load your agents'
+        if (msg.includes('401') || msg.toLowerCase().includes('invalid token')) {
+          router.replace('/login')
+          return
+        }
+        setError(msg)
+      })
       .finally(() => setLoading(false))
   }, [router])
 
   if (loading) return <PageShell><Skeleton /></PageShell>
+
+  if (error) {
+    return (
+      <PageShell>
+        <div className="rounded-xl p-8 text-center" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
+          <p className="text-white font-medium mb-2">Could not load dashboard</p>
+          <p className="text-sm mb-4" style={{ color: '#737373' }}>{error}</p>
+          <button
+            type="button"
+            onClick={() => router.replace('/login')}
+            className="text-sm font-medium"
+            style={{ color: '#22c55e', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            Sign in again →
+          </button>
+        </div>
+      </PageShell>
+    )
+  }
 
   return (
     <PageShell>
