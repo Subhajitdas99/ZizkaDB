@@ -7,8 +7,7 @@ import { useState } from 'react'
 type Section = 'managed' | 'mcp' | 'selfhost' | 'concepts'
 type ManagedTab = 'python' | 'typescript' | 'rest'
 
-const API_EXPLORER_URL =
-  `${(process.env.NEXT_PUBLIC_API_URL || 'https://db.zizka.ai').replace(/\/$/, '')}/api-explorer`
+const API_EXPLORER_URL = '/swagger'
 
 // ── Styles ─────────────────────────────────────────────────────────────────
 const S = {

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 import logging
 
@@ -33,11 +34,17 @@ app = FastAPI(
     description="The operational database for AI agents",
     version="0.1.0",
     lifespan=lifespan,
-    # Served at https://db.zizka.ai/api-explorer (nginx proxies to this path)
-    docs_url="/api-explorer",
+    # /swagger avoids nginx location /api/ rewriting /api-explorer → /v1/explorer
+    docs_url="/swagger",
     redoc_url=None,
     openapi_url="/openapi.json",
 )
+
+
+@app.get("/api-explorer", include_in_schema=False)
+async def api_explorer_redirect():
+    """Legacy URL; nginx may mis-route this unless ^~ /api-explorer is configured."""
+    return RedirectResponse(url="/swagger")
 
 app.add_middleware(
     CORSMiddleware,

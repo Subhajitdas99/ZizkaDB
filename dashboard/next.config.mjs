@@ -5,11 +5,17 @@ const nextConfig = {
   // NEXT_PUBLIC_API_URL can be set at build time for external API hosts.
   // If not set, relative URLs are used and Nginx routes /v1/ to FastAPI.
   output: 'standalone',
-  async rewrites() {
-    // Fallback when /api-explorer hits Next instead of nginx → FastAPI
+  async redirects() {
     return [
-      { source: '/api-explorer', destination: `${apiUpstream}/api-explorer` },
-      { source: '/api-explorer/:path*', destination: `${apiUpstream}/api-explorer/:path*` },
+      { source: '/api-explorer', destination: '/swagger', permanent: false },
+      { source: '/api-explorer/:path*', destination: '/swagger', permanent: false },
+    ]
+  },
+  async rewrites() {
+    // /swagger does not match nginx location /api/ — works when / → PM2
+    return [
+      { source: '/swagger', destination: `${apiUpstream}/swagger` },
+      { source: '/swagger/:path*', destination: `${apiUpstream}/swagger/:path*` },
       { source: '/openapi.json', destination: `${apiUpstream}/openapi.json` },
     ]
   },

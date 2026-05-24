@@ -5,7 +5,7 @@
 **Last updated:** May 2026  
 **Product URL:** https://db.zizka.ai  
 **Docs:** https://db.zizka.ai/docs  
-**API explorer:** https://db.zizka.ai/api-explorer  
+**API explorer:** https://db.zizka.ai/swagger  
 **GitHub:** https://github.com/Zizka-ai/agentdb  
 
 ---
@@ -222,7 +222,7 @@ Base URL: `https://db.zizka.ai` (self-host: your host, port **8000**).
 | Health | GET | `/health` | Status check |
 | Stats | GET | `/v1/stats` | Public install counters (homepage) |
 
-Interactive docs: **https://db.zizka.ai/api-explorer** (FastAPI OpenAPI).
+Interactive docs: **https://db.zizka.ai/swagger** (FastAPI OpenAPI).
 
 ---
 
@@ -423,7 +423,7 @@ When unsure: **“Let me connect you to engineering”** or point to **docs + Gi
 | Product | https://db.zizka.ai |
 | Sign up | https://db.zizka.ai/signup |
 | Docs | https://db.zizka.ai/docs |
-| API explorer | https://db.zizka.ai/api-explorer |
+| API explorer | https://db.zizka.ai/swagger |
 | GitHub | https://github.com/Zizka-ai/agentdb |
 | Company | Zizka AI |
 
