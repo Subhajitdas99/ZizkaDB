@@ -3,9 +3,14 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-echo "==> Pull latest"
 cd "$ROOT"
-git pull origin main
+
+if [ "${SKIP_GIT_PULL:-}" != "1" ]; then
+  echo "==> Pull latest (set SKIP_GIT_PULL=1 to skip)"
+  if ! git pull origin main; then
+    echo "WARN: git pull failed — continuing with current tree ($(git rev-parse --short HEAD 2>/dev/null || echo unknown))" >&2
+  fi
+fi
 
 echo "==> Rebuild dashboard (clean .next)"
 bash "$ROOT/infra/deploy-dashboard.sh"
