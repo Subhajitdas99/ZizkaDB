@@ -11,21 +11,37 @@ docker rm -f zizkadb_dashboard agentdb_dashboard 2>/dev/null || true
 
 cd "$ROOT/dashboard"
 npm ci
+
+# Stale .next causes blank site (HTML references missing webpack chunks → 400)
+rm -rf .next
 npm run build
+
+WEBPACK=$(ls .next/static/chunks/webpack-*.js 2>/dev/null | head -1 || true)
+if [ -z "$WEBPACK" ]; then
+  echo "ERROR: build did not produce webpack chunk in .next/static/chunks/" >&2
+  exit 1
+fi
 
 if [ ! -f ecosystem.config.js ]; then
   echo "ERROR: dashboard/ecosystem.config.js missing. Pull latest code or create it before deploy." >&2
   exit 1
 fi
 
-# Reload if already running — never delete first (that causes downtime)
+# Restart (not reload) after clean build so Node serves new static manifest
 if pm2 describe zizkadb-dashboard >/dev/null 2>&1 || pm2 describe agentdb-dashboard >/dev/null 2>&1; then
-  pm2 reload ecosystem.config.js --update-env
-else
-  pm2 start ecosystem.config.js
+  pm2 delete zizkadb-dashboard agentdb-dashboard 2>/dev/null || true
 fi
+pm2 start ecosystem.config.js
 pm2 save 2>/dev/null || true
 
-sleep 2
+sleep 3
 pm2 list
 curl -sf -o /dev/null http://127.0.0.1:3001/ && echo "Dashboard OK on :3001" || echo "Dashboard not responding on :3001"
+
+CHUNK_NAME=$(basename "$WEBPACK")
+CHUNK_CODE=$(curl -sS -o /dev/null -w "%{http_code}" "http://127.0.0.1:3001/_next/static/chunks/${CHUNK_NAME}" || echo "000")
+if [ "$CHUNK_CODE" != "200" ]; then
+  echo "ERROR: webpack chunk returned HTTP ${CHUNK_CODE} (expected 200 for ${CHUNK_NAME})" >&2
+  exit 1
+fi
+echo "Static chunk OK: ${CHUNK_NAME}"

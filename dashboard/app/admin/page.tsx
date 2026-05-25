@@ -111,7 +111,16 @@ export default function AdminPage() {
     setBootDone(true)
   }, [])
 
-  if (!bootDone) return null
+  if (!bootDone) {
+    return (
+      <div style={{
+        minHeight: '100vh', background: '#0a0a0a', display: 'flex',
+        alignItems: 'center', justifyContent: 'center', color: '#737373', fontSize: 14,
+      }}>
+        Loading…
+      </div>
+    )
+  }
   if (!token) {
     return <Login onAuthed={(t) => { localStorage.setItem(TOKEN_KEY, t); setToken(t) }} />
   }
