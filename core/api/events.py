@@ -89,7 +89,7 @@ async def log_event(
 
     # Generate and store embedding async (non-blocking)
     text = event_to_text(body.event, body.data)
-    embedding = await generate_embedding(text)
+    embedding = await generate_embedding(text, tenant_id)
 
     if embedding:
         # Store in Postgres

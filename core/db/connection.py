@@ -66,6 +66,13 @@ async def init_db():
     """)
 
     await _pg_pool.execute("""
+        ALTER TABLE tenants ADD COLUMN IF NOT EXISTS embedding_provider VARCHAR(32) NOT NULL DEFAULT 'openai';
+        ALTER TABLE tenants ADD COLUMN IF NOT EXISTS embedding_model VARCHAR(64) NOT NULL DEFAULT 'text-embedding-3-small';
+        ALTER TABLE tenants ADD COLUMN IF NOT EXISTS embedding_use_platform_key BOOLEAN NOT NULL DEFAULT TRUE;
+        ALTER TABLE tenants ADD COLUMN IF NOT EXISTS embedding_api_key_encrypted TEXT;
+    """)
+
+    await _pg_pool.execute("""
         CREATE TABLE IF NOT EXISTS sdk_telemetry (
             install_id   TEXT PRIMARY KEY,
             sdk          TEXT    NOT NULL DEFAULT 'unknown',

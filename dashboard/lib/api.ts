@@ -12,13 +12,16 @@ function formatApiError(detail: unknown, fallback: string): string {
 }
 
 async function apiFetch(path: string, token: string, options: RequestInit = {}) {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...((options.headers as Record<string, string>) || {}),
+  }
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
   const res = await fetch(`${API}${path}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
+    headers,
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
@@ -68,6 +71,29 @@ export async function getMemoryDiff(token: string, sessionId: string) {
 export async function timeTravel(token: string, agent: string, timestamp: string) {
   const qs = new URLSearchParams({ agent, timestamp }).toString()
   return apiFetch(`/v1/events/at?${qs}`, token)
+}
+
+export async function getEmbeddingCatalog() {
+  return apiFetch('/v1/settings/embeddings/catalog', '')
+}
+
+export async function getEmbeddingSettings(token: string) {
+  return apiFetch('/v1/settings/embeddings', token)
+}
+
+export async function updateEmbeddingSettings(
+  token: string,
+  body: {
+    provider: string
+    model: string
+    use_platform_key: boolean
+    api_key?: string
+  },
+) {
+  return apiFetch('/v1/settings/embeddings', token, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  })
 }
 
 export async function getAgentBaseline(

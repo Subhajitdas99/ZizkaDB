@@ -76,7 +76,7 @@ async def get_context(
 
     # 2. Semantically relevant events via Qdrant
     semantic_rows = []
-    embedding = await generate_embedding(body.task)
+    embedding = await generate_embedding(body.task, tenant_id)
     if embedding:
         try:
             from qdrant_client.models import Filter, FieldCondition, MatchValue

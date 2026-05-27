@@ -22,11 +22,14 @@ async def semantic_search(
 ):
     tenant_id = tenant["tenant_id"]
 
-    embedding = await generate_embedding(body.query)
+    embedding = await generate_embedding(body.query, tenant_id)
     if not embedding:
         raise HTTPException(
             status_code=400,
-            detail="Embedding generation failed. Set OPENAI_API_KEY or pass embedding directly.",
+            detail=(
+                "Embedding generation failed. Configure embeddings in Dashboard → Settings "
+                "(platform key or your OpenAI API key)."
+            ),
         )
 
     qdrant = get_qdrant()
