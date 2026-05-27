@@ -298,6 +298,7 @@ export default function LandingPage() {
         </div>
         <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
+          <Link href="#managed" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Managed</Link>
           <Link href="#pricing" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Pricing</Link>
           <Link href="/community" style={{
             fontSize: 14, fontWeight: 600, color: '#9a3412', textDecoration: 'none',
@@ -780,6 +781,82 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Managed cloud */}
+      <section id="managed" className="zdb-section" style={{ padding: '72px 40px' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Managed cloud — fastest way to start
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto' }}>
+            Skip running Postgres, Qdrant, and Redis yourself. Sign up, get an API key, and ship in minutes.
+          </p>
+          <div className="zdb-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 32 }}>
+            {[
+              { icon: '⚡', title: 'Live in under 5 minutes', desc: 'Email sign-up, one-time code, API key from Settings. Paste into SDK or MCP — no infra checklist.' },
+              { icon: '☁️', title: 'We run the stack', desc: 'Events, search index, dashboard, and TLS at db.zizka.ai. You focus on agent logic, not ops.' },
+              { icon: '📊', title: 'Dashboard included', desc: 'See agents, replay sessions, search history, and drift — same data your code logs, no extra setup.' },
+              { icon: '🔑', title: 'Free trial, no card', desc: 'Pro and Team include a 1-month trial. Start logging production traffic before you commit.' },
+            ].map(item => (
+              <div key={item.title} style={{ background: '#fff', borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5' }}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              display: 'inline-block', background: '#111', borderRadius: 12, padding: '20px 28px',
+              fontFamily: 'monospace', fontSize: 13, color: '#22c55e', lineHeight: 1.8, textAlign: 'left',
+            }}>
+              <div><span style={{ color: '#666' }}>1.</span> Sign up at db.zizka.ai/signup</div>
+              <div><span style={{ color: '#666' }}>2.</span> Settings → Create API key</div>
+              <div><span style={{ color: '#666' }}>3.</span> ZizkaDB(&quot;agdb_live_…&quot;) — done</div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/signup" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
+                Start managed free →
+              </Link>
+              <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
+                Setup guide
+              </Link>
+            </div>
+            <p style={{ fontSize: 13, color: '#888', marginTop: 16 }}>
+              Prefer your own servers? Self-host with Docker — full feature set, free forever.{' '}
+              <Link href="/docs" style={{ color: '#555' }}>See self-host docs</Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Embeddings */}
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Embeddings built in
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 40, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+            Semantic search and context injection need embeddings. On managed ZizkaDB you choose the model in Settings — no separate vector pipeline to wire up.
+          </p>
+          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
+            {[
+              { icon: '🎛️', title: 'Pick your model', desc: 'text-embedding-3-small, text-embedding-3-large, or ada-002 — switch anytime in the dashboard.' },
+              { icon: '☁️', title: 'Platform-hosted', desc: 'Use Zizka-managed embeddings on Pro and Team. Included — no OpenAI account required to get started.' },
+              { icon: '🔐', title: 'Or bring your key', desc: 'Optional: use your own OpenAI API key for embeddings if you want direct billing control.' },
+            ].map(item => (
+              <div key={item.title} style={{ borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5', background: '#fafafa' }}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <p style={{ textAlign: 'center', fontSize: 14, color: '#666', lineHeight: 1.6 }}>
+            Every logged event is embedded automatically. Search in plain English, build prompt context with <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>db.search()</code> and <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>db.context_for()</code> — one product, one bill.
+          </p>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="zdb-section" style={{ padding: '72px 40px' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -796,13 +873,13 @@ export default function LandingPage() {
               },
               {
                 name: 'Pro', price: '€39', sub: 'per month',
-                features: ['100M events', '90-day retention', '3 projects', 'Email support'],
+                features: ['100M events', '90-day retention', '3 projects', 'Platform embeddings', 'Email support'],
                 cta: 'Start 1-month free trial →', href: '/signup', highlight: true,
                 note: 'No credit card needed',
               },
               {
                 name: 'Team', price: '€99', sub: 'per month',
-                features: ['Up to 1B events/mo (plan limit)', '1-year retention', '10 seats', 'Priority support'],
+                features: ['Up to 1B events/mo (plan limit)', '1-year retention', '10 seats', 'Platform embeddings', 'Priority support'],
                 cta: 'Start 1-month free trial →', href: '/signup', highlight: false,
                 note: 'No credit card needed',
               },
