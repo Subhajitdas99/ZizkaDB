@@ -8,7 +8,7 @@
 ## Quick start
 
 ```bash
-open /Users/talpursai/Desktop/agentdb/docs/investor/pitch-deck.html
+open docs/investor/pitch-deck.html
 ```
 
 Arrow keys or Space = next slide. Print → Save as PDF to email investors.

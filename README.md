@@ -4,7 +4,7 @@ The operational database for AI agents.
 
 > Causal lineage, time-travel over logged state, semantic search, and fleet intelligence — open source, self-hostable, model-agnostic.
 
-## Quickstart
+## Quickstart (managed cloud)
 
 ```bash
 pip install zizkadb-sdk
@@ -15,51 +15,49 @@ pip install zizkadb-sdk
 ```python
 from zizkadb import ZizkaDB
 
-db = ZizkaDB("your-api-key")  # or host="http://localhost:8000" for self-hosted
+db = ZizkaDB("your-api-key")  # get one at db.zizka.ai/signup
 
 await db.log(agent="my-bot", event="tool_call", data={"tool": "search", "query": "..."})
-
-# Why did the agent do this?
 print(await db.why("my-bot"))
 ```
 
-## Self-Host
-
-**Docker Compose (any VPS or local):**
+## Self-host (open source) — one command
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB
 cd ZizkaDB
-cp .env.example infra/.env        # add OPENAI_API_KEY at minimum
-docker compose -f infra/docker-compose.yml up -d
+bash scripts/setup-local.sh
 ```
 
-Then open:
-- **API** → `http://localhost:8000` — REST API
-- **Dashboard** → start separately (see below)
+Then:
 
-**SDK / MCP (no cloud account needed):**
+1. Open **http://localhost:3001/login** → click **Open my dashboard →**
+2. Log a test event (snippet printed by setup script)
+3. Refresh dashboard — your agent appears
+
+**Manual setup** (if you prefer):
+
+```bash
+cp .env.example infra/.env
+docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml up -d
+```
+
+**SDK / MCP** (auto-uses local dev key on localhost):
 
 ```python
 from zizkadb import ZizkaDB
-db = ZizkaDB(host="http://localhost:8000")  # auto-uses local dev key
+db = ZizkaDB(host="http://localhost:8000")
 ```
 
-**Dashboard (local — one click, no email):**
+**Production on your VPS:**
 
 ```bash
-cd dashboard
-npm install
-NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev
-# → http://localhost:3000/login → click "Open my dashboard →"
-# → Settings → create API key for production use
+docker compose -f infra/docker-compose.yml up -d          # API stack
+bash infra/deploy-selfhost.sh                             # dashboard on :3001
+# Configure EMAIL_* in infra/.env for team login via OTP
 ```
 
-**Dashboard (production self-host — email OTP, same as managed cloud):**
-
-Configure `EMAIL_*` in `infra/.env`, then deploy with `bash infra/deploy-dashboard.sh`. Sign in at `/login` with your email.
-
-Your data stays on your machine.
+See [docs](https://db.zizka.ai/docs) → Self-host for full guide.
 
 > **Opt out of anonymous telemetry:** `export ZIZKADB_TELEMETRY=false`
 
@@ -67,10 +65,9 @@ Your data stays on your machine.
 
 [db.zizka.ai](https://db.zizka.ai) — sign up, get API key, done.
 
-## Positioning
-
-See [db.zizka.ai/trust](https://db.zizka.ai/trust) for architecture, APIs, and technical reference.
-
 ## License
 
-AGPL-3.0
+- **Core API, dashboard, Python/TypeScript SDKs:** [AGPL-3.0](LICENSE)
+- **MCP server:** [MIT](mcp/LICENSE)
+
+See [db.zizka.ai/trust](https://db.zizka.ai/trust) for architecture and technical reference.

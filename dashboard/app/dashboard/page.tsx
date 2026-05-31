@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import { getAgents } from '@/lib/api'
 import { getToken } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
-import { Activity, Clock, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
+import { GettingStartedChecklist } from '@/components/ConnectionStatus'
 
 interface Agent {
   agent: string
@@ -73,7 +74,7 @@ export default function DashboardPage() {
       </div>
 
       {agents.length === 0 ? (
-        <EmptyState />
+        <GettingStartedChecklist />
       ) : (
         <div className="grid gap-3">
           {agents.map(agent => (
@@ -132,34 +133,6 @@ function AgentCard({ agent, onClick }: { agent: Agent; onClick: () => void }) {
         </div>
       </div>
     </button>
-  )
-}
-
-function EmptyState() {
-  return (
-    <div className="rounded-xl p-12 text-center" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-           style={{ background: '#1a1a1a' }}>
-        <Activity size={20} style={{ color: '#737373' }} />
-      </div>
-      <h3 className="text-white font-medium mb-2">No agents yet</h3>
-      <p className="text-sm mb-4" style={{ color: '#737373' }}>
-        Log an event with an API key that belongs to <strong>this</strong> dashboard account.
-      </p>
-      <p className="text-xs mb-6" style={{ color: '#525252' }}>
-        Self-host: use &quot;Open my dashboard →&quot; on login + SDK with <code style={{ fontFamily: 'monospace' }}>host=</code>.
-        Managed: paste your <code style={{ fontFamily: 'monospace' }}>agdb_live_…</code> key from Settings below.
-      </p>
-      <pre className="text-left rounded-lg p-4 text-xs inline-block" style={{ background: '#0d0d0d' }}>
-{`# Managed cloud
-db = ZizkaDB("agdb_live_xxxx")
-
-# Self-host (same tenant as dev dashboard login)
-db = ZizkaDB(host="http://localhost:8000")
-
-await db.log(agent="my-bot", event="started", data={})`}
-      </pre>
-    </div>
   )
 }
 

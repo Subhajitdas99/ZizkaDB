@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { clearToken } from '@/lib/auth'
 import { Database, Search, Settings, LogOut, Cpu } from 'lucide-react'
+import { ConnectionStatus } from '@/components/ConnectionStatus'
 
 const nav = [
   { href: '/dashboard',         label: 'Agents',   icon: Cpu },
@@ -88,6 +89,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
 
         <main className="flex-1 overflow-auto pb-16 sm:pb-0">
+          <ConnectionStatus />
           {children}
         </main>
 

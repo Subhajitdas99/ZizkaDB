@@ -7,7 +7,7 @@ export NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://db.zizka.ai}"
 export NEXT_PUBLIC_DEV_MODE="${NEXT_PUBLIC_DEV_MODE:-false}"
 
 # Docker dashboard fights for ports — do not run it in production
-docker rm -f zizkadb_dashboard agentdb_dashboard 2>/dev/null || true
+docker rm -f zizkadb_dashboard 2>/dev/null || true
 
 cd "$ROOT/dashboard"
 npm ci
@@ -28,8 +28,8 @@ if [ ! -f ecosystem.config.js ]; then
 fi
 
 # Restart (not reload) after clean build so Node serves new static manifest
-if pm2 describe zizkadb-dashboard >/dev/null 2>&1 || pm2 describe agentdb-dashboard >/dev/null 2>&1; then
-  pm2 delete zizkadb-dashboard agentdb-dashboard 2>/dev/null || true
+if pm2 describe zizkadb-dashboard >/dev/null 2>&1; then
+  pm2 delete zizkadb-dashboard 2>/dev/null || true
 fi
 pm2 start ecosystem.config.js
 pm2 save 2>/dev/null || true

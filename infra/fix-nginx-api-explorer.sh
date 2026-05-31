@@ -38,7 +38,7 @@ NGINX
 if [ "${1:-}" != "" ]; then
   CONF="$1"
 else
-  CONF=$(grep -rl "db\.zizka\.ai\|agentdb\.zizka\.ai" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null | head -1 || true)
+  CONF=$(grep -rl "db\.zizka\.ai" /etc/nginx/sites-enabled /etc/nginx/conf.d 2>/dev/null | head -1 || true)
   if [ -z "$CONF" ]; then
     CONF=$(ls /etc/nginx/sites-enabled/* 2>/dev/null | head -1 || true)
   fi

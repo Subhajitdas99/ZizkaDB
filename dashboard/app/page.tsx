@@ -939,10 +939,9 @@ export default function LandingPage() {
             Full stack on your machine. Dashboard included — one-click local login.
           </p>
           <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 28, lineHeight: 1.9, overflowX: 'auto' }}>
-            <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/ZizkaDB</div>
-            <div><span style={{ color: '#555' }}>$ </span>docker compose -f infra/docker-compose.yml up -d</div>
-            <div><span style={{ color: '#555' }}>$ </span>cd dashboard &amp;&amp; NEXT_PUBLIC_DEV_MODE=true npm run dev</div>
-            <div><span style={{ color: '#555' }}>→ </span>localhost:3000/login → Open my dashboard →</div>
+            <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/ZizkaDB &amp;&amp; cd ZizkaDB</div>
+            <div><span style={{ color: '#555' }}>$ </span>bash scripts/setup-local.sh</div>
+            <div><span style={{ color: '#555' }}>→ </span>localhost:3001/login → Open my dashboard →</div>
           </div>
           <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
             Setup guide →

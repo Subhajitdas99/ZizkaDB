@@ -800,12 +800,14 @@ export function SelfHostSection() {
         Stack: Postgres + pgvector, Qdrant, Redis, FastAPI. Starts in under 60 seconds with Docker Compose.
       </Callout>
 
-      <Step n={1} title="Prerequisites">
-        <p style={S.p}>Docker and Docker Compose. OpenAI API key for embeddings (optional for logging-only).</p>
-        <Code lang="bash">docker --version && docker compose version</Code>
+      <Step n={1} title="Quick start (recommended)">
+        <Code lang="bash">{`git clone https://github.com/Zizka-ai/ZizkaDB
+cd ZizkaDB
+bash scripts/setup-local.sh`}</Code>
+        <p style={S.p}>Starts API + dashboard. Opens at <code style={{ fontFamily: 'monospace' }}>http://localhost:3001/login</code> — click <strong>Open my dashboard →</strong>.</p>
       </Step>
 
-      <Step n={2} title="Clone and configure">
+      <Step n={2} title="Manual setup (optional)">
         <Code lang="bash">{`git clone https://github.com/Zizka-ai/ZizkaDB
 cd ZizkaDB
 cp .env.example infra/.env`}</Code>
@@ -839,21 +841,23 @@ db = ZizkaDB(host="http://localhost:8000")`}</Code>
       </Step>
 
       <Step n={5} title="Open the dashboard">
-        <Code lang="bash">{`cd dashboard
-npm install
-NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev
-# → http://localhost:3000/login → click "Open my dashboard →"`}</Code>
         <p style={S.p}>
-          The green <strong>SELF-HOSTED</strong> button logs you in instantly — no email. You see the same tenant as your SDK.
-          For production, set <code style={{ fontFamily: 'monospace' }}>NEXT_PUBLIC_DEV_MODE=false</code> and configure SMTP for email OTP (same flow as{' '}
-          <a href="https://db.zizka.ai/login" style={{ color: '#1e40af' }}>db.zizka.ai</a>).
+          With <code style={{ fontFamily: 'monospace' }}>bash scripts/setup-local.sh</code>, dashboard is at{' '}
+          <code style={{ fontFamily: 'monospace' }}>http://localhost:3001/login</code>.
+          Click <strong>Open my dashboard →</strong> — no email required.
+        </p>
+        <p style={S.p}>
+          Or run manually:{' '}
+          <code style={{ fontFamily: 'monospace' }}>docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml up -d</code>
         </p>
       </Step>
 
-      <Step n={6} title="Production deploy">
-        <p style={S.p}>For production on a VPS, use the included scripts:</p>
-        <Code lang="bash">{`bash infra/deploy-dashboard.sh   # PM2 + Next.js on :3001
-# Point nginx to :3001 (dashboard) and :8000 (API) — see infra/nginx.conf`}</Code>
+      <Step n={6} title="Production on your VPS">
+        <p style={S.p}>For production on a VPS:</p>
+        <Code lang="bash">{`docker compose -f infra/docker-compose.yml up -d
+bash infra/deploy-selfhost.sh
+# Set EMAIL_* in infra/.env for team login; set NEXT_PUBLIC_DEV_MODE=false`}</Code>
+        <p style={S.p}>Point nginx to :3001 (dashboard) and :8000 (API) — see <code style={{ fontFamily: 'monospace' }}>infra/nginx.conf</code>.</p>
       </Step>
 
       <h2 style={S.h2}>Troubleshooting</h2>
