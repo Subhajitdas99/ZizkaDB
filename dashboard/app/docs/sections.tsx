@@ -122,19 +122,54 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
         ))}
       </div>
 
-      <h2 style={{ ...S.h2, marginTop: 0 }}>End-to-end flow (all paths)</h2>
-      <Step n={1} title="Create account & API key">
+      <h2 style={{ ...S.h2, marginTop: 0 }}>Two paths — pick one</h2>
+
+      <h3 style={S.h3}>Path A — Managed cloud (easiest)</h3>
+      <p style={S.p}>Best if you don&apos;t want to run servers. Everything at <strong>db.zizka.ai</strong>.</p>
+      <Step n={1} title="Sign up & create API key">
         <p style={S.p}>
-          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> with email OTP → open{' '}
+          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> with email OTP →{' '}
           <Link href="/dashboard/settings" style={{ color: '#111', fontWeight: 500 }}>Dashboard → Settings</Link> →{' '}
-          <strong>Create API key</strong>. Keys start with <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>agdb_live_</code>.
-          Save it once — it is not shown again.
+          <strong>Create API key</strong> (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>agdb_live_…</code>).
         </p>
       </Step>
-      <Step n={2} title="Connect your agent">
-        <p style={S.p}>Install the SDK, configure MCP, or call the REST API. All paths write to the same backend.</p>
+      <Step n={2} title="Connect SDK, MCP, or REST">
+        <p style={S.p}>Use your API key — all integrations write to <strong>your</strong> tenant automatically.</p>
       </Step>
-      <Step n={3} title="Log events with session_id">
+      <Step n={3} title="Open your dashboard">
+        <p style={S.p}>
+          <Link href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>db.zizka.ai/dashboard</Link> shows the same agents and events your code logs. No extra setup.
+        </p>
+      </Step>
+
+      <h3 style={{ ...S.h3, marginTop: 40 }}>Path B — Self-host (open source)</h3>
+      <p style={S.p}>Run Docker on your laptop or VPS. Full guide in <button type="button" onClick={() => onNavigate('selfhost')} style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Self-host →</button>.</p>
+      <Step n={1} title="Start API + dashboard">
+        <Code lang="bash">{`docker compose -f infra/docker-compose.yml up -d
+cd dashboard && NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev`}</Code>
+      </Step>
+      <Step n={2} title="Open dashboard (no email)">
+        <p style={S.p}>
+          Go to <code style={{ fontFamily: 'monospace' }}>http://localhost:3000/login</code> → click{' '}
+          <strong>Open my dashboard →</strong>. This is your local workspace.
+        </p>
+      </Step>
+      <Step n={3} title="Log events from your agent">
+        <Code lang="python">{`from zizkadb import ZizkaDB
+db = ZizkaDB(host="http://localhost:8000")  # auto-uses local dev key
+await db.log(agent="my-bot", event="started", data={})`}</Code>
+        <Callout type="warning">
+          <strong>Important:</strong> Your SDK and dashboard must use the <strong>same tenant</strong>.
+          Local dev: use the green dashboard button + <code style={{ fontFamily: 'monospace' }}>host=</code> SDK (same dev tenant).
+          Production self-host: sign in with email OTP, create an API key in Settings, paste that key into your SDK.
+        </Callout>
+      </Step>
+      <Step n={4} title="See your data in the dashboard">
+        <p style={S.p}>Refresh <Link href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>/dashboard</Link> — agents appear as soon as you log events with a matching key/tenant.</p>
+      </Step>
+
+      <h2 style={{ ...S.h2, marginTop: 48 }}>After connecting (both paths)</h2>
+      <Step n={1} title="Log events with session_id">
         <p style={S.p}>
           Log <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>user_message</code>, each{' '}
           <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>tool_call</code>, and{' '}
@@ -143,15 +178,15 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
           Use the same <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>session_id</code> for one conversation so baselines and diffs work.
         </p>
       </Step>
-      <Step n={4} title="Configure embeddings (managed)">
+      <Step n={2} title="Configure embeddings (managed)">
         <p style={S.p}>
           In Settings → <strong>Embeddings</strong>, pick your OpenAI model (platform-hosted or your own key).
           Required for semantic search and <code style={{ fontFamily: 'monospace' }}>context_for()</code>. Logging and <code style={{ fontFamily: 'monospace' }}>why()</code> work without embeddings.
         </p>
       </Step>
-      <Step n={5} title="Use the dashboard">
+      <Step n={3} title="Use drift & search">
         <p style={S.p}>
-          Open <Link href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>db.zizka.ai/dashboard</Link> to see agents, search history, replay sessions, and drift baselines.
+          Once you have enough sessions, use <code style={{ fontFamily: 'monospace' }}>baseline()</code> and semantic search in the dashboard or SDK.
         </p>
       </Step>
     </div>
@@ -173,11 +208,9 @@ export function PythonSection() {
         <Code lang="bash">python3 --version   # 3.10 or higher</Code>
       </Step>
 
-      <Step n={2} title="Get your API key">
-        <p style={S.p}>
-          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Dashboard → Settings → Create API key.
-          For self-host, skip the key and use <code style={{ fontFamily: 'monospace' }}>host=</code> below.
-        </p>
+      <Step n={2} title="Choose your environment">
+        <p style={S.p}><strong>Managed cloud:</strong> <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Settings → Create API key (<code style={{ fontFamily: 'monospace' }}>agdb_live_…</code>).</p>
+        <p style={S.p}><strong>Self-host:</strong> use <code style={{ fontFamily: 'monospace' }}>host=&quot;http://localhost:8000&quot;</code> (dev key auto-sent). See <Link href="/docs" style={{ color: '#1e40af' }}>Self-host docs</Link> → click <strong>Open my dashboard →</strong> on the login page.</p>
       </Step>
 
       <Step n={3} title="Install">
@@ -302,7 +335,8 @@ asyncio.run(run_turn("Hello", "sess_001"))`}</Code>
       <div style={{ display: 'grid', gap: 12 }}>
         {[
           { q: 'SyntaxError: await outside async function', a: 'Wrap code in async def main() and asyncio.run(main()).' },
-          { q: '401 Invalid API key', a: 'Check the key in Dashboard → Settings. Keys start with agdb_live_.' },
+          { q: '401 Invalid API key', a: 'Managed: check key in Dashboard → Settings. Self-host: use host= with dev dashboard login, or paste the API key from Settings into your SDK.' },
+          { q: 'Dashboard empty but SDK works', a: 'SDK and dashboard must share the same tenant. Self-host: use "Open my dashboard →" (not email login) with host= SDK. Or create an API key in Settings and use that key in your SDK.' },
           { q: 'Search returns nothing', a: 'Configure embeddings in Settings. Log a few events first so there is history to search.' },
           { q: 'baseline shows warming_up', a: 'Log more sessions with session_id on each event. Drift needs volume.' },
         ].map(item => (
@@ -331,10 +365,9 @@ export function TypeScriptSection() {
         <Code lang="bash">node --version   # v18+</Code>
       </Step>
 
-      <Step n={2} title="Get your API key">
-        <p style={S.p}>
-          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Settings → Create API key (<code style={{ fontFamily: 'monospace' }}>agdb_live_…</code>).
-        </p>
+      <Step n={2} title="Choose your environment">
+        <p style={S.p}><strong>Managed cloud:</strong> <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Settings → Create API key.</p>
+        <p style={S.p}><strong>Self-host:</strong> <code style={{ fontFamily: 'monospace' }}>{`new ZizkaDB({ host: 'http://localhost:8000' })`}</code> — see <Link href="/docs" style={{ color: '#1e40af' }}>Self-host docs</Link> for dashboard setup.</p>
       </Step>
 
       <Step n={3} title="Install">
@@ -754,6 +787,15 @@ export function SelfHostSection() {
         SDK, MCP, and dashboard all connect to the same local tenant.
       </p>
 
+      <Callout type="warning">
+        <strong>One rule:</strong> SDK/MCP and dashboard must use the <strong>same tenant</strong>.
+        <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
+          <li><strong>Local dev (just you):</strong> login → <em>Open my dashboard →</em> + SDK with <code style={{ fontFamily: 'monospace' }}>host=</code></li>
+          <li><strong>Production / team on your server:</strong> email OTP login → create API key in Settings → use that key in SDK/MCP</li>
+        </ul>
+        Mixing email login with the auto dev key shows an empty dashboard.
+      </Callout>
+
       <Callout type="info">
         Stack: Postgres + pgvector, Qdrant, Redis, FastAPI. Starts in under 60 seconds with Docker Compose.
       </Callout>
@@ -818,6 +860,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev
       <div style={{ display: 'grid', gap: 12 }}>
         {[
           { q: 'API not starting', a: 'docker compose -f infra/docker-compose.yml logs api --tail=50' },
+          { q: 'Dashboard empty but SDK logs work', a: 'Use "Open my dashboard →" (dev login) with host= SDK — or create an API key in Settings and use it in your agent.' },
           { q: 'Search not working', a: 'Set OPENAI_API_KEY in infra/.env and restart api container.' },
           { q: 'Port 8000 in use', a: 'Change port mapping in infra/docker-compose.yml.' },
         ].map(item => (

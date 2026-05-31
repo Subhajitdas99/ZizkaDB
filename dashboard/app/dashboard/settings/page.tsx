@@ -72,7 +72,11 @@ export default function SettingsPage() {
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-white font-semibold text-xl mb-1">Settings</h1>
-      <p className="text-sm mb-8" style={{ color: '#737373' }}>API keys and embedding model for semantic search.</p>
+      <p className="text-sm mb-4" style={{ color: '#737373' }}>API keys and embedding model for semantic search.</p>
+      <p className="text-xs mb-8 rounded-lg px-3 py-2" style={{ color: '#a3a3a3', background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+        Use these keys in your SDK, MCP, or REST calls. Your dashboard only shows data logged with keys from this account.
+        Self-host: if you use email login here, replace the auto dev key in your agent code with a key created below.
+      </p>
 
       {/* Embeddings */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>

@@ -143,18 +143,21 @@ function EmptyState() {
         <Activity size={20} style={{ color: '#737373' }} />
       </div>
       <h3 className="text-white font-medium mb-2">No agents yet</h3>
-      <p className="text-sm mb-6" style={{ color: '#737373' }}>
-        Log your first event to get started.
+      <p className="text-sm mb-4" style={{ color: '#737373' }}>
+        Log an event with an API key that belongs to <strong>this</strong> dashboard account.
+      </p>
+      <p className="text-xs mb-6" style={{ color: '#525252' }}>
+        Self-host: use &quot;Open my dashboard →&quot; on login + SDK with <code style={{ fontFamily: 'monospace' }}>host=</code>.
+        Managed: paste your <code style={{ fontFamily: 'monospace' }}>agdb_live_…</code> key from Settings below.
       </p>
       <pre className="text-left rounded-lg p-4 text-xs inline-block" style={{ background: '#0d0d0d' }}>
-{`from zizkadb import ZizkaDB
+{`# Managed cloud
+db = ZizkaDB("agdb_live_xxxx")
 
-db = ZizkaDB("your-api-key")
-await db.log(
-    agent="my-bot",
-    event="started",
-    data={"version": "1.0"}
-)`}
+# Self-host (same tenant as dev dashboard login)
+db = ZizkaDB(host="http://localhost:8000")
+
+await db.log(agent="my-bot", event="started", data={})`}
       </pre>
     </div>
   )
