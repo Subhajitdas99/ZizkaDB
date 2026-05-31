@@ -41,6 +41,7 @@ export * from './types'
 const CLOUD_HOST = 'https://db.zizka.ai'
 const TELEMETRY_URL = 'https://db.zizka.ai/v1/telemetry'
 const SDK_VERSION = '0.2.1'
+const DEFAULT_DEV_API_KEY = 'agdb_dev_local'
 
 let _telemetrySent = false
 
@@ -120,9 +121,18 @@ export class ZizkaDB {
 
     this.baseUrl = config.host?.replace(/\/$/, '') ?? CLOUD_HOST
     this.timeout = config.timeout ?? 10_000
+
+    const apiKey =
+      config.apiKey ??
+      (config.host
+        ? (process.env.ZIZKADB_API_KEY ??
+          process.env.DEV_API_KEY ??
+          DEFAULT_DEV_API_KEY)
+        : undefined)
+
     this.headers = {
       'Content-Type': 'application/json',
-      ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     }
 
     _sendTelemetry(config.host ? 'self-hosted' : 'cloud')

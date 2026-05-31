@@ -124,7 +124,7 @@ export default function TrustPage() {
               Docker Compose stack: Postgres (pgvector), Qdrant, Redis, API. Dashboard is optional (run from <code style={codeInline}>dashboard/</code>).
               Requires <code style={codeInline}>OPENAI_API_KEY</code> for embedding-backed features; logging and causal APIs work without it.
             </p>
-            <Code>{`git clone https://github.com/Zizka-ai/Agentdb
+            <Code>{`git clone https://github.com/Zizka-ai/ZizkaDB
 cp .env.example infra/.env
 docker compose -f infra/docker-compose.yml up -d`}</Code>
           </Section>
@@ -450,7 +450,7 @@ chain = await db.why(tool.event_id)`}</Code>
                   ['Product', 'https://db.zizka.ai'],
                   ['Docs', 'https://db.zizka.ai/docs'],
                   ['API', 'https://db.zizka.ai/swagger'],
-                  ['GitHub', 'https://github.com/Zizka-ai/Agentdb'],
+                  ['GitHub', 'https://github.com/Zizka-ai/ZizkaDB'],
                   ['Email', 'founder@zizka.ai'],
                 ].map(([k, v]) => (
                   <tr key={k}>

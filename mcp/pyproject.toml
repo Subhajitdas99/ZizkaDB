@@ -29,7 +29,7 @@ zizkadb-mcp = "zizkadb_mcp.server:main"
 [project.urls]
 Homepage = "https://db.zizka.ai"
 Documentation = "https://db.zizka.ai/docs"
-Repository = "https://github.com/Zizka-ai/agentdb"
+Repository = "https://github.com/Zizka-ai/ZizkaDB"
 
 [tool.setuptools.packages.find]
 where = ["."]

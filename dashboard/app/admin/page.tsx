@@ -146,7 +146,7 @@ function Login({ onAuthed }: { onAuthed: (t: string) => void }) {
       setStep('verify')
     } catch (e) {
       if (e instanceof Error && e.name === 'AbortError') {
-        setErr('Request timed out. The API may be down — check docker logs for agentdb_api.')
+        setErr('Request timed out. The API may be down — check docker logs for zizkadb_api.')
       } else {
         setErr(e instanceof Error ? e.message : 'Failed')
       }

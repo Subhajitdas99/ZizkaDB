@@ -36,7 +36,7 @@
   "homepage": "https://db.zizka.ai",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Zizka-ai/agentdb.git"
+    "url": "git+https://github.com/Zizka-ai/ZizkaDB.git"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

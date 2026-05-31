@@ -23,14 +23,19 @@ import platform
 import threading
 import uuid
 from pathlib import Path
+from urllib.parse import urlencode
 
 import httpx
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("ZizkaDB")
 
+DEFAULT_DEV_API_KEY = "agdb_dev_local"
 _HOST = os.getenv("ZIZKADB_HOST", "https://db.zizka.ai").rstrip("/")
-_KEY  = os.getenv("ZIZKADB_API_KEY", "")
+_KEY = os.getenv("ZIZKADB_API_KEY", "")
+
+if not _KEY and _HOST and ("localhost" in _HOST or "127.0.0.1" in _HOST):
+    _KEY = os.getenv("DEV_API_KEY", DEFAULT_DEV_API_KEY)
 
 # ── Anonymous telemetry (opt-out: ZIZKADB_TELEMETRY=false) ────────────────────
 
@@ -255,7 +260,10 @@ async def time_travel(agent: str, timestamp: str) -> dict:
     Returns:
         Agent state snapshot at that moment (events, summary, last_event)
     """
-    return await _api("POST", "/events/at", {"agent": agent, "timestamp": timestamp})
+    return await _api(
+        "GET",
+        f"/events/at?{urlencode({'agent': agent, 'timestamp': timestamp})}",
+    )
 
 
 @mcp.tool()

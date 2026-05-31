@@ -9,7 +9,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
         NEXT_PUBLIC_DEV_MODE: ${NEXT_PUBLIC_DEV_MODE:-true}
-    container_name: agentdb_dashboard
+    container_name: zizkadb_dashboard
     ports:
       - "127.0.0.1:3001:3000"
     environment:

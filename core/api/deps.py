@@ -10,9 +10,13 @@ bearer = HTTPBearer()
 # Never set this in production.
 _DEV_API_KEY = os.getenv("DEV_API_KEY", "")
 
+# Same IDs as /v1/auth/dev-token (core/api/auth.py)
+_DEV_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+_DEV_USER_ID = "00000000-0000-0000-0000-000000000001"
+
 _DEV_TENANT = {
-    "tenant_id": "dev-tenant",
-    "user_id":   "dev-user",
+    "tenant_id": _DEV_TENANT_ID,
+    "user_id": _DEV_USER_ID,
 }
 
 

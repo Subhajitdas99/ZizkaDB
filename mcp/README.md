@@ -1,35 +1,25 @@
-# agentdb-mcp
+# zizkadb-mcp
 
-MCP server for [AgentDB](https://agentdb.zizka.ai). Gives any MCP-compatible AI agent persistent memory, semantic search, causal debugging, and time travel — no SDK, no code changes.
-
-Works with **Claude Desktop**, **Cursor**, **Windsurf**, **Zed**, LangChain MCP, CrewAI, AutoGen, and any framework that supports the Model Context Protocol.
+MCP server for [ZizkaDB](https://db.zizka.ai). Gives any MCP-compatible AI agent persistent memory, semantic search, causal debugging, and time travel.
 
 ## Install
 
 ```bash
-pip install agentdb-mcp
+pip install zizkadb-mcp
+# or
+uvx zizkadb-mcp
 ```
 
-Or run directly with `uvx` (no install needed):
+## Managed cloud
 
-```bash
-uvx agentdb-mcp
-```
-
-## Quickstart
-
-Get an API key at [agentdb.zizka.ai](https://agentdb.zizka.ai/signup), then add AgentDB to your MCP config.
-
-### Claude Desktop
-
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Get an API key at [db.zizka.ai/signup](https://db.zizka.ai/signup), then add ZizkaDB to your MCP config.
 
 ```json
 {
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
         "ZIZKADB_API_KEY": "agdb_live_xxxx"
       }
@@ -38,76 +28,33 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. You'll see AgentDB tools appear in the tool list.
-
-### Cursor
-
-Edit your MCP config at `~/.cursor/mcp.json`:
+## Self-hosted
 
 ```json
 {
   "mcpServers": {
-    "agentdb": {
+    "zizkadb": {
       "command": "uvx",
-      "args": ["agentdb-mcp"],
+      "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_HOST": "http://localhost:8000"
       }
     }
   }
 }
 ```
 
-### Self-hosted AgentDB
+On localhost, the dev key (`agdb_dev_local`) is auto-injected — no API key needed for local development.
 
-```json
-{
-  "mcpServers": {
-    "agentdb": {
-      "command": "uvx",
-      "args": ["agentdb-mcp"],
-      "env": {
-        "ZIZKADB_HOST": "http://localhost:8000",
-        "ZIZKADB_API_KEY": ""
-      }
-    }
-  }
-}
-```
+## Environment variables
 
-## Available Tools
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ZIZKADB_HOST` | `https://db.zizka.ai` | API base URL |
+| `ZIZKADB_API_KEY` | — | Bearer token (required for cloud) |
+| `ZIZKADB_TELEMETRY` | on | Set `false` to opt out |
 
-| Tool | What it does |
-|------|-------------|
-| `log_event` | Log an agent action (tool call, decision, message) with optional causal link |
-| `search_memory` | Semantically search past events by meaning |
-| `get_context` | Get a formatted memory block ready to paste into a system prompt |
-| `why` | Trace the causal chain that led to any event |
-| `query_events` | List recent events for an agent, optionally filtered by type |
-| `time_travel` | Reconstruct logged agent state at a past timestamp |
-| `memory_diff` | Summarise what happened in a session |
-| `forget` | GDPR erasure — delete all events matching a filter |
+## Links
 
-## Example: Claude with persistent memory
-
-Once configured, Claude can call AgentDB tools in any conversation:
-
-> "Remember that the user prefers short replies"
-> → Claude calls `log_event("assistant", "preference", {"note": "user prefers short replies", "user_id": "u_123"})`
-
-> "What do I know about this user?"
-> → Claude calls `search_memory("user preferences and history", agent="assistant")`
-
-> "What did you tell this user last week?"
-> → Claude calls `time_travel("assistant", "2026-05-03T00:00:00Z")`
-
-## Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ZIZKADB_HOST` | `https://agentdb.zizka.ai` | API base URL (change for self-hosted) |
-| `ZIZKADB_API_KEY` | _(empty)_ | Your API key from the dashboard |
-
-## License
-
-MIT
+- [Docs](https://db.zizka.ai/docs)
+- [GitHub](https://github.com/Zizka-ai/ZizkaDB)

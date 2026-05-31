@@ -750,7 +750,8 @@ export function SelfHostSection() {
     <div>
       <h1 style={S.h1}>Self-Host</h1>
       <p style={S.lead}>
-        Run the full ZizkaDB stack on your server. Free forever (AGPL), no account required, all features.
+        Run the full ZizkaDB stack on your server. Free forever (AGPL), no cloud account required.
+        SDK, MCP, and dashboard all connect to the same local tenant.
       </p>
 
       <Callout type="info">
@@ -763,14 +764,15 @@ export function SelfHostSection() {
       </Step>
 
       <Step n={2} title="Clone and configure">
-        <Code lang="bash">{`git clone https://github.com/Zizka-ai/Agentdb
-cd Agentdb
-cp .env.example .env`}</Code>
-        <p style={S.p}>Edit <code style={{ fontFamily: 'monospace' }}>.env</code>:</p>
+        <Code lang="bash">{`git clone https://github.com/Zizka-ai/ZizkaDB
+cd ZizkaDB
+cp .env.example infra/.env`}</Code>
+        <p style={S.p}>Edit <code style={{ fontFamily: 'monospace' }}>infra/.env</code>:</p>
         <Code lang="bash">{`OPENAI_API_KEY=sk-...          # for semantic search
 JWT_SECRET=your-random-32-char-secret
+DEV_API_KEY=agdb_dev_local       # default local dev key (SDK auto-sends this)
 
-# Optional: email OTP for dashboard login
+# Optional: email OTP for production dashboard login
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=465
 EMAIL_USER=you@gmail.com
@@ -784,17 +786,26 @@ EMAIL_PASS=your-app-password`}</Code>
       </Step>
 
       <Step n={4} title="Connect SDK or MCP">
+        <p style={S.p}>
+          Self-hosted SDK calls auto-send the local dev key (<code style={{ fontFamily: 'monospace' }}>agdb_dev_local</code> by default).
+          Create a named API key in the dashboard Settings when you move to production.
+        </p>
         <Code lang="python">{`from zizkadb import ZizkaDB
 db = ZizkaDB(host="http://localhost:8000")`}</Code>
-        <p style={S.p}>MCP: set <code style={{ fontFamily: 'monospace' }}>ZIZKADB_HOST=http://localhost:8000</code></p>
-        <p style={S.p}>REST: <code style={{ fontFamily: 'monospace' }}>http://localhost:8000/v1/events</code></p>
+        <p style={S.p}>MCP: <code style={{ fontFamily: 'monospace' }}>ZIZKADB_HOST=http://localhost:8000</code> (dev key auto-injected on localhost)</p>
+        <p style={S.p}>REST: <code style={{ fontFamily: 'monospace' }}>Authorization: Bearer agdb_dev_local</code></p>
       </Step>
 
-      <Step n={5} title="Run the dashboard (optional)">
+      <Step n={5} title="Open the dashboard">
         <Code lang="bash">{`cd dashboard
 npm install
-NEXT_PUBLIC_API_URL=http://localhost:8000 npm run dev
-# http://localhost:3000`}</Code>
+NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev
+# → http://localhost:3000/login → click "Open my dashboard →"`}</Code>
+        <p style={S.p}>
+          The green <strong>SELF-HOSTED</strong> button logs you in instantly — no email. You see the same tenant as your SDK.
+          For production, set <code style={{ fontFamily: 'monospace' }}>NEXT_PUBLIC_DEV_MODE=false</code> and configure SMTP for email OTP (same flow as{' '}
+          <a href="https://db.zizka.ai/login" style={{ color: '#1e40af' }}>db.zizka.ai</a>).
+        </p>
       </Step>
 
       <Step n={6} title="Production deploy">

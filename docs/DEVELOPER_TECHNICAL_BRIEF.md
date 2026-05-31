@@ -6,7 +6,7 @@
 **Product URL:** https://db.zizka.ai  
 **Docs:** https://db.zizka.ai/docs  
 **API explorer:** https://db.zizka.ai/swagger  
-**GitHub:** https://github.com/Zizka-ai/agentdb  
+**GitHub:** https://github.com/Zizka-ai/ZizkaDB  
 
 ---
 
@@ -259,7 +259,7 @@ Python 3.10+, TypeScript works on Node/Deno/Bun/edge.
 **Self-host (Docker Compose):**
 
 ```bash
-git clone https://github.com/Zizka-ai/agentdb
+git clone https://github.com/Zizka-ai/ZizkaDB
 cp .env.example infra/.env   # OPENAI_API_KEY required for embeddings
 docker compose -f infra/docker-compose.yml up -d
 ```
@@ -268,7 +268,7 @@ Stack: postgres (pgvector), qdrant, redis, api. Dashboard optional (`npm run dev
 
 **Embeddings:** Without `OPENAI_API_KEY`, **logging still works**; semantic search and context injection that rely on embeddings will not.
 
-**Telemetry:** SDK/MCP send **one anonymous ping** on startup (SDK name, version, OS, cloud vs self-host). No event payloads, no API keys. Opt out: `AGENTDB_TELEMETRY=false` or `ZIZKADB_TELEMETRY=false` (confirm env name in release notes).
+**Telemetry:** SDK/MCP send **one anonymous ping** on startup (SDK name, version, OS, cloud vs self-host). No event payloads, no API keys. Opt out: `ZIZKADB_TELEMETRY=false`.
 
 ---
 
@@ -424,7 +424,7 @@ When unsure: **“Let me connect you to engineering”** or point to **docs + Gi
 | Sign up | https://db.zizka.ai/signup |
 | Docs | https://db.zizka.ai/docs |
 | API explorer | https://db.zizka.ai/swagger |
-| GitHub | https://github.com/Zizka-ai/agentdb |
+| GitHub | https://github.com/Zizka-ai/ZizkaDB |
 | Company | Zizka AI |
 
 ---

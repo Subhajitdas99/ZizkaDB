@@ -939,9 +939,9 @@ export default function LandingPage() {
             Full feature set. No account. No limits. Forever.
           </p>
           <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 28, lineHeight: 1.9, overflowX: 'auto' }}>
-            <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/agentdb</div>
-            <div><span style={{ color: '#555' }}>$ </span>cp .env.example .env &amp;&amp; nano .env</div>
-            <div><span style={{ color: '#555' }}>$ </span>docker-compose -f infra/docker-compose.yml up</div>
+            <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/ZizkaDB</div>
+            <div><span style={{ color: '#555' }}>$ </span>cp .env.example infra/.env &amp;&amp; nano infra/.env</div>
+            <div><span style={{ color: '#555' }}>$ </span>docker compose -f infra/docker-compose.yml up -d</div>
           </div>
           <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
             Setup guide →

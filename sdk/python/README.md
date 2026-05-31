@@ -1,97 +1,51 @@
-# agentdb-sdk
+# zizkadb-sdk
 
-Python SDK for [AgentDB](https://agentdb.zizka.ai) — the operational database for AI agents.
+Python SDK for [ZizkaDB](https://db.zizka.ai) — the operational database for AI agents.
 
 ## Install
 
 ```bash
-pip install agentdb-sdk
+pip install zizkadb-sdk
 ```
 
-> **Note:** There is an unrelated package called `agentdb` on PyPI. Make sure to install `agentdb-sdk` (this package). The import is still `from agentdb import AgentDB`.
+> **Note:** There is an unrelated package called `agentdb` on PyPI. Install **`zizkadb-sdk`**. Import: `from zizkadb import ZizkaDB`.
 
 ## Quickstart
 
 ```python
-from agentdb import AgentDB
+from zizkadb import ZizkaDB
 
-# Cloud (agentdb.zizka.ai)
-db = AgentDB("agdb_live_xxxx")
+# Managed cloud (db.zizka.ai)
+db = ZizkaDB("agdb_live_xxxx")
 
-# Self-hosted
-db = AgentDB(host="http://localhost:8000")
+# Self-hosted — auto-sends local dev key (agdb_dev_local)
+db = ZizkaDB(host="http://localhost:8000")
+
+async with db:
+    result = await db.log(
+        agent="my-bot",
+        event="tool_call",
+        data={"tool": "search", "query": "billing"},
+    )
+    chain = await db.why(result.event_id)
+    chain.print()
 ```
 
-## Log an event
+## Self-host dashboard
 
-```python
-result = await db.log(
-    agent="my-bot",
-    event="tool_call",
-    data={"tool": "search_web", "query": "competitor pricing"},
-)
-print(result.event_id)
-```
+1. `docker compose -f infra/docker-compose.yml up -d`
+2. `NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev` in `dashboard/`
+3. Open http://localhost:3000/login → **Open my dashboard →**
+4. Settings → create a named API key for production
 
-## Link events causally
-
-```python
-# Log the user message
-msg = await db.log(agent="my-bot", event="user_message",
-                   data={"text": "why is my bill $200?"})
-
-# Log the tool call that happened BECAUSE of the message
-tool = await db.log(agent="my-bot", event="tool_call",
-                    data={"tool": "get_billing"},
-                    parent_id=msg.event_id)  # <-- causal link
-
-# Log the response that happened BECAUSE of the tool call
-await db.log(agent="my-bot", event="agent_response",
-             data={"text": "I found an anomaly in your account"},
-             parent_id=tool.event_id)
-```
-
-## Why did something happen?
-
-```python
-chain = await db.why(tool.event_id)
-chain.print()
-# user_message: {'text': 'why is my bill $200?'}  [14:32:01]
-#     └── tool_call: {'tool': 'get_billing'}       [14:32:02]
-#         └── agent_response: {'text': '...'}      [14:32:03]
-```
-
-## Semantic search
-
-```python
-results = await db.search("customer angry about billing")
-for event in results:
-    print(event.event, event.data)
-```
-
-## Time travel
-
-```python
-from datetime import datetime
-
-state = await db.at("my-bot", datetime(2026, 5, 1, 15, 0))
-print(state.state)
-```
-
-## Query events
-
-```python
-events = await db.query("my-bot", limit=100, event_type="tool_call")
-```
-
-## Self-host
+## Telemetry opt-out
 
 ```bash
-git clone https://github.com/Zizka-ai/agentdb
-cd agentdb && cp .env.example .env
-docker-compose -f infra/docker-compose.yml up
+export ZIZKADB_TELEMETRY=false
 ```
 
-## License
+## Links
 
-AGPL-3.0
+- [Docs](https://db.zizka.ai/docs)
+- [API explorer](https://db.zizka.ai/swagger)
+- [GitHub](https://github.com/Zizka-ai/ZizkaDB)

@@ -3,8 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 import logging
+import os
 
-from db.connection import init_db, close_db
+from db.connection import init_db, close_db, get_pool
+from api.auth import _ensure_dev_tenant
 from api.events import router as events_router
 from api.agents import router as agents_router
 from api.auth import router as auth_router
@@ -24,6 +26,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    if os.getenv("ENV", "development") == "development":
+        await _ensure_dev_tenant(get_pool())
     logger.info("ZizkaDB started")
     yield
     await close_db()

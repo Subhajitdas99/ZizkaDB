@@ -24,6 +24,7 @@ Usage:
     state = await db.at(agent="my-bot", timestamp=datetime(2026, 5, 1))
 """
 
+import os
 import httpx
 from datetime import datetime
 from typing import Any
@@ -33,6 +34,7 @@ from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError
 from .telemetry import ping as _telemetry_ping
 
 CLOUD_HOST = "https://db.zizka.ai"
+DEFAULT_DEV_API_KEY = "agdb_dev_local"
 
 
 class ZizkaDB:
@@ -58,6 +60,13 @@ class ZizkaDB:
                 "Provide an api_key (cloud) or host (self-hosted).\n"
                 "  Cloud:       ZizkaDB('agdb_live_...')\n"
                 "  Self-hosted: ZizkaDB(host='http://localhost:8000')"
+            )
+
+        if not api_key and host:
+            api_key = (
+                os.getenv("ZIZKADB_API_KEY")
+                or os.getenv("DEV_API_KEY")
+                or DEFAULT_DEV_API_KEY
             )
 
         self._api_key = api_key

@@ -93,7 +93,7 @@ Framework-agnostic · Self-host or managed · No LLM wrapper required
 - Self-host Docker (AGPL)  
 - Python + TypeScript SDKs, MCP for Cursor/Claude  
 - Dashboard, Stripe billing, docs, `/swagger`, `/trust`  
-- GitHub: Zizka-ai/Agentdb  
+- GitHub: Zizka-ai/ZizkaDB  
 
 ---
 
@@ -183,7 +183,7 @@ Runway: [12–18] months to [milestone: e.g. $X MRR / N paying teams]
 
 **When your agent stops behaving like itself, you know first.**
 
-db.zizka.ai · founder@zizka.ai · GitHub: Zizka-ai/Agentdb
+db.zizka.ai · founder@zizka.ai · GitHub: Zizka-ai/ZizkaDB
 
 ---
 
