@@ -100,6 +100,13 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
         , create an API key in Settings, and connect via SDK, MCP, or REST. We run Postgres, Qdrant, embeddings, and the dashboard.
       </Callout>
 
+      <Callout type="tip">
+        SDKs are <strong>stateless</strong> — pass <code style={{ fontFamily: 'monospace' }}>agent</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>session_id</code>, and <code style={{ fontFamily: 'monospace' }}>event_id</code> explicitly.
+        See <Link href="/trust#performance" style={{ color: '#166534' }}>performance</Link> and{' '}
+        <Link href="/trust#security" style={{ color: '#166534' }}>security</Link> on the technical reference.
+      </Callout>
+
       <h2 style={{ ...S.h2, marginTop: 24 }}>Choose your integration</h2>
       <div style={{ display: 'grid', gap: 12, marginBottom: 40 }}>
         {[
@@ -646,6 +653,22 @@ export function McpSection() {
       </p>
 
       <Callout type="info">
+        <strong>Fastest start — Cursor:</strong> paste this into <code style={{ fontFamily: 'monospace' }}>~/.cursor/mcp.json</code>, reload MCP, done.
+      </Callout>
+      <Code lang="json">{`{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+    }
+  }
+}`}</Code>
+      <p style={{ ...S.p, marginTop: -8, marginBottom: 24 }}>
+        Self-host: replace env with <code style={{ fontFamily: 'monospace' }}>{`"ZIZKADB_HOST": "http://localhost:8000"`}</code> only.
+      </p>
+
+      <Callout type="info">
         <strong>MCP</strong> (Model Context Protocol) lets AI apps use external tools. ZizkaDB exposes log, search, why, time travel, and more as native MCP tools.
       </Callout>
 
@@ -717,8 +740,7 @@ uvx --version</Code>
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_HOST": "http://localhost:8000",
-        "ZIZKADB_API_KEY": ""
+        "ZIZKADB_HOST": "http://localhost:8000"
       }
     }
   }

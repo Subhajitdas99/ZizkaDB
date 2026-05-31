@@ -929,6 +929,42 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* MCP — fastest path in Cursor */}
+      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fff' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Add to Cursor in 30 seconds
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>
+            No SDK refactor. Paste into MCP settings — your agent gets log, search, why, and time travel as native tools.
+          </p>
+          <div style={{
+            background: '#111', borderRadius: 12, padding: '20px 24px',
+            fontFamily: 'monospace', fontSize: 12.5, color: '#22c55e', lineHeight: 1.75,
+            overflowX: 'auto', marginBottom: 24,
+          }}>
+            <div style={{ color: '#666', marginBottom: 8 }}>// ~/.cursor/mcp.json</div>
+            {`{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+    }
+  }
+}`}
+          </div>
+          <p style={{ textAlign: 'center', fontSize: 13, color: '#888', marginBottom: 20 }}>
+            Self-host: use <code style={{ fontFamily: 'monospace', background: '#f5f5f5', padding: '2px 6px', borderRadius: 4 }}>ZIZKADB_HOST=http://localhost:8000</code> instead of API key.
+          </p>
+          <div style={{ textAlign: 'center' }}>
+            <Link href="/docs" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
+              MCP setup guide →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Self-host CTA */}
       <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
         <div className="zdb-self-host" style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '56px 40px' }}>

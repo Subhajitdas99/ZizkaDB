@@ -14,6 +14,8 @@ const SECTIONS = [
   { id: 'capabilities', label: 'Capabilities' },
   { id: 'time-travel', label: 'Time travel' },
   { id: 'integrity', label: 'Integrity & retention' },
+  { id: 'performance', label: 'Performance' },
+  { id: 'security', label: 'Security' },
   { id: 'integration', label: 'Integration' },
   { id: 'api', label: 'REST API' },
   { id: 'deployment', label: 'Deployment' },
@@ -238,14 +240,62 @@ docker compose -f infra/docker-compose.yml up -d`}</Code>
 
           <Section id="integrity" title="Integrity & retention">
             <ul style={ul}>
-              <li>Events are stored <strong>append-only</strong> by default; each payload has a <strong>SHA-256 checksum</strong>.</li>
+              <li>Events are stored in <strong>Postgres</strong> with an append-by-default write pattern; each payload includes a <strong>SHA-256 checksum</strong> for integrity verification.</li>
               <li><code style={codeInline}>forget()</code> removes events matching metadata filters (GDPR right to erasure) — storage is not WORM/immutable.</li>
               <li>Managed plans enforce <strong>retention windows</strong> (90 days Pro, 1 year Team); self-hosted retention is operator-defined.</li>
               <li>Bulk signed audit export is on the product roadmap; today, export via API/query and verify checksums per event.</li>
             </ul>
           </Section>
 
+          <Section id="performance" title="Performance expectations">
+            <p style={p}>
+              ZizkaDB is built for normal agent loops — tool calls, messages, and decisions — not for blockchain-scale write throughput.
+              Stack: Postgres (events), Qdrant (vectors), Redis (cache).
+            </p>
+            <table style={table}>
+              <thead><tr><th style={th}>Mode</th><th style={th}>Write path</th><th style={th}>Typical use</th></tr></thead>
+              <tbody>
+                {[
+                  ['Logging only', 'Postgres INSERT + SHA-256 checksum', 'Fast enough for typical agent step loops'],
+                  ['With semantic search', 'Above + OpenAI embedding + Qdrant upsert (per log)', 'Fine for normal volume; embedding adds network latency'],
+                  ['why() / query', 'Postgres reads on explicit event_id or filters', 'No hidden session state on the server'],
+                ].map(([mode, path, use]) => (
+                  <tr key={mode}><td style={td}><strong>{mode}</strong></td><td style={td}>{path}</td><td style={td}>{use}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <p style={p}>
+              High-frequency fleets (thousands of parallel writes per second) are not a v1 target.
+              Async embedding queues and published benchmarks are on the roadmap as usage grows.
+            </p>
+          </Section>
+
+          <Section id="security" title="Security (early stage)">
+            <p style={p}>
+              ZizkaDB v1 is aimed at developers and small teams — not enterprise compliance certification yet.
+              Here is what we do today:
+            </p>
+            <ul style={ul}>
+              <li><strong>In transit:</strong> TLS on managed cloud (<code style={codeInline}>db.zizka.ai</code> via nginx).</li>
+              <li><strong>Tenant isolation:</strong> every API call scoped by API key or JWT to a <code style={codeInline}>tenant_id</code>; no cross-tenant reads.</li>
+              <li><strong>At rest:</strong> standard Postgres / disk encryption on the operator&apos;s infrastructure (AWS EBS on managed; your disk when self-hosted).</li>
+              <li><strong>BYOK embedding keys:</strong> encrypted in Postgres (Fernet) when you bring your own OpenAI key.</li>
+              <li><strong>GDPR erasure:</strong> <code style={codeInline}>forget()</code> deletes matching events and vectors.</li>
+              <li><strong>Telemetry:</strong> one anonymous SDK/MCP startup ping — opt out with <code style={codeInline}>ZIZKADB_TELEMETRY=false</code>.</li>
+            </ul>
+            <p style={p}>
+              <strong>Not claimed today:</strong> SOC 2, HIPAA, or formal DPAs. For enterprise security review, contact{' '}
+              <a href="mailto:founder@zizka.ai" style={link}>founder@zizka.ai</a>.
+            </p>
+          </Section>
+
           <Section id="integration" title="Integration">
+            <p style={p}>
+              <strong>Concurrency:</strong> Python and TypeScript SDKs are <strong>stateless HTTP clients</strong> — no thread-local storage or{' '}
+              <code style={codeInline}>contextvars</code>. Pass <code style={codeInline}>agent</code>,{' '}
+              <code style={codeInline}>session_id</code>, <code style={codeInline}>parent_id</code>, and{' '}
+              <code style={codeInline}>event_id</code> explicitly on each call. Safe in FastAPI, Celery, and parallel async workers.
+            </p>
             <table style={table}>
               <thead><tr><th style={th}>Surface</th><th style={th}>Install</th><th style={th}>Use case</th></tr></thead>
               <tbody>
@@ -268,6 +318,18 @@ db = ZizkaDB("agdb_live_xxxx")  # managed
 msg = await db.log(agent="bot", event="user_message", data={"text": "..."})
 tool = await db.log(agent="bot", event="tool_call", data={...}, parent_id=msg.event_id)
 chain = await db.why(tool.event_id)`}</Code>
+            <h3 style={h3}>Cursor MCP (30 seconds)</h3>
+            <p style={p}>Add to <code style={codeInline}>~/.cursor/mcp.json</code> or project <code style={codeInline}>.cursor/mcp.json</code>, then reload MCP:</p>
+            <Code lang="json">{`{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+    }
+  }
+}`}</Code>
+            <p style={p}>Self-host: set <code style={codeInline}>ZIZKADB_HOST</code> to <code style={codeInline}>http://localhost:8000</code> instead (dev key auto-injected).</p>
             <h3 style={h3}>MCP tools</h3>
             <p style={p}>
               <code style={codeInline}>log_event</code>, <code style={codeInline}>search_memory</code>, <code style={codeInline}>get_context</code>,{' '}

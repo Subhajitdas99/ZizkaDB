@@ -13,12 +13,20 @@ pip install zizkadb-sdk
 > **Note:** Install `zizkadb-sdk` on PyPI. The import is `from zizkadb import ZizkaDB`.
 
 ```python
+import asyncio
 from zizkadb import ZizkaDB
 
-db = ZizkaDB("your-api-key")  # get one at db.zizka.ai/signup
+async def main():
+    async with ZizkaDB("your-api-key") as db:  # db.zizka.ai/signup
+        result = await db.log(
+            agent="my-bot",
+            event="tool_call",
+            data={"tool": "search", "query": "..."},
+        )
+        chain = await db.why(result.event_id)  # explicit event_id, not agent name
+        chain.print()
 
-await db.log(agent="my-bot", event="tool_call", data={"tool": "search", "query": "..."})
-print(await db.why("my-bot"))
+asyncio.run(main())
 ```
 
 ## Self-host (open source) — one command

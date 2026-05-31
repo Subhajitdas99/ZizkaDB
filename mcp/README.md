@@ -2,6 +2,24 @@
 
 MCP server for [ZizkaDB](https://db.zizka.ai). Gives any MCP-compatible AI agent persistent memory, semantic search, causal debugging, and time travel.
 
+## Cursor — 30 second setup
+
+Paste into `~/.cursor/mcp.json` (or `.cursor/mcp.json` in your project), then reload MCP:
+
+```json
+{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+    }
+  }
+}
+```
+
+Self-host: use `"ZIZKADB_HOST": "http://localhost:8000"` instead (dev key auto-injected on localhost).
+
 ## Install
 
 ```bash
