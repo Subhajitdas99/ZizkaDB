@@ -321,35 +321,37 @@ export default function LandingPage() {
         </div>
         <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
+          <Link href="#managed" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Managed</Link>
+          <Link href="#pricing" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Pricing</Link>
           <Link href="#mcp" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>MCP</Link>
           <Link href="#opensource" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Open source</Link>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{
-            fontSize: 14, fontWeight: 600, color: '#111', textDecoration: 'none',
-            padding: '7px 14px', background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8,
+          <Link href="/community" style={{
+            fontSize: 14, fontWeight: 600, color: BRAND_MUTED, textDecoration: 'none',
+            padding: '7px 14px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8,
           }}>
-            GitHub ↗
-          </a>
+            Community
+          </Link>
           <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
-          <Link href="#mcp" style={{
+          <Link href="/signup" style={{
             fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none',
             padding: '8px 18px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
             borderRadius: 8, boxShadow: '0 2px 12px rgba(249,115,22,0.35)',
           }}>
-            Connect MCP →
+            Start free →
           </Link>
         </div>
         {/* Mobile nav — only CTAs */}
         <div className="zdb-nav-cta" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
-          <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
-            GitHub
-          </a>
+          <Link href="#pricing" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
+            Pricing
+          </Link>
           <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
-          <Link href="#mcp" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: BRAND, borderRadius: 8 }}>
-            MCP →
+          <Link href="/signup" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: BRAND, borderRadius: 8 }}>
+            Start free →
           </Link>
         </div>
       </nav>
@@ -367,9 +369,9 @@ export default function LandingPage() {
           <div style={{ textAlign: 'left' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
               {[
-                { label: 'Open source', style: { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.35)', color: BRAND_PALE } },
+                { label: 'Managed cloud', style: { bg: 'rgba(249,115,22,0.2)', border: 'rgba(249,115,22,0.45)', color: BRAND_PALE } },
                 { label: 'MCP server', style: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(96,165,250,0.3)', color: '#93c5fd' } },
-                { label: 'Self-host free', style: { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d1d5db' } },
+                { label: 'Open source', style: { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d1d5db' } },
               ].map(b => (
                 <span key={b.label} style={{
                   fontSize: 12, fontWeight: 600, letterSpacing: 0.3,
@@ -385,56 +387,49 @@ export default function LandingPage() {
               fontSize: 48, fontWeight: 800, lineHeight: 1.06, margin: '0 0 20px',
               letterSpacing: -1.5, color: '#fff',
             }}>
-              Give Cursor &amp; Claude<br />
+              Your agent stops behaving<br />
               <span style={{
                 background: `linear-gradient(90deg, ${BRAND} 0%, ${BRAND_LIGHT} 100%)`,
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
-                persistent memory
+                like itself. You know first.
               </span>
-              {' '}in 30 seconds
             </h1>
 
             <p className="zdb-hero-p" style={{
               fontSize: 17, color: '#9ca3af', lineHeight: 1.65, margin: '0 0 28px', maxWidth: 480, fontWeight: 400,
             }}>
-              Paste one MCP config. No SDK refactor. Your agent gets log, search, why(), and time travel —
-              or clone the repo and self-host the full stack on Docker, free forever.
+              Start on <strong style={{ color: '#e5e7eb', fontWeight: 600 }}>db.zizka.ai</strong> in minutes — or connect via MCP in Cursor, or self-host free on Docker.
             </p>
 
             <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+              <Link href="/signup" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '14px 24px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
+                color: '#fff', borderRadius: 12, textDecoration: 'none',
+                fontWeight: 600, fontSize: 15,
+                boxShadow: '0 4px 24px rgba(249,115,22,0.4)',
+              }}>
+                Start managed free →
+              </Link>
               <button
                 type="button"
                 onClick={() => copy(MCP_HERO_CONFIG, 'hero-mcp')}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '14px 24px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
-                  color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
-                  fontWeight: 600, fontSize: 15,
-                  boxShadow: '0 4px 24px rgba(249,115,22,0.4)',
-                }}
-              >
-                {copied === 'hero-mcp' ? '✓ Copied MCP config' : 'Copy MCP config →'}
-              </button>
-              <a
-                href={GITHUB_URL}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
                   padding: '14px 24px', background: 'rgba(255,255,255,0.08)',
-                  color: '#fff', borderRadius: 12, textDecoration: 'none',
-                  fontWeight: 600, fontSize: 15, border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#fff', borderRadius: 12, border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer',
+                  fontWeight: 600, fontSize: 15,
                 }}
               >
-                Self-host on GitHub ↗
-              </a>
-              <Link href="/signup" style={{
+                {copied === 'hero-mcp' ? '✓ Copied MCP config' : 'Copy MCP config'}
+              </button>
+              <Link href="#pricing" style={{
                 display: 'inline-flex', alignItems: 'center',
                 padding: '14px 20px', color: '#9ca3af', textDecoration: 'none',
                 fontWeight: 500, fontSize: 14,
               }}>
-                or try managed cloud →
+                See pricing →
               </Link>
             </div>
 
@@ -495,16 +490,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Two paths — MCP vs self-host */}
+      {/* Three paths — managed, MCP, self-host */}
       <section className="zdb-section" style={{ padding: '56px 40px 48px', background: '#fafafa', borderBottom: '1px solid #eee' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: '#888', marginBottom: 12 }}>
             Pick your entry point
           </p>
           <h2 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', marginBottom: 36, letterSpacing: -0.5 }}>
-            Two ways in. Same product.
+            Three ways in. Same product.
           </h2>
-          <div className="zdb-path-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="zdb-path-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+            {/* Managed — main service */}
             <div style={{
               background: '#fff', borderRadius: 16, padding: '32px 28px',
               border: `2px solid ${BRAND}`, position: 'relative',
@@ -515,7 +511,47 @@ export default function LandingPage() {
                 background: BRAND, color: '#fff', fontSize: 10, fontWeight: 700,
                 padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
               }}>
-                FASTEST — MCP
+                RECOMMENDED — MANAGED
+              </div>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>☁️</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>Managed at db.zizka.ai</h3>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
+                We run Postgres, Qdrant, embeddings, and the dashboard. Sign up, get an API key, ship in under 5 minutes.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Email OTP signup — no password', 'API key from Settings', 'Pro trial — no credit card'].map(item => (
+                  <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
+                    <span style={{ color: BRAND, fontWeight: 700 }}>✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/signup" style={{
+                  flex: 1, minWidth: 140, padding: '12px 18px', background: BRAND, color: '#fff',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14, textAlign: 'center',
+                }}>
+                  Start free →
+                </Link>
+                <Link href="#pricing" style={{
+                  flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  border: '1px solid #ddd', textAlign: 'center',
+                }}>
+                  Pricing →
+                </Link>
+              </div>
+            </div>
+
+            <div style={{
+              background: '#fff', borderRadius: 16, padding: '32px 28px',
+              border: '1px solid #e5e5e5',
+            }}>
+              <div style={{
+                display: 'inline-block', marginBottom: 12,
+                background: '#eff6ff', color: '#1d4ed8', fontSize: 10, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
+              }}>
+                MCP — CURSOR / CLAUDE
               </div>
               <div style={{ fontSize: 28, marginBottom: 12 }}>🔌</div>
               <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>Connect your IDE</h3>
@@ -602,6 +638,151 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Managed cloud — main service */}
+      <section id="managed" className="zdb-section" style={{ padding: '64px 40px', background: '#fff' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Managed cloud — fastest way to start
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto' }}>
+            Skip running Postgres, Qdrant, and Redis yourself. Sign up at db.zizka.ai, get an API key, and ship in minutes.
+          </p>
+          <div className="zdb-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 32 }}>
+            {[
+              { icon: '⚡', title: 'Live in under 5 minutes', desc: 'Email sign-up, one-time code, API key from Settings. Paste into SDK or MCP — no infra checklist.' },
+              { icon: '☁️', title: 'We run the stack', desc: 'Events, search index, dashboard, and TLS at db.zizka.ai. You focus on agent logic, not ops.' },
+              { icon: '📊', title: 'Dashboard included', desc: 'See agents, replay sessions, search history, and drift — same data your code logs, no extra setup.' },
+              { icon: '🔑', title: 'Free trial, no card', desc: 'Pro and Team include a 1-month trial. Start logging production traffic before you commit.' },
+            ].map(item => (
+              <div key={item.title} style={{ background: '#fafafa', borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5' }}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              display: 'inline-block', background: '#111', borderRadius: 12, padding: '20px 28px',
+              fontFamily: 'monospace', fontSize: 13, color: BRAND_LIGHT, lineHeight: 1.8, textAlign: 'left',
+            }}>
+              <div><span style={{ color: '#666' }}>1.</span> Sign up at db.zizka.ai/signup</div>
+              <div><span style={{ color: '#666' }}>2.</span> Settings → Create API key</div>
+              <div><span style={{ color: '#666' }}>3.</span> ZizkaDB(&quot;agdb_live_…&quot;) — done</div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/signup" style={{ padding: '12px 28px', background: BRAND, color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
+                Start managed free →
+              </Link>
+              <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
+                Setup guide
+              </Link>
+            </div>
+            <p style={{ fontSize: 13, color: '#888', marginTop: 16 }}>
+              Also available: self-host with Docker (free forever) or connect via MCP in Cursor.{' '}
+              <Link href="#opensource" style={{ color: BRAND_DARK, fontWeight: 500 }}>See open source →</Link>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="zdb-section" style={{ padding: '64px 40px', background: '#fafafa' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>Pricing</h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48 }}>
+            Managed plans at db.zizka.ai — or self-host free forever on your own infra.
+          </p>
+          <div className="zdb-price-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+            {([
+              {
+                name: 'Self-Hosted', price: 'Free', sub: 'forever',
+                features: ['Full feature set', 'Your infra', 'Docker Compose', 'Community support'],
+                cta: 'Setup guide →', href: '/docs', highlight: false,
+              },
+              {
+                name: 'Pro', price: '€39', sub: 'per month',
+                features: ['100M events', '90-day retention', '3 projects', 'Platform embeddings', 'Email support'],
+                cta: 'Start 1-month free trial →', href: '/signup', highlight: true,
+                note: 'No credit card needed',
+              },
+              {
+                name: 'Team', price: '€99', sub: 'per month',
+                features: ['Up to 1B events/mo (plan limit)', '1-year retention', '10 seats', 'Platform embeddings', 'Priority support'],
+                cta: 'Start 1-month free trial →', href: '/signup', highlight: false,
+                note: 'No credit card needed',
+              },
+            ] as { name: string; price: string; sub: string; features: string[]; cta: string; href: string; highlight: boolean; note?: string }[]).map(plan => (
+              <div key={plan.name} style={{
+                background: '#fff', borderRadius: 14, padding: '32px 28px',
+                border: plan.highlight ? `2px solid ${BRAND}` : '1px solid #e5e5e5',
+                position: 'relative',
+              }}>
+                {plan.highlight && (
+                  <div style={{
+                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+                    background: BRAND, color: '#fff', fontSize: 11, fontWeight: 600,
+                    padding: '3px 12px', borderRadius: 100,
+                  }}>MOST POPULAR</div>
+                )}
+                <div style={{ fontSize: 12, fontWeight: 600, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{plan.name}</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
+                  <span style={{ fontSize: 34, fontWeight: 700 }}>{plan.price}</span>
+                  <span style={{ fontSize: 13, color: '#888' }}>{plan.sub}</span>
+                </div>
+                <div style={{ borderTop: '1px solid #f0f0f0', margin: '18px 0' }} />
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {plan.features.map(f => (
+                    <li key={f} style={{ fontSize: 13.5, color: '#444', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ color: BRAND_DARK, fontWeight: 600 }}>✓</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link href={plan.href} style={{
+                  display: 'block', textAlign: 'center', padding: '10px',
+                  borderRadius: 8, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  background: plan.highlight ? BRAND : '#fff',
+                  color: plan.highlight ? '#fff' : '#111',
+                  border: plan.highlight ? 'none' : '1px solid #ddd',
+                }}>
+                  {plan.cta}
+                </Link>
+                {plan.note && (
+                  <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 8 }}>
+                    {plan.note}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Embeddings — managed feature */}
+      <section className="zdb-section" style={{ padding: '56px 40px', background: '#fff', borderTop: '1px solid #eee' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 26, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Embeddings built in
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 32, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+            On managed ZizkaDB you choose the embedding model in Settings — no separate vector pipeline.
+          </p>
+          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+            {[
+              { icon: '🎛️', title: 'Pick your model', desc: 'text-embedding-3-small, large, or ada-002 — switch anytime.' },
+              { icon: '☁️', title: 'Platform-hosted', desc: 'Included on Pro and Team — no OpenAI account required to start.' },
+              { icon: '🔐', title: 'Or bring your key', desc: 'Optional: your own OpenAI key for direct billing control.' },
+            ].map(item => (
+              <div key={item.title} style={{ borderRadius: 12, padding: '20px 18px', border: '1px solid #e5e5e5', background: '#fafafa' }}>
+                <div style={{ fontSize: 22, marginBottom: 8 }}>{item.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 6 }}>{item.title}</div>
+                <div style={{ fontSize: 13, color: '#555', lineHeight: 1.55 }}>{item.desc}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1030,198 +1211,49 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Managed cloud */}
-      <section id="managed" className="zdb-section" style={{ padding: '72px 40px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Managed cloud — fastest way to start
-          </h2>
-          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto' }}>
-            Skip running Postgres, Qdrant, and Redis yourself. Sign up, get an API key, and ship in minutes.
-          </p>
-          <div className="zdb-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 32 }}>
-            {[
-              { icon: '⚡', title: 'Live in under 5 minutes', desc: 'Email sign-up, one-time code, API key from Settings. Paste into SDK or MCP — no infra checklist.' },
-              { icon: '☁️', title: 'We run the stack', desc: 'Events, search index, dashboard, and TLS at db.zizka.ai. You focus on agent logic, not ops.' },
-              { icon: '📊', title: 'Dashboard included', desc: 'See agents, replay sessions, search history, and drift — same data your code logs, no extra setup.' },
-              { icon: '🔑', title: 'Free trial, no card', desc: 'Pro and Team include a 1-month trial. Start logging production traffic before you commit.' },
-            ].map(item => (
-              <div key={item.title} style={{ background: '#fff', borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5' }}>
-                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
-                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
-              </div>
-            ))}
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{
-              display: 'inline-block', background: '#111', borderRadius: 12, padding: '20px 28px',
-              fontFamily: 'monospace', fontSize: 13, color: BRAND_LIGHT, lineHeight: 1.8, textAlign: 'left',
-            }}>
-              <div><span style={{ color: '#666' }}>1.</span> Sign up at db.zizka.ai/signup</div>
-              <div><span style={{ color: '#666' }}>2.</span> Settings → Create API key</div>
-              <div><span style={{ color: '#666' }}>3.</span> ZizkaDB(&quot;agdb_live_…&quot;) — done</div>
-            </div>
-            <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/signup" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
-                Start managed free →
-              </Link>
-              <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
-                Setup guide
-              </Link>
-            </div>
-            <p style={{ fontSize: 13, color: '#888', marginTop: 16 }}>
-              Prefer your own servers? Self-host with Docker — full feature set, free forever.{' '}
-              <Link href="/docs" style={{ color: '#555' }}>See self-host docs</Link>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Embeddings */}
-      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Embeddings built in
-          </h2>
-          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 40, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
-            Semantic search and context injection need embeddings. On managed ZizkaDB you choose the model in Settings — no separate vector pipeline to wire up.
-          </p>
-          <div className="zdb-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 32 }}>
-            {[
-              { icon: '🎛️', title: 'Pick your model', desc: 'text-embedding-3-small, text-embedding-3-large, or ada-002 — switch anytime in the dashboard.' },
-              { icon: '☁️', title: 'Platform-hosted', desc: 'Use Zizka-managed embeddings on Pro and Team. Included — no OpenAI account required to get started.' },
-              { icon: '🔐', title: 'Or bring your key', desc: 'Optional: use your own OpenAI API key for embeddings if you want direct billing control.' },
-            ].map(item => (
-              <div key={item.title} style={{ borderRadius: 12, padding: '24px 22px', border: '1px solid #e5e5e5', background: '#fafafa' }}>
-                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
-                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
-                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
-              </div>
-            ))}
-          </div>
-          <p style={{ textAlign: 'center', fontSize: 14, color: '#666', lineHeight: 1.6 }}>
-            Every logged event is embedded automatically. Search in plain English, build prompt context with <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>db.search()</code> and <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>db.context_for()</code> — one product, one bill.
-          </p>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="zdb-section" style={{ padding: '72px 40px' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>Pricing</h2>
-          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48 }}>
-            Free if you self-host. Paid if you don&apos;t want to.
-          </p>
-          <div className="zdb-price-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-            {([
-              {
-                name: 'Self-Hosted', price: 'Free', sub: 'forever',
-                features: ['Full feature set', 'Your infra', 'Docker Compose', 'Community support'],
-                cta: 'Setup guide →', href: '/docs', highlight: false,
-              },
-              {
-                name: 'Pro', price: '€39', sub: 'per month',
-                features: ['100M events', '90-day retention', '3 projects', 'Platform embeddings', 'Email support'],
-                cta: 'Start 1-month free trial →', href: '/signup', highlight: true,
-                note: 'No credit card needed',
-              },
-              {
-                name: 'Team', price: '€99', sub: 'per month',
-                features: ['Up to 1B events/mo (plan limit)', '1-year retention', '10 seats', 'Platform embeddings', 'Priority support'],
-                cta: 'Start 1-month free trial →', href: '/signup', highlight: false,
-                note: 'No credit card needed',
-              },
-            ] as { name: string; price: string; sub: string; features: string[]; cta: string; href: string; highlight: boolean; note?: string }[]).map(plan => (
-              <div key={plan.name} style={{
-                background: '#fff', borderRadius: 14, padding: '32px 28px',
-                border: plan.highlight ? '2px solid #111' : '1px solid #e5e5e5',
-                position: 'relative',
-              }}>
-                {plan.highlight && (
-                  <div style={{
-                    position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-                    background: '#111', color: '#fff', fontSize: 11, fontWeight: 600,
-                    padding: '3px 12px', borderRadius: 100,
-                  }}>MOST POPULAR</div>
-                )}
-                <div style={{ fontSize: 12, fontWeight: 600, color: '#888', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>{plan.name}</div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
-                  <span style={{ fontSize: 34, fontWeight: 700 }}>{plan.price}</span>
-                  <span style={{ fontSize: 13, color: '#888' }}>{plan.sub}</span>
-                </div>
-                <div style={{ borderTop: '1px solid #f0f0f0', margin: '18px 0' }} />
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 9 }}>
-                  {plan.features.map(f => (
-                    <li key={f} style={{ fontSize: 13.5, color: '#444', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ color: BRAND_DARK, fontWeight: 600 }}>✓</span> {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link href={plan.href} style={{
-                  display: 'block', textAlign: 'center', padding: '10px',
-                  borderRadius: 8, textDecoration: 'none', fontWeight: 500, fontSize: 14,
-                  background: plan.highlight ? '#111' : '#fff',
-                  color: plan.highlight ? '#fff' : '#111',
-                  border: plan.highlight ? 'none' : '1px solid #ddd',
-                }}>
-                  {plan.cta}
-                </Link>
-                {plan.note && (
-                  <div style={{ textAlign: 'center', fontSize: 11.5, color: '#888', marginTop: 8 }}>
-                    {plan.note}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA — MCP + open source */}
+      {/* Final CTA */}
       <section className="zdb-section" style={{ padding: '80px 40px', background: 'linear-gradient(165deg, #0a0a0a 0%, #111827 100%)' }}>
         <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
           <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: BRAND, marginBottom: 16 }}>
-            Start building today
+            Ready to start?
           </p>
           <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: -0.8, lineHeight: 1.15 }}>
-            Memory for agents.<br />Open source. MCP-ready.
+            Managed cloud, MCP,<br />or self-host — your choice.
           </h2>
           <p style={{ fontSize: 16, color: '#9ca3af', marginBottom: 36, lineHeight: 1.6 }}>
-            Copy the MCP config for Cursor, or clone the repo and run your own stack — no credit card, no sales call.
+            Most teams start on db.zizka.ai — free trial, no credit card. Developers also connect Cursor via MCP or clone the open-source stack.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
+            <Link href="/signup" style={{
+              padding: '16px 32px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
+              color: '#fff', borderRadius: 12, textDecoration: 'none',
+              fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(249,115,22,0.45)',
+            }}>
+              Start managed free →
+            </Link>
             <button
               type="button"
               onClick={() => copy(MCP_HERO_CONFIG, 'final-mcp')}
               style={{
-                padding: '16px 32px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
-                color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
-                fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(249,115,22,0.45)',
+                padding: '16px 32px', background: 'rgba(255,255,255,0.1)', color: '#fff',
+                borderRadius: 12, border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer',
+                fontWeight: 600, fontSize: 16,
               }}
             >
-              {copied === 'final-mcp' ? '✓ Copied — paste in Cursor' : 'Copy MCP config →'}
+              {copied === 'final-mcp' ? '✓ Copied MCP config' : 'Copy MCP config'}
             </button>
-            <a
-              href={GITHUB_URL}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                padding: '16px 32px', background: '#fff', color: '#111', borderRadius: 12,
-                textDecoration: 'none', fontWeight: 700, fontSize: 16,
-              }}
-            >
-              Star on GitHub ↗
-            </a>
           </div>
           <p style={{ fontSize: 14, color: '#6b7280' }}>
-            Prefer hosted?{' '}
-            <Link href="/signup" style={{ color: '#93c5fd', fontWeight: 500, textDecoration: 'none' }}>
-              Start managed free →
+            <Link href="#pricing" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
+              View pricing
             </Link>
             {' '}·{' '}
-            <Link href="/docs" style={{ color: '#93c5fd', fontWeight: 500, textDecoration: 'none' }}>
-              Read the docs
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
+              GitHub ↗
+            </a>
+            {' '}·{' '}
+            <Link href="/docs" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
+              Docs
             </Link>
           </p>
         </div>
@@ -1275,7 +1307,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          {[['Docs', '/docs'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Managed', '#managed'], ['Pricing', '#pricing'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Sign in', '/login']].map(([l, h]) => (
             h.startsWith('http') ? (
               <a key={l} href={h} target="_blank" rel="noreferrer" style={{ color: '#999', textDecoration: 'none' }}>{l}</a>
             ) : (
