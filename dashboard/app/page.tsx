@@ -164,6 +164,14 @@ curl -X POST https://db.zizka.ai/v1/events \\
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
+/** Matches favicon / icon.tsx brand orange */
+const BRAND = '#f97316'
+const BRAND_DARK = '#ea580c'
+const BRAND_DEEP = '#c2410c'
+const BRAND_LIGHT = '#fdba74'
+const BRAND_PALE = '#fed7aa'
+const BRAND_MUTED = '#9a3412'
+
 const MCP_HERO_CONFIG = `{
   "mcpServers": {
     "zizkadb": {
@@ -305,7 +313,7 @@ export default function LandingPage() {
         backdropFilter: 'blur(8px)', zIndex: 100,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 7, background: BRAND, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 700, fontSize: 15 }}>ZizkaDB</span>
@@ -326,8 +334,8 @@ export default function LandingPage() {
           </Link>
           <Link href="#mcp" style={{
             fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none',
-            padding: '8px 18px', background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
-            borderRadius: 8, boxShadow: '0 2px 12px rgba(22,163,74,0.35)',
+            padding: '8px 18px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
+            borderRadius: 8, boxShadow: '0 2px 12px rgba(249,115,22,0.35)',
           }}>
             Connect MCP →
           </Link>
@@ -340,7 +348,7 @@ export default function LandingPage() {
           <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
-          <Link href="#mcp" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: '#16a34a', borderRadius: 8 }}>
+          <Link href="#mcp" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: BRAND, borderRadius: 8 }}>
             MCP →
           </Link>
         </div>
@@ -359,7 +367,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'left' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
               {[
-                { label: 'Open source', style: { bg: 'rgba(22,163,74,0.15)', border: 'rgba(34,197,94,0.35)', color: '#86efac' } },
+                { label: 'Open source', style: { bg: 'rgba(249,115,22,0.15)', border: 'rgba(249,115,22,0.35)', color: BRAND_PALE } },
                 { label: 'MCP server', style: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(96,165,250,0.3)', color: '#93c5fd' } },
                 { label: 'Self-host free', style: { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d1d5db' } },
               ].map(b => (
@@ -379,7 +387,7 @@ export default function LandingPage() {
             }}>
               Give Cursor &amp; Claude<br />
               <span style={{
-                background: 'linear-gradient(90deg, #4ade80 0%, #22d3ee 100%)',
+                background: `linear-gradient(90deg, ${BRAND} 0%, ${BRAND_LIGHT} 100%)`,
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
               }}>
                 persistent memory
@@ -400,10 +408,10 @@ export default function LandingPage() {
                 onClick={() => copy(MCP_HERO_CONFIG, 'hero-mcp')}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '14px 24px', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  padding: '14px 24px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
                   color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
                   fontWeight: 600, fontSize: 15,
-                  boxShadow: '0 4px 24px rgba(34,197,94,0.4)',
+                  boxShadow: '0 4px 24px rgba(249,115,22,0.4)',
                 }}
               >
                 {copied === 'hero-mcp' ? '✓ Copied MCP config' : 'Copy MCP config →'}
@@ -433,7 +441,7 @@ export default function LandingPage() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: '#6b7280' }}>
               {['Cursor', 'Claude Desktop', 'Windsurf', 'Python SDK', 'npm SDK'].map(t => (
                 <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ color: '#22c55e', fontSize: 10 }}>●</span> {t}
+                  <span style={{ color: BRAND, fontSize: 10 }}>●</span> {t}
                 </span>
               ))}
             </div>
@@ -442,7 +450,7 @@ export default function LandingPage() {
           {/* MCP config preview */}
           <div id="mcp" style={{
             background: '#0d1117', borderRadius: 16, overflow: 'hidden',
-            border: '1px solid rgba(34,197,94,0.25)',
+            border: '1px solid rgba(249,115,22,0.25)',
             boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
           }}>
             <div style={{
@@ -461,8 +469,8 @@ export default function LandingPage() {
                 type="button"
                 onClick={() => copy(MCP_HERO_CONFIG, 'hero-mcp-side')}
                 style={{
-                  background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
-                  borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: '#4ade80',
+                  background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)',
+                  borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: BRAND_LIGHT,
                 }}
               >
                 {copied === 'hero-mcp-side' ? '✓' : 'Copy'}
@@ -476,12 +484,12 @@ export default function LandingPage() {
               {MCP_HERO_CONFIG}
             </pre>
             <div style={{
-              padding: '14px 18px', background: 'rgba(34,197,94,0.08)',
-              borderTop: '1px solid rgba(34,197,94,0.15)',
-              fontSize: 12.5, color: '#86efac', lineHeight: 1.5,
+              padding: '14px 18px', background: 'rgba(249,115,22,0.08)',
+              borderTop: '1px solid rgba(249,115,22,0.15)',
+              fontSize: 12.5, color: BRAND_PALE, lineHeight: 1.5,
             }}>
               Reload MCP in Cursor → ask &quot;log that we chose Postgres&quot; → it calls{' '}
-              <code style={{ color: '#4ade80' }}>log_event</code> natively
+              <code style={{ color: BRAND_LIGHT }}>log_event</code> natively
             </div>
           </div>
         </div>
@@ -499,12 +507,12 @@ export default function LandingPage() {
           <div className="zdb-path-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <div style={{
               background: '#fff', borderRadius: 16, padding: '32px 28px',
-              border: '2px solid #22c55e', position: 'relative',
-              boxShadow: '0 8px 32px rgba(34,197,94,0.12)',
+              border: `2px solid ${BRAND}`, position: 'relative',
+              boxShadow: '0 8px 32px rgba(249,115,22,0.12)',
             }}>
               <div style={{
                 position: 'absolute', top: -11, left: 20,
-                background: '#22c55e', color: '#fff', fontSize: 10, fontWeight: 700,
+                background: BRAND, color: '#fff', fontSize: 10, fontWeight: 700,
                 padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
               }}>
                 FASTEST — MCP
@@ -513,12 +521,12 @@ export default function LandingPage() {
               <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>Connect your IDE</h3>
               <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
                 Paste config into Cursor or Claude Desktop. Zero app code changes.
-                <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0fdf4', padding: '2px 6px', borderRadius: 4, color: '#166534' }}> uvx zizkadb-mcp</code> runs on demand.
+                <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#fff7ed', padding: '2px 6px', borderRadius: 4, color: BRAND_MUTED }}> uvx zizkadb-mcp</code> runs on demand.
               </p>
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {['30-second setup', '8 MCP tools: log, search, why, time_travel', 'Managed cloud or self-host'].map(item => (
                   <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
-                    <span style={{ color: '#22c55e', fontWeight: 700 }}>✓</span> {item}
+                    <span style={{ color: BRAND, fontWeight: 700 }}>✓</span> {item}
                   </li>
                 ))}
               </ul>
@@ -561,7 +569,7 @@ export default function LandingPage() {
               </p>
               <div style={{
                 background: '#111', borderRadius: 10, padding: '14px 16px', marginBottom: 20,
-                fontFamily: 'monospace', fontSize: 12, color: '#4ade80', lineHeight: 1.8,
+                fontFamily: 'monospace', fontSize: 12, color: BRAND_LIGHT, lineHeight: 1.8,
               }}>
                 <div><span style={{ color: '#666' }}>$ </span>git clone github.com/Zizka-ai/ZizkaDB</div>
                 <div><span style={{ color: '#666' }}>$ </span>bash scripts/setup-local.sh</div>
@@ -569,7 +577,7 @@ export default function LandingPage() {
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {['Python + TypeScript SDKs included', 'Dashboard + API key from Settings', 'MCP works against your own host'].map(item => (
                   <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
-                    <span style={{ color: '#16a34a', fontWeight: 700 }}>✓</span> {item}
+                    <span style={{ color: BRAND, fontWeight: 700 }}>✓</span> {item}
                   </li>
                 ))}
               </ul>
@@ -612,7 +620,7 @@ export default function LandingPage() {
               }}>
                 {t}
                 {t === 'MCP' && (
-                  <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 4px' }}>★</span>
+                  <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, background: BRAND, color: '#fff', borderRadius: 4, padding: '1px 4px' }}>★</span>
                 )}
               </button>
             ))}
@@ -620,7 +628,7 @@ export default function LandingPage() {
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, maxWidth: '100%', overflow: 'hidden',
             background: '#111', borderRadius: 10, padding: '10px 16px',
-            fontFamily: 'monospace', fontSize: 13, color: '#4ade80',
+            fontFamily: 'monospace', fontSize: 13, color: BRAND_LIGHT,
           }}>
             <span style={{ color: '#666', flexShrink: 0 }}>$</span>
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{INSTALL[activeSdk]}</span>
@@ -712,7 +720,7 @@ export default function LandingPage() {
                 <div style={{ fontSize: 11, fontWeight: 700, color: i === 0 ? '#f97316' : '#bbb', letterSpacing: 1, marginBottom: 12 }}>{s.num}</div>
                 <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12, lineHeight: 1.4 }}>{s.title}</div>
                 <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6, marginBottom: 16 }}>{s.pain}</div>
-                <div style={{ fontSize: 13.5, color: '#16a34a', lineHeight: 1.6, fontWeight: 500 }}>✓ {s.fix}</div>
+                <div style={{ fontSize: 13.5, color: BRAND_DARK, lineHeight: 1.6, fontWeight: 500 }}>✓ {s.fix}</div>
               </div>
             ))}
           </div>
@@ -740,7 +748,7 @@ export default function LandingPage() {
               }}>
                 {t}
                 {t === 'MCP' && (
-                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 600, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 5px' }}>★ START HERE</span>
+                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 600, background: BRAND, color: '#fff', borderRadius: 4, padding: '1px 5px' }}>★ START HERE</span>
                 )}
               </button>
             ))}
@@ -980,7 +988,7 @@ export default function LandingPage() {
                       background: h === 'ZizkaDB' ? '#f5fffe' : 'transparent',
                       fontSize: 13,
                     }}>
-                      {h}{h === 'ZizkaDB' && <span style={{ display: 'block', fontSize: 10, color: '#22c55e', fontWeight: 500 }}>← us</span>}
+                      {h}{h === 'ZizkaDB' && <span style={{ display: 'block', fontSize: 10, color: BRAND, fontWeight: 500 }}>← us</span>}
                     </th>
                   ))}
                 </tr>
@@ -1002,7 +1010,7 @@ export default function LandingPage() {
                     {vals.map((v, j) => (
                       <td key={j} style={{
                         padding: '12px 14px', textAlign: 'center', fontSize: 15,
-                        color: v === '✓' ? (j === 3 ? '#16a34a' : '#bbb')
+                        color: v === '✓' ? (j === 3 ? BRAND_DARK : '#bbb')
                              : v === '~' ? '#f59e0b' : '#e0e0e0',
                         fontWeight: j === 3 && v === '✓' ? 700 : 400,
                         background: j === 3 ? '#f5fffe' : 'transparent',
@@ -1048,7 +1056,7 @@ export default function LandingPage() {
           <div style={{ textAlign: 'center' }}>
             <div style={{
               display: 'inline-block', background: '#111', borderRadius: 12, padding: '20px 28px',
-              fontFamily: 'monospace', fontSize: 13, color: '#22c55e', lineHeight: 1.8, textAlign: 'left',
+              fontFamily: 'monospace', fontSize: 13, color: BRAND_LIGHT, lineHeight: 1.8, textAlign: 'left',
             }}>
               <div><span style={{ color: '#666' }}>1.</span> Sign up at db.zizka.ai/signup</div>
               <div><span style={{ color: '#666' }}>2.</span> Settings → Create API key</div>
@@ -1146,7 +1154,7 @@ export default function LandingPage() {
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 9 }}>
                   {plan.features.map(f => (
                     <li key={f} style={{ fontSize: 13.5, color: '#444', display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ color: '#16a34a', fontWeight: 600 }}>✓</span> {f}
+                      <span style={{ color: BRAND_DARK, fontWeight: 600 }}>✓</span> {f}
                     </li>
                   ))}
                 </ul>
@@ -1173,7 +1181,7 @@ export default function LandingPage() {
       {/* Final CTA — MCP + open source */}
       <section className="zdb-section" style={{ padding: '80px 40px', background: 'linear-gradient(165deg, #0a0a0a 0%, #111827 100%)' }}>
         <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: '#22c55e', marginBottom: 16 }}>
+          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: BRAND, marginBottom: 16 }}>
             Start building today
           </p>
           <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: -0.8, lineHeight: 1.15 }}>
@@ -1187,9 +1195,9 @@ export default function LandingPage() {
               type="button"
               onClick={() => copy(MCP_HERO_CONFIG, 'final-mcp')}
               style={{
-                padding: '16px 32px', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                padding: '16px 32px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
                 color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
-                fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(34,197,94,0.45)',
+                fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(249,115,22,0.45)',
               }}
             >
               {copied === 'final-mcp' ? '✓ Copied — paste in Cursor' : 'Copy MCP config →'}
@@ -1224,8 +1232,8 @@ export default function LandingPage() {
         <div className="zdb-self-host" style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '48px 40px' }}>
           <div style={{
             display: 'inline-block', marginBottom: 16,
-            background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
-            color: '#86efac', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
+            background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)',
+            color: BRAND_PALE, fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
           }}>
             AGPL · DOCKER · FULL FEATURE SET
           </div>
@@ -1235,7 +1243,7 @@ export default function LandingPage() {
           <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.6 }}>
             API, dashboard, Postgres, Qdrant — everything in the repo. MCP and SDKs point at your host.
           </p>
-          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 24, lineHeight: 1.9, overflowX: 'auto' }}>
+          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: BRAND_LIGHT, textAlign: 'left', marginBottom: 24, lineHeight: 1.9, overflowX: 'auto' }}>
             <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/ZizkaDB &amp;&amp; cd ZizkaDB</div>
             <div><span style={{ color: '#555' }}>$ </span>bash scripts/setup-local.sh</div>
             <div><span style={{ color: '#555' }}>→ </span>localhost:3001/login → Open my dashboard →</div>
@@ -1245,7 +1253,7 @@ export default function LandingPage() {
               href={GITHUB_URL}
               target="_blank"
               rel="noreferrer"
-              style={{ padding: '12px 28px', background: '#22c55e', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}
+              style={{ padding: '12px 28px', background: BRAND, color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}
             >
               Clone on GitHub ↗
             </a>
@@ -1259,7 +1267,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="zdb-footer" style={{ borderTop: '1px solid #f0f0f0', padding: '28px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: '#999' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 22, height: 22, borderRadius: 5, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 22, height: 22, borderRadius: 5, background: BRAND, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 500, color: '#333' }}>ZizkaDB</span>
