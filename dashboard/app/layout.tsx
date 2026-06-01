@@ -3,11 +3,11 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ZizkaDB — your agent stops behaving like itself, you know first',
+    default: 'ZizkaDB — Open-source agent memory for Cursor & Claude (MCP)',
     template: '%s · ZizkaDB',
   },
   description:
-    'ZizkaDB watches every agent session, builds a behavioral baseline, and flags the ones that drift. Causal lineage, time travel and semantic search for any AI agent.',
+    'Open-source operational database for AI agents. Connect via MCP in 30 seconds — or self-host free with Docker. Causal lineage, search, and drift detection.',
   metadataBase: new URL('https://db.zizka.ai'),
   icons: {
     icon: [
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'ZizkaDB — your agent stops behaving like itself, you know first',
+    title: 'ZizkaDB — Open-source agent memory for Cursor & Claude (MCP)',
     description:
-      'ZizkaDB watches every agent session, builds a behavioral baseline, and flags the ones that drift.',
+      'Connect via MCP in 30 seconds or self-host free. Causal lineage, semantic search, and drift detection for any AI agent.',
     url: 'https://db.zizka.ai',
     siteName: 'ZizkaDB',
     type: 'website',

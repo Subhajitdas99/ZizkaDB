@@ -162,6 +162,18 @@ curl -X POST https://db.zizka.ai/v1/events \\
 # → {"event_id":"...","timestamp":"...","checksum":"..."}`,
 }
 
+const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
+
+const MCP_HERO_CONFIG = `{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+    }
+  }
+}`
+
 const INSTALL_CMD = 'pip install zizkadb-sdk'
 
 const QUICKSTART = `from zizkadb import ZizkaDB
@@ -249,7 +261,7 @@ async def run(user_input: str):
 export default function LandingPage() {
   const [copied, setCopied] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'claude' | 'openai'>('claude')
-  const [activeSdk, setActiveSdk] = useState<SdkTab>('Python')
+  const [activeSdk, setActiveSdk] = useState<SdkTab>('MCP')
 
   function copy(text: string, key: string) {
     navigator.clipboard.writeText(text)
@@ -264,8 +276,11 @@ export default function LandingPage() {
           .zdb-nav-links { display: none !important; }
           .zdb-nav-cta { display: flex !important; }
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
-          .zdb-hero-h1 { font-size: 34px !important; letter-spacing: -0.5px !important; }
+          .zdb-hero-h1 { font-size: 32px !important; letter-spacing: -0.5px !important; }
           .zdb-hero-p { font-size: 15px !important; }
+          .zdb-hero-dark { padding: 48px 20px 56px !important; }
+          .zdb-hero-grid { grid-template-columns: 1fr !important; }
+          .zdb-path-grid { grid-template-columns: 1fr !important; }
           .zdb-grid-3 { grid-template-columns: 1fr !important; }
           .zdb-grid-2 { grid-template-columns: 1fr !important; }
           .zdb-price-grid { grid-template-columns: 1fr !important; }
@@ -278,7 +293,7 @@ export default function LandingPage() {
           .zdb-install-box { max-width: 100% !important; width: 100% !important; }
           .zdb-stat-grid { gap: 10px !important; }
           .zdb-hero-btns { flex-direction: column !important; align-items: stretch !important; }
-          .zdb-hero-btns a { text-align: center !important; }
+          .zdb-hero-btns a, .zdb-hero-btns button { text-align: center !important; justify-content: center !important; }
         }
       `}</style>
 
@@ -298,65 +313,293 @@ export default function LandingPage() {
         </div>
         <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
-          <Link href="#managed" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Managed</Link>
-          <Link href="#pricing" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Pricing</Link>
-          <Link href="/community" style={{
-            fontSize: 14, fontWeight: 600, color: '#9a3412', textDecoration: 'none',
-            padding: '7px 16px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8,
+          <Link href="#mcp" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>MCP</Link>
+          <Link href="#opensource" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Open source</Link>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{
+            fontSize: 14, fontWeight: 600, color: '#111', textDecoration: 'none',
+            padding: '7px 14px', background: '#f5f5f5', border: '1px solid #e5e5e5', borderRadius: 8,
           }}>
-            Community
-          </Link>
+            GitHub ↗
+          </a>
           <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
-          <Link href="/signup" style={{ fontSize: 14, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '7px 16px', background: '#111', borderRadius: 8 }}>
-            Start free →
+          <Link href="#mcp" style={{
+            fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none',
+            padding: '8px 18px', background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+            borderRadius: 8, boxShadow: '0 2px 12px rgba(22,163,74,0.35)',
+          }}>
+            Connect MCP →
           </Link>
         </div>
         {/* Mobile nav — only CTAs */}
         <div className="zdb-nav-cta" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
-          <Link href="/community" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
-            Community
-          </Link>
+          <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
+            GitHub
+          </a>
           <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
             Sign in
           </Link>
-          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 8 }}>
-            Start free →
+          <Link href="#mcp" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: '#16a34a', borderRadius: 8 }}>
+            MCP →
           </Link>
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="zdb-section" style={{ padding: '72px 40px 56px', maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 100, padding: '5px 14px',
-          fontSize: 13, color: '#9a3412', marginBottom: 24, fontWeight: 500,
+      {/* Hero — MCP + open source first */}
+      <section className="zdb-hero-dark" style={{
+        padding: '64px 40px 72px',
+        background: 'linear-gradient(165deg, #0a0a0a 0%, #111827 45%, #0f172a 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}>
+        <div className="zdb-hero-grid" style={{
+          maxWidth: 1080, margin: '0 auto',
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center',
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#f97316', display: 'inline-block' }} />
-          New: behavioral baselines on every agent
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+              {[
+                { label: 'Open source', style: { bg: 'rgba(22,163,74,0.15)', border: 'rgba(34,197,94,0.35)', color: '#86efac' } },
+                { label: 'MCP server', style: { bg: 'rgba(59,130,246,0.12)', border: 'rgba(96,165,250,0.3)', color: '#93c5fd' } },
+                { label: 'Self-host free', style: { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.12)', color: '#d1d5db' } },
+              ].map(b => (
+                <span key={b.label} style={{
+                  fontSize: 12, fontWeight: 600, letterSpacing: 0.3,
+                  padding: '5px 12px', borderRadius: 100,
+                  background: b.style.bg, border: `1px solid ${b.style.border}`, color: b.style.color,
+                }}>
+                  {b.label}
+                </span>
+              ))}
+            </div>
+
+            <h1 className="zdb-hero-h1" style={{
+              fontSize: 48, fontWeight: 800, lineHeight: 1.06, margin: '0 0 20px',
+              letterSpacing: -1.5, color: '#fff',
+            }}>
+              Give Cursor &amp; Claude<br />
+              <span style={{
+                background: 'linear-gradient(90deg, #4ade80 0%, #22d3ee 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>
+                persistent memory
+              </span>
+              {' '}in 30 seconds
+            </h1>
+
+            <p className="zdb-hero-p" style={{
+              fontSize: 17, color: '#9ca3af', lineHeight: 1.65, margin: '0 0 28px', maxWidth: 480, fontWeight: 400,
+            }}>
+              Paste one MCP config. No SDK refactor. Your agent gets log, search, why(), and time travel —
+              or clone the repo and self-host the full stack on Docker, free forever.
+            </p>
+
+            <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+              <button
+                type="button"
+                onClick={() => copy(MCP_HERO_CONFIG, 'hero-mcp')}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '14px 24px', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
+                  fontWeight: 600, fontSize: 15,
+                  boxShadow: '0 4px 24px rgba(34,197,94,0.4)',
+                }}
+              >
+                {copied === 'hero-mcp' ? '✓ Copied MCP config' : 'Copy MCP config →'}
+              </button>
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  padding: '14px 24px', background: 'rgba(255,255,255,0.08)',
+                  color: '#fff', borderRadius: 12, textDecoration: 'none',
+                  fontWeight: 600, fontSize: 15, border: '1px solid rgba(255,255,255,0.15)',
+                }}
+              >
+                Self-host on GitHub ↗
+              </a>
+              <Link href="/signup" style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '14px 20px', color: '#9ca3af', textDecoration: 'none',
+                fontWeight: 500, fontSize: 14,
+              }}>
+                or try managed cloud →
+              </Link>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 12, color: '#6b7280' }}>
+              {['Cursor', 'Claude Desktop', 'Windsurf', 'Python SDK', 'npm SDK'].map(t => (
+                <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ color: '#22c55e', fontSize: 10 }}>●</span> {t}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* MCP config preview */}
+          <div id="mcp" style={{
+            background: '#0d1117', borderRadius: 16, overflow: 'hidden',
+            border: '1px solid rgba(34,197,94,0.25)',
+            boxShadow: '0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+          }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', background: '#161b22', borderBottom: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {['#ff5f57', '#febc2e', '#28c840'].map(c => (
+                  <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+                ))}
+                <span style={{ marginLeft: 8, fontSize: 12, color: '#8b949e', fontFamily: 'monospace' }}>
+                  ~/.cursor/mcp.json
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => copy(MCP_HERO_CONFIG, 'hero-mcp-side')}
+                style={{
+                  background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+                  borderRadius: 6, padding: '4px 10px', fontSize: 11, cursor: 'pointer', color: '#4ade80',
+                }}
+              >
+                {copied === 'hero-mcp-side' ? '✓' : 'Copy'}
+              </button>
+            </div>
+            <pre style={{
+              margin: 0, padding: '20px 22px', fontSize: 12.5, lineHeight: 1.7,
+              fontFamily: 'JetBrains Mono, Fira Code, monospace', color: '#e6edf3',
+              overflowX: 'auto',
+            }}>
+              {MCP_HERO_CONFIG}
+            </pre>
+            <div style={{
+              padding: '14px 18px', background: 'rgba(34,197,94,0.08)',
+              borderTop: '1px solid rgba(34,197,94,0.15)',
+              fontSize: 12.5, color: '#86efac', lineHeight: 1.5,
+            }}>
+              Reload MCP in Cursor → ask &quot;log that we chose Postgres&quot; → it calls{' '}
+              <code style={{ color: '#4ade80' }}>log_event</code> natively
+            </div>
+          </div>
         </div>
+      </section>
 
-        <h1 className="zdb-hero-h1" style={{ fontSize: 52, fontWeight: 700, lineHeight: 1.08, margin: '0 0 20px', letterSpacing: -1.5 }}>
-          Your agent stops behaving<br />
-          <span style={{ color: '#f97316' }}>like itself. You know first.</span>
-        </h1>
+      {/* Two paths — MCP vs self-host */}
+      <section className="zdb-section" style={{ padding: '56px 40px 48px', background: '#fafafa', borderBottom: '1px solid #eee' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: '#888', marginBottom: 12 }}>
+            Pick your entry point
+          </p>
+          <h2 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', marginBottom: 36, letterSpacing: -0.5 }}>
+            Two ways in. Same product.
+          </h2>
+          <div className="zdb-path-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+            <div style={{
+              background: '#fff', borderRadius: 16, padding: '32px 28px',
+              border: '2px solid #22c55e', position: 'relative',
+              boxShadow: '0 8px 32px rgba(34,197,94,0.12)',
+            }}>
+              <div style={{
+                position: 'absolute', top: -11, left: 20,
+                background: '#22c55e', color: '#fff', fontSize: 10, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
+              }}>
+                FASTEST — MCP
+              </div>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>🔌</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>Connect your IDE</h3>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
+                Paste config into Cursor or Claude Desktop. Zero app code changes.
+                <code style={{ fontFamily: 'monospace', fontSize: 12, background: '#f0fdf4', padding: '2px 6px', borderRadius: 4, color: '#166534' }}> uvx zizkadb-mcp</code> runs on demand.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['30-second setup', '8 MCP tools: log, search, why, time_travel', 'Managed cloud or self-host'].map(item => (
+                  <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
+                    <span style={{ color: '#22c55e', fontWeight: 700 }}>✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => copy(MCP_HERO_CONFIG, 'path-mcp')}
+                  style={{
+                    flex: 1, minWidth: 140, padding: '12px 18px', background: '#111', color: '#fff',
+                    border: 'none', borderRadius: 10, cursor: 'pointer', fontWeight: 600, fontSize: 14,
+                  }}
+                >
+                  {copied === 'path-mcp' ? '✓ Copied' : 'Copy MCP config'}
+                </button>
+                <Link href="/docs" style={{
+                  flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  border: '1px solid #ddd', textAlign: 'center',
+                }}>
+                  MCP guide →
+                </Link>
+              </div>
+            </div>
 
-        <p className="zdb-hero-p" style={{ fontSize: 17, color: '#222', lineHeight: 1.55, margin: '0 0 32px', maxWidth: 560, marginLeft: 'auto', marginRight: 'auto', fontWeight: 500 }}>
-          ZizkaDB watches every session, builds a baseline, and flags the ones that drift. Before your users do.
-        </p>
-
-        <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 20 }}>
-          <Link href="/signup" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
-            Start free →
-          </Link>
-          <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
-            Read docs
-          </Link>
+            <div id="opensource" style={{
+              background: '#fff', borderRadius: 16, padding: '32px 28px',
+              border: '1px solid #e5e5e5',
+            }}>
+              <div style={{
+                display: 'inline-block', marginBottom: 12,
+                background: '#f3f4f6', color: '#374151', fontSize: 10, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
+              }}>
+                OPEN SOURCE — AGPL
+              </div>
+              <div style={{ fontSize: 28, marginBottom: 12 }}>🐳</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 10 }}>Self-host on your server</h3>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
+                Full stack: Postgres, Qdrant, Redis, API, dashboard. Clone from GitHub, one command, free forever.
+              </p>
+              <div style={{
+                background: '#111', borderRadius: 10, padding: '14px 16px', marginBottom: 20,
+                fontFamily: 'monospace', fontSize: 12, color: '#4ade80', lineHeight: 1.8,
+              }}>
+                <div><span style={{ color: '#666' }}>$ </span>git clone github.com/Zizka-ai/ZizkaDB</div>
+                <div><span style={{ color: '#666' }}>$ </span>bash scripts/setup-local.sh</div>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Python + TypeScript SDKs included', 'Dashboard + API key from Settings', 'MCP works against your own host'].map(item => (
+                  <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
+                    <span style={{ color: '#16a34a', fontWeight: 700 }}>✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    flex: 1, minWidth: 140, padding: '12px 18px', background: '#111', color: '#fff',
+                    borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14, textAlign: 'center',
+                  }}
+                >
+                  View on GitHub ↗
+                </a>
+                <Link href="/docs" style={{
+                  flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  border: '1px solid #ddd', textAlign: 'center',
+                }}>
+                  Self-host guide →
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
+      </section>
 
-        {/* SDK tab switcher */}
+      {/* Quick install strip */}
+      <section className="zdb-section" style={{ padding: '40px 40px 48px', maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
         <div className="zdb-install-box" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 0, maxWidth: '100%' }}>
           <div className="zdb-sdk-tabs" style={{ display: 'flex', gap: 2, background: '#f0f0f0', borderRadius: 9, padding: 3, marginBottom: 10 }}>
             {SDK_TABS.map(t => (
@@ -368,25 +611,23 @@ export default function LandingPage() {
                 transition: 'all 0.15s',
               }}>
                 {t}
+                {t === 'MCP' && (
+                  <span style={{ marginLeft: 5, fontSize: 9, fontWeight: 700, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 4px' }}>★</span>
+                )}
               </button>
             ))}
           </div>
           <div style={{
             display: 'flex', alignItems: 'center', gap: 10, maxWidth: '100%', overflow: 'hidden',
-            background: '#f5f5f5', borderRadius: 8, padding: '8px 14px',
-            fontFamily: 'monospace', fontSize: 13, color: '#333',
+            background: '#111', borderRadius: 10, padding: '10px 16px',
+            fontFamily: 'monospace', fontSize: 13, color: '#4ade80',
           }}>
-            <span style={{ color: '#aaa', flexShrink: 0 }}>$</span>
+            <span style={{ color: '#666', flexShrink: 0 }}>$</span>
             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{INSTALL[activeSdk]}</span>
-            <button onClick={() => copy(INSTALL[activeSdk], 'install')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: 0, flexShrink: 0 }}>
+            <button onClick={() => copy(INSTALL[activeSdk], 'install')} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', cursor: 'pointer', fontSize: 11, color: '#aaa', padding: '4px 10px', borderRadius: 6, flexShrink: 0 }}>
               {copied === 'install' ? '✓' : 'copy'}
             </button>
           </div>
-          {activeSdk === 'MCP' && (
-            <p style={{ fontSize: 12, color: '#aaa', margin: '8px 0 0' }}>
-              Claude Desktop · Cursor · Windsurf · any MCP framework
-            </p>
-          )}
         </div>
       </section>
 
@@ -400,17 +641,17 @@ export default function LandingPage() {
         </p>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', maxWidth: 760, margin: '0 auto' }}>
           {[
+            { label: 'MCP Server', sub: 'uvx · Cursor' },
+            { label: 'Cursor', sub: 'via MCP' },
+            { label: 'Claude Desktop', sub: 'via MCP' },
             { label: 'Python SDK', sub: 'pip' },
             { label: 'TypeScript SDK', sub: 'npm' },
-            { label: 'MCP Server', sub: 'uvx' },
             { label: 'REST API', sub: 'any language' },
-            { label: 'Claude Desktop', sub: 'via MCP' },
-            { label: 'Cursor', sub: 'via MCP' },
+            { label: 'Windsurf', sub: 'via MCP' },
             { label: 'LangChain', sub: 'Python / JS' },
             { label: 'CrewAI', sub: 'Python' },
-            { label: 'AutoGen', sub: 'Python' },
             { label: 'OpenAI Agents', sub: 'Python / JS' },
-            { label: 'LlamaIndex', sub: 'Python' },
+            { label: 'Self-host', sub: 'Docker · AGPL' },
             { label: 'Custom', sub: 'any stack' },
           ].map(f => (
             <div key={f.label} style={{
@@ -499,7 +740,7 @@ export default function LandingPage() {
               }}>
                 {t}
                 {t === 'MCP' && (
-                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 600, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 5px' }}>NEW</span>
+                  <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 600, background: '#22c55e', color: '#fff', borderRadius: 4, padding: '1px 5px' }}>★ START HERE</span>
                 )}
               </button>
             ))}
@@ -929,59 +1170,89 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* MCP — fastest path in Cursor */}
-      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fff' }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
-            Add to Cursor in 30 seconds
+      {/* Final CTA — MCP + open source */}
+      <section className="zdb-section" style={{ padding: '80px 40px', background: 'linear-gradient(165deg, #0a0a0a 0%, #111827 100%)' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase', color: '#22c55e', marginBottom: 16 }}>
+            Start building today
+          </p>
+          <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: -0.8, lineHeight: 1.15 }}>
+            Memory for agents.<br />Open source. MCP-ready.
           </h2>
-          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 32, lineHeight: 1.6 }}>
-            No SDK refactor. Paste into MCP settings — your agent gets log, search, why, and time travel as native tools.
+          <p style={{ fontSize: 16, color: '#9ca3af', marginBottom: 36, lineHeight: 1.6 }}>
+            Copy the MCP config for Cursor, or clone the repo and run your own stack — no credit card, no sales call.
           </p>
-          <div style={{
-            background: '#111', borderRadius: 12, padding: '20px 24px',
-            fontFamily: 'monospace', fontSize: 12.5, color: '#22c55e', lineHeight: 1.75,
-            overflowX: 'auto', marginBottom: 24,
-          }}>
-            <div style={{ color: '#666', marginBottom: 8 }}>// ~/.cursor/mcp.json</div>
-            {`{
-  "mcpServers": {
-    "zizkadb": {
-      "command": "uvx",
-      "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
-    }
-  }
-}`}
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
+            <button
+              type="button"
+              onClick={() => copy(MCP_HERO_CONFIG, 'final-mcp')}
+              style={{
+                padding: '16px 32px', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: '#fff', borderRadius: 12, border: 'none', cursor: 'pointer',
+                fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(34,197,94,0.45)',
+              }}
+            >
+              {copied === 'final-mcp' ? '✓ Copied — paste in Cursor' : 'Copy MCP config →'}
+            </button>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: '16px 32px', background: '#fff', color: '#111', borderRadius: 12,
+                textDecoration: 'none', fontWeight: 700, fontSize: 16,
+              }}
+            >
+              Star on GitHub ↗
+            </a>
           </div>
-          <p style={{ textAlign: 'center', fontSize: 13, color: '#888', marginBottom: 20 }}>
-            Self-host: use <code style={{ fontFamily: 'monospace', background: '#f5f5f5', padding: '2px 6px', borderRadius: 4 }}>ZIZKADB_HOST=http://localhost:8000</code> instead of API key.
-          </p>
-          <div style={{ textAlign: 'center' }}>
-            <Link href="/docs" style={{ padding: '12px 28px', background: '#111', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
-              MCP setup guide →
+          <p style={{ fontSize: 14, color: '#6b7280' }}>
+            Prefer hosted?{' '}
+            <Link href="/signup" style={{ color: '#93c5fd', fontWeight: 500, textDecoration: 'none' }}>
+              Start managed free →
             </Link>
-          </div>
+            {' '}·{' '}
+            <Link href="/docs" style={{ color: '#93c5fd', fontWeight: 500, textDecoration: 'none' }}>
+              Read the docs
+            </Link>
+          </p>
         </div>
       </section>
 
       {/* Self-host CTA */}
-      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fafafa' }}>
-        <div className="zdb-self-host" style={{ maxWidth: 680, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '56px 40px' }}>
-          <h2 style={{ fontSize: 30, fontWeight: 700, color: '#fff', marginBottom: 14, letterSpacing: -0.5 }}>
-            Run it yourself
+      <section className="zdb-section" style={{ padding: '56px 40px', background: '#fafafa' }}>
+        <div className="zdb-self-host" style={{ maxWidth: 720, margin: '0 auto', textAlign: 'center', background: '#111', borderRadius: 20, padding: '48px 40px' }}>
+          <div style={{
+            display: 'inline-block', marginBottom: 16,
+            background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
+            color: '#86efac', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
+          }}>
+            AGPL · DOCKER · FULL FEATURE SET
+          </div>
+          <h2 style={{ fontSize: 28, fontWeight: 700, color: '#fff', marginBottom: 12, letterSpacing: -0.5 }}>
+            One command. Your infra.
           </h2>
-          <p style={{ fontSize: 13, color: '#888', marginBottom: 28 }}>
-            Full stack on your machine. Dashboard included — one-click local login.
+          <p style={{ fontSize: 14, color: '#888', marginBottom: 24, lineHeight: 1.6 }}>
+            API, dashboard, Postgres, Qdrant — everything in the repo. MCP and SDKs point at your host.
           </p>
-          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 28, lineHeight: 1.9, overflowX: 'auto' }}>
+          <div style={{ background: '#1a1a1a', borderRadius: 10, padding: '16px 20px', fontFamily: 'monospace', fontSize: 13, color: '#22c55e', textAlign: 'left', marginBottom: 24, lineHeight: 1.9, overflowX: 'auto' }}>
             <div><span style={{ color: '#555' }}>$ </span>git clone https://github.com/Zizka-ai/ZizkaDB &amp;&amp; cd ZizkaDB</div>
             <div><span style={{ color: '#555' }}>$ </span>bash scripts/setup-local.sh</div>
             <div><span style={{ color: '#555' }}>→ </span>localhost:3001/login → Open my dashboard →</div>
           </div>
-          <Link href="/docs" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15 }}>
-            Setup guide →
-          </Link>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noreferrer"
+              style={{ padding: '12px 28px', background: '#22c55e', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}
+            >
+              Clone on GitHub ↗
+            </a>
+            <Link href="/docs" style={{ padding: '12px 28px', background: 'transparent', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid rgba(255,255,255,0.2)' }}>
+              Self-host guide →
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -995,10 +1266,15 @@ export default function LandingPage() {
           <span style={{ color: '#ddd' }}>·</span>
           <span>by Zizka AI</span>
         </div>
-        <div className="zdb-footer-links" style={{ display: 'flex', gap: 24 }}>
-          {[['Docs', '/docs'], ['Technical', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login'], ['Sign up', '/signup']].map(([l, h]) => (
-            <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
+        <div className="zdb-footer-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+          {[['Docs', '/docs'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Pricing', '#pricing'], ['Sign in', '/login']].map(([l, h]) => (
+            h.startsWith('http') ? (
+              <a key={l} href={h} target="_blank" rel="noreferrer" style={{ color: '#999', textDecoration: 'none' }}>{l}</a>
+            ) : (
+              <Link key={l} href={h} style={{ color: '#999', textDecoration: 'none' }}>{l}</Link>
+            )
           ))}
+          <Link href="/signup" style={{ color: '#111', fontWeight: 600, textDecoration: 'none' }}>Start free →</Link>
         </div>
       </footer>
     </div>
