@@ -1,6 +1,8 @@
 /** Favicon / icon.tsx brand orange — use across marketing pages */
 export const BRAND = '#f97316'
 export const BRAND_DARK = '#ea580c'
+export const BRAND_LIGHT = '#fdba74'
+export const BRAND_PALE = '#fed7aa'
 export const BRAND_MUTED = '#9a3412'
 
 export const brandLogoStyle = {
