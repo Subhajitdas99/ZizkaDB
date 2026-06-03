@@ -1,81 +1,101 @@
+<div align="center">
+
 # ZizkaDB
 
-**The operational database for AI agents** — log every decision with causal links, walk backward with `why()`, time-travel state with `at()`, and search fleet memory semantically. Open source (AGPL), self-hostable, model-agnostic.
+**The operational database for AI agents.**
+
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Zizka-ai/ZizkaDB?label=release)](https://github.com/Zizka-ai/ZizkaDB/releases)
+[![Python SDK](https://img.shields.io/badge/PyPI-zizkadb--sdk-orange)](https://pypi.org/project/zizkadb-sdk/)
+[![Website](https://img.shields.io/badge/demo-db.zizka.ai-orange)](https://db.zizka.ai)
+
+[Try it live](https://db.zizka.ai) · [Documentation](https://db.zizka.ai/docs) · [Architecture](https://db.zizka.ai/trust) · [Development](#development)
+
+</div>
+
+When an agent misbehaves in production, you need more than scattered traces and a vector index. **ZizkaDB** is one store for **causal lineage** (`why()`), **time-travel state** (`at()`), **semantic search**, and **fleet dashboards** — open source, self-hostable, and model-agnostic.
+
+Log every decision with `parent_id`, walk backward to the root cause in one call, and ship the same SDK to managed cloud or your own Docker stack.
 
 <p align="center">
-  <img src="docs/assets/why-demo.gif" alt="db.why() printing a causal chain in the terminal" width="720"/>
+  <a href="https://db.zizka.ai">
+    <img src="docs/assets/hero-dashboard.png" alt="ZizkaDB dashboard — fleet of agents" width="100%"/>
+  </a>
 </p>
 
 <p align="center">
-  <sub>
-    Live terminal: <code>python scripts/demo-why.py</code> after <code>bash scripts/setup-local.sh</code> —
-    <a href="docs/assets/RECORD_DEMO.md">re-record a cinematic GIF</a> with vhs (replaces placeholder loop)
-  </sub>
+  <a href="https://db.zizka.ai"><img src="docs/assets/gallery-homepage.png" alt="Homepage" width="23%"/></a>
+  <a href="https://db.zizka.ai/dashboard"><img src="docs/assets/gallery-dashboard.png" alt="Agent fleet" width="23%"/></a>
+  <img src="docs/assets/gallery-why.png" alt="Causal chain from db.why()" width="23%"/>
+  <a href="mcp/README.md"><img src="docs/assets/gallery-mcp.png" alt="MCP in Cursor" width="23%"/></a>
 </p>
 
-**Example output** (what the GIF shows):
+---
 
-```
-Logged chain. Walking back with db.why():
+## Online viewer
 
-user_message: {'text': 'Why was my order delayed?'}  [14:02:01]
-    └── llm_response: {'model': 'gpt-4o', 'tokens': 412}  [14:02:03]
-        └── tool_call: {'tool': 'lookup_order', 'order_id': 'ORD-8842'}  [14:02:04]
+**[db.zizka.ai](https://db.zizka.ai)** — managed cloud with signup, API keys, billing, and the full dashboard. No credit card for the free tier.
+
+<p align="center">
+  <img src="docs/assets/hero-live.png" alt="ZizkaDB at db.zizka.ai" width="100%"/>
+</p>
+
+---
+
+## `why()` — causal chain in the terminal
+
+Self-host locally, then run the demo script. The SDK prints a tree from any `event_id` back to the root.
+
+<p align="center">
+  <img src="docs/assets/why-demo.gif" alt="db.why() printing a causal chain" width="100%"/>
+</p>
+
+```bash
+bash scripts/setup-local.sh
+pip install zizkadb-sdk
+python scripts/demo-why.py
 ```
 
 ---
 
-## Self-host in ~30 seconds
+## Development
 
-**One command** (API + Postgres + Qdrant + Redis + dashboard):
+### Prerequisites
+
+- **Docker** + Docker Compose v2
+- **Python 3.10+** (for the demo script and SDK)
+- Optional: **Node 18+** if you hack on `dashboard/`
+
+### Installation (self-host, ~30 seconds)
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
 bash scripts/setup-local.sh
 ```
 
-**Docker Compose directly** (same stack):
+Or with Compose only:
 
 ```bash
 cp .env.example infra/.env
 docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml up -d
 ```
 
-| Service    | URL |
-|-----------|-----|
-| API       | http://localhost:8000/health |
-| Swagger   | http://localhost:8000/swagger |
+| Service | URL |
+|---------|-----|
+| API | http://localhost:8000/health |
+| Swagger | http://localhost:8000/swagger |
 | Dashboard | http://localhost:3001/login → **Open my dashboard →** |
 
-Then run the demo (no API key on localhost — dev key is auto-injected):
+### Run the demo
 
 ```bash
 pip install zizkadb-sdk
 python scripts/demo-why.py
 ```
 
-**Production VPS:** `docker compose -f infra/docker-compose.yml up -d` then `bash infra/deploy-selfhost.sh` — see [Self-host docs](https://db.zizka.ai/docs).
+Localhost uses an auto-injected dev key — no API key required.
 
-> Opt out of anonymous telemetry: `export ZIZKADB_TELEMETRY=false`
-
----
-
-## What is ZizkaDB?
-
-Most agent stacks scatter **traces**, **vectors**, and **session blobs** across three tools. ZizkaDB is one **operational store** for runtime agent data:
-
-| Problem | ZizkaDB primitive |
-|--------|-------------------|
-| “Why did the agent do that?” | `parent_id` on `log()` → `why(event_id)` walks root → leaf |
-| “What did it know at 2pm Tuesday?” | `at(agent, timestamp)` |
-| “Find similar past failures” | `search()` / `context_for()` (embeddings optional for log + why) |
-| “Is this agent drifting?” | baselines + fleet views in the dashboard |
-
-**Not** a vector DB alone. **Not** observability alone. **Operational** — the data your agent needs to run, debug, and improve in production.
-
----
-
-## Quickstart (managed cloud)
+### Managed cloud (same SDK)
 
 ```bash
 pip install zizkadb-sdk
@@ -97,32 +117,56 @@ async def main():
 asyncio.run(main())
 ```
 
-> PyPI package: `zizkadb-sdk` · import: `from zizkadb import ZizkaDB` · pass **`event_id`** to `why()`, not agent name.
+> PyPI: `zizkadb-sdk` · import: `from zizkadb import ZizkaDB` · pass **`event_id`** to `why()`, not the agent name.
+
+### Production on a VPS
+
+```bash
+docker compose -f infra/docker-compose.yml up -d
+bash infra/deploy-selfhost.sh
+```
+
+Configure `EMAIL_*` in `infra/.env` for team OTP login. Full guide: [db.zizka.ai/docs](https://db.zizka.ai/docs).
+
+### Refresh README assets
+
+```bash
+python scripts/generate-readme-assets.py
+```
+
+Re-record a cinematic terminal GIF: [docs/assets/RECORD_DEMO.md](docs/assets/RECORD_DEMO.md).
+
+> Opt out of anonymous telemetry: `export ZIZKADB_TELEMETRY=false`
+
+---
+
+## What is ZizkaDB?
+
+| Problem | Primitive |
+|---------|-----------|
+| Why did the agent do that? | `parent_id` → `why(event_id)` |
+| What did it know at 2pm Tuesday? | `at(agent, timestamp)` |
+| Find similar past failures | `search()` / `context_for()` |
+| Is this agent drifting? | Baselines + fleet views |
+
+**Not** a vector DB alone. **Not** traces alone. **Operational** data for agents in production.
 
 ---
 
 ## Integrate
 
-| Path | Command / snippet |
-|------|-------------------|
-| **Python SDK** | `pip install zizkadb-sdk` |
-| **TypeScript** | `npm install zizkadb` — [sdk/typescript](sdk/typescript) |
-| **MCP (Cursor, Claude, …)** | `uvx zizkadb-mcp` — [mcp/README.md](mcp/README.md) |
-| **REST** | OpenAPI at `/swagger` on your host |
+| Path | Getting started |
+|------|-----------------|
+| Python | `pip install zizkadb-sdk` |
+| TypeScript | `npm install zizkadb` — [sdk/typescript](sdk/typescript) |
+| MCP | `uvx zizkadb-mcp` — [mcp/README.md](mcp/README.md) |
+| REST | OpenAPI at `/swagger` |
 
-Self-host SDK / MCP: point at `http://localhost:8000` (or your VPS); local dev key is sent automatically.
-
----
-
-## Managed service
-
-**[db.zizka.ai](https://db.zizka.ai)** — sign up, API key, dashboard, billing. Same SDK and MCP; swap host/key only.
+Self-host: `ZizkaDB(host="http://localhost:8000")` or `ZIZKADB_HOST` for MCP.
 
 ---
 
-## Docs & license
+## License
 
-- **Architecture & trust:** [db.zizka.ai/trust](https://db.zizka.ai/trust)
-- **Full guides:** [db.zizka.ai/docs](https://db.zizka.ai/docs)
-- **Core API, dashboard, SDKs:** [AGPL-3.0](LICENSE)
+- **API, dashboard, SDKs:** [AGPL-3.0](LICENSE)
 - **MCP server:** [MIT](mcp/LICENSE)

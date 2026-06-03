@@ -1,6 +1,8 @@
 # Record the README `why()` GIF
 
-Target: **~15s loop**, terminal only, `python scripts/demo-why.py`.
+Default assets come from `python scripts/generate-readme-assets.py` (styled terminal animation).
+
+For a **live terminal** recording (~15s loop), use `python scripts/demo-why.py` after setup.
 
 ## Prereqs
 
