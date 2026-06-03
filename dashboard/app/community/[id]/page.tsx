@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { SiteNav } from '@/components/SiteNav'
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
@@ -50,23 +51,7 @@ export default function CommunityPostPage() {
 
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fafafa', minHeight: '100vh' }}>
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', height: 56, borderBottom: '1px solid #eee', background: '#fff',
-      }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>ZizkaDB</span>
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link href="/community" style={{ fontSize: 14, color: '#111', fontWeight: 600, textDecoration: 'none' }}>Community</Link>
-          <Link href="/signup" style={{ fontSize: 14, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '7px 14px', background: '#111', borderRadius: 8 }}>
-            Start free →
-          </Link>
-        </div>
-      </nav>
+      <SiteNav active="community" />
 
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '28px 20px 80px' }}>
         <Link href="/community" style={{ fontSize: 13, color: '#888', textDecoration: 'none' }}>← Back to community</Link>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { CSSProperties, ReactNode } from 'react'
+import { SiteNav } from '@/components/SiteNav'
 
 export const metadata = {
   title: 'Technical reference',
@@ -29,18 +30,7 @@ const SECTIONS = [
 export default function TrustPage() {
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fff', minHeight: '100vh' }}>
-      <header style={{ borderBottom: '1px solid #f0f0f0', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: '#111' }}>
-          <div style={{ width: 26, height: 26, borderRadius: 6, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>Z</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 14 }}>ZizkaDB</span>
-        </Link>
-        <nav style={{ display: 'flex', gap: 20, fontSize: 13 }}>
-          <Link href="/docs" style={{ color: '#666', textDecoration: 'none' }}>Docs</Link>
-          <Link href="/swagger" style={{ color: '#666', textDecoration: 'none' }}>API Explorer</Link>
-        </nav>
-      </header>
+      <SiteNav active="trust" suffix="Technical" />
 
       <div style={{ display: 'flex', maxWidth: 1100, margin: '0 auto' }}>
         <aside style={{ width: 200, flexShrink: 0, padding: '32px 16px', position: 'sticky', top: 56, height: 'calc(100vh - 56px)', overflowY: 'auto', borderRight: '1px solid #f0f0f0', display: 'none' }} className="trust-sidebar">

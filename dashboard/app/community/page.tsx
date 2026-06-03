@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
+import { SiteNav } from '@/components/SiteNav'
+import { BRAND } from '@/components/brand'
 import { formatDistanceToNow } from 'date-fns'
 import {
   listCommunityPosts,
@@ -51,35 +53,11 @@ export default function CommunityPage() {
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fafafa', minHeight: '100vh' }}>
       <style>{`
         @media (max-width: 640px) {
-          .zdb-comm-nav-links { display: none !important; }
-          .zdb-comm-nav-cta { display: flex !important; }
           .zdb-comm-pad { padding-left: 16px !important; padding-right: 16px !important; }
         }
       `}</style>
 
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', height: 56, borderBottom: '1px solid #eee',
-        background: '#fff', position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>ZizkaDB</span>
-        </Link>
-        <div className="zdb-comm-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-          <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
-          <Link href="/community" style={{ fontSize: 14, color: '#111', fontWeight: 600, textDecoration: 'none' }}>Community</Link>
-          <Link href="/login" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Sign in</Link>
-          <Link href="/signup" style={{ fontSize: 14, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '7px 14px', background: '#111', borderRadius: 8 }}>
-            Start free →
-          </Link>
-        </div>
-        <div className="zdb-comm-nav-cta" style={{ display: 'none', gap: 8 }}>
-          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 8 }}>Start free</Link>
-        </div>
-      </nav>
+      <SiteNav active="community" />
 
       <main className="zdb-comm-pad" style={{ maxWidth: 760, margin: '0 auto', padding: '32px 20px 80px' }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, margin: '0 0 8px', letterSpacing: -0.5 }}>Community</h1>

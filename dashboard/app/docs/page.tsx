@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { SiteNav } from '@/components/SiteNav'
 import {
   OverviewSection,
   PythonSection,
@@ -75,33 +76,17 @@ export default function DocsPage() {
     <div style={S.page}>
       <style>{`
         @media (max-width: 640px) {
-          .docs-nav-links { display: none !important; }
           .docs-sidebar { display: none !important; }
           .docs-mobile-nav { display: flex !important; }
           .docs-main { padding: 20px 16px 60px !important; }
         }
       `}</style>
 
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', height: 52, borderBottom: '1px solid #f0f0f0', position: 'sticky', top: 0, background: '#fff', zIndex: 100 }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{ width: 26, height: 26, borderRadius: 6, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 12, fontWeight: 700 }}>Z</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 14, color: '#111' }}>ZizkaDB</span>
-          <span className="docs-nav-links" style={{ fontSize: 12, color: '#bbb' }}>/ Docs</span>
-        </Link>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link href="/community" className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>Community</Link>
-          <a href={API_EXPLORER_URL} className="docs-nav-links" style={{ fontSize: 13, color: '#666', textDecoration: 'none' }}>API Explorer</a>
-          <Link href="/signup" style={{ fontSize: 13, fontWeight: 500, color: '#fff', textDecoration: 'none', padding: '6px 12px', background: '#111', borderRadius: 7 }}>
-            Get API key →
-          </Link>
-        </div>
-      </nav>
+      <SiteNav active="docs" suffix="Docs" />
 
       <div className="docs-mobile-nav" style={{
         display: 'none', overflowX: 'auto', borderBottom: '1px solid #f0f0f0',
-        padding: '0 16px', gap: 0, position: 'sticky', top: 52, background: '#fff', zIndex: 99,
+        padding: '0 16px', gap: 0, position: 'sticky', top: 56, background: '#fff', zIndex: 99,
       }}>
         {NAV.map(({ id, label }) => (
           <button key={id} type="button" onClick={() => navigate(id)} style={{

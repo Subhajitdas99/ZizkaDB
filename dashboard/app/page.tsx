@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
+import { SiteNav } from '@/components/SiteNav'
+import { BRAND, BRAND_DARK, BRAND_LIGHT, BRAND_MUTED, BRAND_PALE, brandLogoStyle } from '@/components/brand'
 
 // ── Live user counters ─────────────────────────────────────────────────────
 
@@ -164,14 +166,6 @@ curl -X POST https://db.zizka.ai/v1/events \\
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
-/** Matches favicon / icon.tsx brand orange */
-const BRAND = '#f97316'
-const BRAND_DARK = '#ea580c'
-const BRAND_DEEP = '#c2410c'
-const BRAND_LIGHT = '#fdba74'
-const BRAND_PALE = '#fed7aa'
-const BRAND_MUTED = '#9a3412'
-
 const MCP_HERO_CONFIG = `{
   "mcpServers": {
     "zizkadb": {
@@ -281,8 +275,6 @@ export default function LandingPage() {
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: '#111', background: '#fff' }}>
       <style>{`
         @media (max-width: 640px) {
-          .zdb-nav-links { display: none !important; }
-          .zdb-nav-cta { display: flex !important; }
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
           .zdb-hero-h1 { font-size: 32px !important; letter-spacing: -0.5px !important; }
           .zdb-hero-p { font-size: 15px !important; }
@@ -305,56 +297,7 @@ export default function LandingPage() {
         }
       `}</style>
 
-      {/* Nav */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 20px', height: 56, borderBottom: '1px solid #f0f0f0',
-        position: 'sticky', top: 0, background: 'rgba(255,255,255,0.95)',
-        backdropFilter: 'blur(8px)', zIndex: 100,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: BRAND, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 15 }}>ZizkaDB</span>
-          <span className="zdb-nav-links" style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>by Zizka AI</span>
-        </div>
-        <div className="zdb-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <Link href="/docs" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Docs</Link>
-          <Link href="#managed" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Managed</Link>
-          <Link href="#pricing" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Pricing</Link>
-          <Link href="#mcp" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>MCP</Link>
-          <Link href="#opensource" style={{ fontSize: 14, color: '#555', textDecoration: 'none' }}>Open source</Link>
-          <Link href="/community" style={{
-            fontSize: 14, fontWeight: 600, color: BRAND_MUTED, textDecoration: 'none',
-            padding: '7px 14px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 8,
-          }}>
-            Community
-          </Link>
-          <Link href="/login" style={{ fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8 }}>
-            Sign in
-          </Link>
-          <Link href="/signup" style={{
-            fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none',
-            padding: '8px 18px', background: `linear-gradient(135deg, ${BRAND} 0%, ${BRAND_DARK} 100%)`,
-            borderRadius: 8, boxShadow: '0 2px 12px rgba(249,115,22,0.35)',
-          }}>
-            Start free →
-          </Link>
-        </div>
-        {/* Mobile nav — only CTAs */}
-        <div className="zdb-nav-cta" style={{ display: 'none', alignItems: 'center', gap: 8 }}>
-          <Link href="#pricing" style={{ fontSize: 13, fontWeight: 500, color: '#555', textDecoration: 'none', padding: '6px 10px' }}>
-            Pricing
-          </Link>
-          <Link href="/login" style={{ fontSize: 13, fontWeight: 500, color: '#111', textDecoration: 'none', padding: '6px 12px', border: '1px solid #ddd', borderRadius: 8 }}>
-            Sign in
-          </Link>
-          <Link href="/signup" style={{ fontSize: 13, fontWeight: 600, color: '#fff', textDecoration: 'none', padding: '6px 14px', background: BRAND, borderRadius: 8 }}>
-            Start free →
-          </Link>
-        </div>
-      </nav>
+      <SiteNav />
 
       {/* Hero — MCP + open source first */}
       <section className="zdb-hero-dark" style={{
@@ -1299,7 +1242,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="zdb-footer" style={{ borderTop: '1px solid #f0f0f0', padding: '28px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 13, color: '#999' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 22, height: 22, borderRadius: 5, background: BRAND, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ ...brandLogoStyle, width: 22, height: 22, borderRadius: 5 }}>
             <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>Z</span>
           </div>
           <span style={{ fontWeight: 500, color: '#333' }}>ZizkaDB</span>
