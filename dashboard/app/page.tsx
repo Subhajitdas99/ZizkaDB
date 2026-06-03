@@ -105,19 +105,19 @@ const INSTALL: Record<SdkTab, string> = {
 }
 
 const SDK_SNIPPETS: Record<SdkTab, string> = {
-  Python: `from zizkadb import ZizkaDB
+  Python: `# pip install zizkadb-sdk
+from zizkadb import ZizkaDB
 
-db = ZizkaDB("agdb_live_xxxx")   # your API key
+async with ZizkaDB("agdb_live_xxxx") as db:  # your API key
+    result = await db.log(
+        agent="my-bot",
+        event="tool_call",
+        data={"tool": "search", "query": "pricing"},
+    )
 
-result = await db.log(
-    agent="my-bot",
-    event="tool_call",
-    data={"tool": "search", "query": "pricing"},
-)
-
-# Why did this happen?
-chain = await db.why(result.event_id)
-chain.print()`,
+    # Why did this happen?
+    chain = await db.why(result.event_id)
+    chain.print()`,
 
   TypeScript: `import { ZizkaDB } from 'zizkadb-sdk'
 
@@ -133,7 +133,8 @@ const result = await db.log({
 const chain = await db.why(result.eventId)
 chain.print()`,
 
-  MCP: `// Add to claude_desktop_config.json or ~/.cursor/mcp.json
+  MCP: `# uvx zizkadb-mcp  (PyPI package: zizkadb-mcp)
+# Add to claude_desktop_config.json or ~/.cursor/mcp.json
 {
   "mcpServers": {
     "zizkadb": {
@@ -146,9 +147,8 @@ chain.print()`,
   }
 }
 
-// Claude and Cursor can now call these tools natively:
-// log_event  · search_memory  · get_context
-// why        · time_travel    · memory_diff  · forget`,
+# Self-host: use "ZIZKADB_HOST": "http://localhost:8000" instead of API key
+# Tools: log_event · search_memory · get_context · why · time_travel · memory_diff · forget`,
 
   'REST API': `# Works in Python, Go, Ruby, Rust, Java, or anything with HTTP
 
@@ -178,86 +178,88 @@ const MCP_HERO_CONFIG = `{
 
 const INSTALL_CMD = 'pip install zizkadb-sdk'
 
-const QUICKSTART = `from zizkadb import ZizkaDB
+const QUICKSTART = `# pip install zizkadb-sdk
+from zizkadb import ZizkaDB
 
-db = ZizkaDB("agdb_live_xxxx")   # your API key
+async with ZizkaDB("agdb_live_xxxx") as db:  # your API key
+    # 1. Log what your agent does
+    msg = await db.log(agent="support-bot", event="user_message",
+        data={"text": "why is my bill $200?"})
 
-# 1. Log what your agent does
-msg = await db.log(agent="support-bot", event="user_message",
-    data={"text": "why is my bill $200?"})
+    # 2. Link every action to its cause
+    tool = await db.log(agent="support-bot", event="tool_call",
+        data={"tool": "get_billing", "user": 123},
+        parent_id=msg.event_id)          # ← causal link
 
-# 2. Link every action to its cause
-tool = await db.log(agent="support-bot", event="tool_call",
-    data={"tool": "get_billing", "user": 123},
-    parent_id=msg.event_id)          # ← causal link
-
-# 3. Ask why, at any time, for any event
-chain = await db.why(tool.event_id)
-chain.print()
+    # 3. Ask why, at any time, for any event
+    chain = await db.why(tool.event_id)
+    chain.print()
 # user_message: "why is my bill $200?"     [14:32:01]
 #   └── tool_call: get_billing(user=123)    [14:32:02]
 #       └── response: "Found anomaly"       [14:32:03]`
 
-const CLAUDE_CODE = `import anthropic
+const CLAUDE_CODE = `# pip install zizkadb-sdk anthropic
+import anthropic
 from zizkadb import ZizkaDB
 
-db     = ZizkaDB("agdb_live_xxxx")
-client = anthropic.Anthropic()
-
 async def run(user_input: str):
-    # Log the user turn
-    turn = await db.log(
-        agent="claude-3-5-sonnet",
-        event="user_message",
-        data={"text": user_input},
-    )
+    async with ZizkaDB("agdb_live_xxxx") as db:
+        client = anthropic.AsyncAnthropic()
 
-    response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=1024,
-        messages=[{"role": "user", "content": user_input}],
-    )
+        # Log the user turn
+        turn = await db.log(
+            agent="claude-3-5-sonnet",
+            event="user_message",
+            data={"text": user_input},
+        )
 
-    # Log Claude's reply, causally linked to the input
-    await db.log(
-        agent="claude-3-5-sonnet",
-        event="assistant_response",
-        data={"text": response.content[0].text},
-        parent_id=turn.event_id,     # ← one line. full lineage.
-    )
+        response = await client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": user_input}],
+        )
+
+        # Log Claude's reply, causally linked to the input
+        await db.log(
+            agent="claude-3-5-sonnet",
+            event="assistant_response",
+            data={"text": response.content[0].text},
+            parent_id=turn.event_id,     # ← one line. full lineage.
+        )
     return response`
 
-const OPENAI_CODE = `from openai import OpenAI
+const OPENAI_CODE = `# pip install zizkadb-sdk openai
+from openai import AsyncOpenAI
 from zizkadb import ZizkaDB
 import json
 
-db     = ZizkaDB("agdb_live_xxxx")
-client = OpenAI()
-
 async def run(user_input: str):
-    turn = await db.log(
-        agent="gpt-4o",
-        event="user_message",
-        data={"text": user_input},
-    )
+    async with ZizkaDB("agdb_live_xxxx") as db:
+        client = AsyncOpenAI()
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": user_input}],
-        tools=my_tools,
-    )
-
-    # Log every tool call with its causal parent
-    for tc in response.choices[0].message.tool_calls or []:
-        await db.log(
+        turn = await db.log(
             agent="gpt-4o",
-            event="tool_call",
-            data={
-                "tool": tc.function.name,
-                "args": json.loads(tc.function.arguments),
-            },
-            parent_id=turn.event_id,  # ← causal chain preserved
+            event="user_message",
+            data={"text": user_input},
         )
+
+        response = await client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": user_input}],
+            tools=my_tools,
+        )
+
+        # Log every tool call with its causal parent
+        for tc in response.choices[0].message.tool_calls or []:
+            await db.log(
+                agent="gpt-4o",
+                event="tool_call",
+                data={
+                    "tool": tc.function.name,
+                    "args": json.loads(tc.function.arguments),
+                },
+                parent_id=turn.event_id,  # ← causal chain preserved
+            )
     return response`
 
 export default function LandingPage() {
@@ -1006,7 +1008,9 @@ export default function LandingPage() {
             Their memory is for the chat. ZizkaDB is for your code: every decision, every cause, every trigger.
           </p>
           <p style={{ textAlign: 'center', fontSize: 13, color: '#666', marginBottom: 40 }}>
-            No wrappers. No monkey-patching. Just parent_id.
+            No wrappers. No monkey-patching. Just parent_id. Install{' '}
+            <code style={{ fontFamily: 'monospace', fontSize: 12 }}>zizkadb-sdk</code> on PyPI (import{' '}
+            <code style={{ fontFamily: 'monospace', fontSize: 12 }}>zizkadb</code>).
           </p>
 
           {/* Tabs */}
