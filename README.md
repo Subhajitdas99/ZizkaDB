@@ -121,7 +121,7 @@ import asyncio
 from zizkadb import ZizkaDB
 
 async def main():
-    async with ZizkaDB("agdb_live_...") as db:  # https://db.zizka.ai/signup
+    async with ZizkaDB("zizkadb_live_...") as db:  # https://db.zizka.ai/signup
         user = await db.log(agent="my-bot", event="user_message", data={"text": "..."})
         tool = await db.log(
             agent="my-bot", event="tool_call", data={"tool": "search"},
