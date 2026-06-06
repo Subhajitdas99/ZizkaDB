@@ -22,8 +22,8 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 # ─────────────────────────────────────────
 
 def generate_api_key() -> tuple[str, str]:
-    """Returns (raw_key, key_hash). Store hash, show raw once."""
-    raw = f"agdb_live_{secrets.token_urlsafe(32)}"
+    """Returns (raw_key, key_hash, prefix). Store hash, show raw once."""
+    raw = f"zizkadb_live_{secrets.token_urlsafe(32)}"
     key_hash = hashlib.sha256(raw.encode()).hexdigest()
     prefix = raw[:16]
     return raw, key_hash, prefix

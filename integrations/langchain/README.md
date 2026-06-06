@@ -12,7 +12,7 @@ from langchain_core.messages import HumanMessage
 from zizkadb import ZizkaDB
 from zizkadb_langchain import ZizkaDBCallbackHandler
 
-async with ZizkaDB("agdb_live_...") as db:
+async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
     llm = ChatOpenAI(model="gpt-4o-mini")
     await llm.ainvoke([HumanMessage(content="Hello")], config={"callbacks": [handler]})

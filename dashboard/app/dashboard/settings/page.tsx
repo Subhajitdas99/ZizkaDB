@@ -198,6 +198,9 @@ export default function SettingsPage() {
       {/* Create new key */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-4">Create API key</h2>
+        <p className="text-xs mb-3" style={{ color: '#525252' }}>
+          Keys start with <span className="font-mono">zizkadb_live_</span> — use in SDK, MCP, or REST. Your dashboard updates live as events arrive.
+        </p>
         <form onSubmit={handleCreate} className="flex gap-3">
           <input
             value={name}

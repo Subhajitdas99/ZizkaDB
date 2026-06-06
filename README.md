@@ -34,7 +34,7 @@ Log every decision with `parent_id`, walk backward to the root cause in one call
 
 ## Online viewer
 
-**[db.zizka.ai](https://db.zizka.ai)** — managed cloud with signup, API keys, billing, and the full dashboard. No credit card for the free tier.
+**[db.zizka.ai](https://db.zizka.ai)** — managed cloud with signup, API keys (`zizkadb_live_...`), live dashboard (auto-refreshes every 30s), and billing. No credit card for the free tier.
 
 <p align="center">
   <img src="docs/assets/hero-live.png" alt="ZizkaDB at db.zizka.ai" width="100%"/>
@@ -141,7 +141,7 @@ docker compose -f infra/docker-compose.yml up -d
 bash infra/deploy-selfhost.sh
 ```
 
-Configure `EMAIL_*` in `infra/.env` for team OTP login. Full guide: [db.zizka.ai/docs](https://db.zizka.ai/docs).
+Configure `EMAIL_*` in `infra/.env` for team OTP login. On managed cloud set `ENV=production` and leave `DEV_API_KEY` unset. Full guide: [db.zizka.ai/docs](https://db.zizka.ai/docs).
 
 ### Refresh README assets
 
@@ -176,7 +176,7 @@ Re-record a cinematic terminal GIF: [docs/assets/RECORD_DEMO.md](docs/assets/REC
 | Python | `pip install zizkadb-sdk` |
 | LangChain | `pip install zizkadb-langchain` — [integrations/langchain](integrations/langchain) |
 | CrewAI | `pip install zizkadb-crewai` — [integrations/crewai](integrations/crewai) |
-| TypeScript | `npm install zizkadb` — [sdk/typescript](sdk/typescript) |
+| TypeScript | `npm install zizkadb-sdk` — [sdk/typescript](sdk/typescript) |
 | MCP | `uvx zizkadb-mcp` — [mcp/README.md](mcp/README.md) |
 | REST | OpenAPI at `/swagger` |
 

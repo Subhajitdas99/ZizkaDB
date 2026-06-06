@@ -23,9 +23,9 @@ def test_python_sdk_auto_injects_dev_key():
 def test_python_sdk_respects_env_api_key(monkeypatch):
     from zizkadb.client import ZizkaDB
 
-    monkeypatch.setenv("ZIZKADB_API_KEY", "agdb_custom_key")
+    monkeypatch.setenv("ZIZKADB_API_KEY", "zizkadb_custom_key")
     db = ZizkaDB(host="http://localhost:8000")
-    assert db._api_key == "agdb_custom_key"
+    assert db._api_key == "zizkadb_custom_key"
 
 
 @pytest.mark.asyncio
@@ -46,7 +46,7 @@ async def test_dev_token_and_log_event():
     import httpx
 
     base = os.getenv("ZIZKADB_TEST_URL", "http://localhost:8000")
-    dev_key = os.getenv("DEV_API_KEY", "agdb_dev_local")
+    dev_key = os.getenv("DEV_API_KEY", "zizkadb_dev_local")
 
     async with httpx.AsyncClient(base_url=base, timeout=10) as client:
         token_res = await client.post("/v1/auth/dev-token")

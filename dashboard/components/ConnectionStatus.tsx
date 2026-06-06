@@ -72,7 +72,7 @@ python -c "
 import asyncio
 from zizkadb import ZizkaDB
 async def main():
-    async with ZizkaDB('agdb_live_YOUR_KEY') as db:
+    async with ZizkaDB('zizkadb_live_YOUR_KEY') as db:
         r = await db.log(agent='my-bot', event='started', data={'ok': True})
         print('Logged:', r.event_id)
 asyncio.run(main())"`
@@ -89,8 +89,8 @@ asyncio.run(main())"`
       desc: 'Run the snippet below in a terminal. Use the same API key / host as this dashboard account.',
     },
     {
-      title: 'Refresh this page',
-      desc: 'Your agent appears here under Agents. Click it to explore sessions and causal chains.',
+      title: 'Watch it live',
+      desc: 'Your agent appears here within 30 seconds — no refresh needed. Click it for events, sessions, and drift.',
     },
   ]
 

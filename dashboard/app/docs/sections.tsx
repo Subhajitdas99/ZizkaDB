@@ -138,7 +138,7 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
         <p style={S.p}>
           <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> with email OTP →{' '}
           <Link href="/dashboard/settings" style={{ color: '#111', fontWeight: 500 }}>Dashboard → Settings</Link> →{' '}
-          <strong>Create API key</strong> (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>agdb_live_…</code>).
+          <strong>Create API key</strong> (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>zizkadb_live_…</code>).
         </p>
       </Step>
       <Step n={2} title="Connect SDK, MCP, or REST">
@@ -217,7 +217,7 @@ export function PythonSection() {
       </Step>
 
       <Step n={2} title="Choose your environment">
-        <p style={S.p}><strong>Managed cloud:</strong> <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Settings → Create API key (<code style={{ fontFamily: 'monospace' }}>agdb_live_…</code>).</p>
+        <p style={S.p}><strong>Managed cloud:</strong> <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Settings → Create API key (<code style={{ fontFamily: 'monospace' }}>zizkadb_live_…</code>).</p>
         <p style={S.p}><strong>Self-host:</strong> use <code style={{ fontFamily: 'monospace' }}>host=&quot;http://localhost:8000&quot;</code> (dev key auto-sent). See <Link href="/docs" style={{ color: '#1e40af' }}>Self-host docs</Link> → click <strong>Open my dashboard →</strong> on the login page.</p>
       </Step>
 
@@ -232,7 +232,7 @@ export function PythonSection() {
         <Code lang="python">{`from zizkadb import ZizkaDB
 
 # Managed cloud (db.zizka.ai)
-db = ZizkaDB("agdb_live_xxxx")
+db = ZizkaDB("zizkadb_live_xxxx")
 
 # Self-hosted
 # db = ZizkaDB(host="http://localhost:8000")`}</Code>
@@ -243,7 +243,7 @@ db = ZizkaDB("agdb_live_xxxx")
         <Code lang="python">{`import asyncio
 from zizkadb import ZizkaDB
 
-db = ZizkaDB("agdb_live_xxxx")
+db = ZizkaDB("zizkadb_live_xxxx")
 
 async def main():
     result = await db.log(
@@ -311,7 +311,7 @@ asyncio.run(main())`}</Code>
 from openai import AsyncOpenAI
 from zizkadb import ZizkaDB
 
-db = ZizkaDB("agdb_live_xxxx")
+db = ZizkaDB("zizkadb_live_xxxx")
 openai = AsyncOpenAI()
 
 async def run_turn(user_text: str, session_id: str):
@@ -387,7 +387,7 @@ export function TypeScriptSection() {
         <Code lang="typescript">{`import { ZizkaDB } from 'zizkadb-sdk'
 
 // Managed cloud
-const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
+const db = new ZizkaDB({ apiKey: 'zizkadb_live_xxxx' })
 
 // Self-hosted
 // const db = new ZizkaDB({ host: 'http://localhost:8000' })`}</Code>
@@ -506,7 +506,7 @@ export function RestSection() {
           <strong>Self-host:</strong> <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>http://localhost:8000</code>
         </p>
         <p style={S.p}>Every request (except <code style={{ fontFamily: 'monospace' }}>/health</code>) needs:</p>
-        <Code lang="http">Authorization: Bearer agdb_live_xxxx
+        <Code lang="http">Authorization: Bearer zizkadb_live_xxxx
 Content-Type: application/json</Code>
         <Callout type="warning">
           API routes are under <strong>/v1/</strong> — not <code style={{ fontFamily: 'monospace' }}>/api/v1/</code> when calling directly.
@@ -521,7 +521,7 @@ Content-Type: application/json</Code>
 
       <Step n={3} title="Log an event">
         <Code lang="bash">{`curl -X POST https://db.zizka.ai/v1/events \\
-  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Authorization: Bearer zizkadb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
     "agent": "support-bot",
@@ -535,22 +535,22 @@ Content-Type: application/json</Code>
 
       <Step n={4} title="Query events">
         <Code lang="bash">{`curl "https://db.zizka.ai/v1/events?agent=support-bot&limit=20" \\
-  -H "Authorization: Bearer agdb_live_xxxx"`}</Code>
+  -H "Authorization: Bearer zizkadb_live_xxxx"`}</Code>
       </Step>
 
       <Step n={5} title="Causal chain (why)">
         <Code lang="bash">{`curl "https://db.zizka.ai/v1/events/EVENT_UUID_HERE/why" \\
-  -H "Authorization: Bearer agdb_live_xxxx"`}</Code>
+  -H "Authorization: Bearer zizkadb_live_xxxx"`}</Code>
       </Step>
 
       <Step n={6} title="Time travel (state at timestamp)">
         <Code lang="bash">{`curl "https://db.zizka.ai/v1/events/at?agent=support-bot&timestamp=2026-05-01T15:00:00Z" \\
-  -H "Authorization: Bearer agdb_live_xxxx"`}</Code>
+  -H "Authorization: Bearer zizkadb_live_xxxx"`}</Code>
       </Step>
 
       <Step n={7} title="Semantic search">
         <Code lang="bash">{`curl -X POST https://db.zizka.ai/v1/search \\
-  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Authorization: Bearer zizkadb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
     "query": "customer frustrated about billing",
@@ -561,7 +561,7 @@ Content-Type: application/json</Code>
 
       <Step n={8} title="Context for prompts">
         <Code lang="bash">{`curl -X POST https://db.zizka.ai/v1/memory/context \\
-  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Authorization: Bearer zizkadb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
     "agent": "support-bot",
@@ -572,19 +572,19 @@ Content-Type: application/json</Code>
 
       <Step n={9} title="Agents, baseline, session diff, forget">
         <Code lang="bash">{`# List agents
-curl https://db.zizka.ai/v1/agents -H "Authorization: Bearer agdb_live_xxxx"
+curl https://db.zizka.ai/v1/agents -H "Authorization: Bearer zizkadb_live_xxxx"
 
 # Behavioral baseline / drift
 curl "https://db.zizka.ai/v1/agents/support-bot/baseline?recent_window=50" \\
-  -H "Authorization: Bearer agdb_live_xxxx"
+  -H "Authorization: Bearer zizkadb_live_xxxx"
 
 # Session summary
 curl https://db.zizka.ai/v1/memory/diff/sess_abc123 \\
-  -H "Authorization: Bearer agdb_live_xxxx"
+  -H "Authorization: Bearer zizkadb_live_xxxx"
 
 # GDPR erasure by metadata
 curl -X DELETE https://db.zizka.ai/v1/memory/forget \\
-  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Authorization: Bearer zizkadb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{"filter_key": "user_id", "filter_value": "user_123"}'`}</Code>
       </Step>
@@ -628,7 +628,7 @@ curl -X DELETE https://db.zizka.ai/v1/memory/forget \\
       <h2 style={S.h2}>Common errors</h2>
       <div style={{ display: 'grid', gap: 12 }}>
         {[
-          { q: '401 Unauthorized', a: 'Missing or invalid Bearer token. Use agdb_live_ key from Settings.' },
+          { q: '401 Unauthorized', a: 'Missing or invalid Bearer token. Use zizkadb_live_ key from Settings.' },
           { q: '404 on /api/v1/...', a: 'Use /v1/ directly: https://db.zizka.ai/v1/events' },
           { q: '400 on /v1/search', a: 'Embeddings not configured. Set up in Dashboard → Settings → Embeddings.' },
         ].map(item => (
@@ -661,7 +661,7 @@ export function McpSection() {
     "zizkadb": {
       "command": "uvx",
       "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+      "env": { "ZIZKADB_API_KEY": "zizkadb_live_xxxx" }
     }
   }
 }`}</Code>
@@ -702,7 +702,7 @@ uvx --version</Code>
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "zizkadb_live_xxxx"
       }
     }
   }
@@ -721,7 +721,7 @@ uvx --version</Code>
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "zizkadb_live_xxxx"
       }
     }
   }
@@ -837,7 +837,7 @@ cp .env.example infra/.env`}</Code>
         <p style={S.p}>Edit <code style={{ fontFamily: 'monospace' }}>infra/.env</code>:</p>
         <Code lang="bash">{`OPENAI_API_KEY=sk-...          # for semantic search
 JWT_SECRET=your-random-32-char-secret
-DEV_API_KEY=agdb_dev_local       # default local dev key (SDK auto-sends this)
+DEV_API_KEY=zizkadb_dev_local       # default local dev key (SDK auto-sends this)
 
 # Optional: email OTP for production dashboard login
 EMAIL_HOST=smtp.gmail.com
@@ -854,13 +854,13 @@ EMAIL_PASS=your-app-password`}</Code>
 
       <Step n={4} title="Connect SDK or MCP">
         <p style={S.p}>
-          Self-hosted SDK calls auto-send the local dev key (<code style={{ fontFamily: 'monospace' }}>agdb_dev_local</code> by default).
+          Self-hosted SDK calls auto-send the local dev key (<code style={{ fontFamily: 'monospace' }}>zizkadb_dev_local</code> by default).
           Create a named API key in the dashboard Settings when you move to production.
         </p>
         <Code lang="python">{`from zizkadb import ZizkaDB
 db = ZizkaDB(host="http://localhost:8000")`}</Code>
         <p style={S.p}>MCP: <code style={{ fontFamily: 'monospace' }}>ZIZKADB_HOST=http://localhost:8000</code> (dev key auto-injected on localhost)</p>
-        <p style={S.p}>REST: <code style={{ fontFamily: 'monospace' }}>Authorization: Bearer agdb_dev_local</code></p>
+        <p style={S.p}>REST: <code style={{ fontFamily: 'monospace' }}>Authorization: Bearer zizkadb_dev_local</code></p>
       </Step>
 
       <Step n={5} title="Open the dashboard">
@@ -942,7 +942,7 @@ import anthropic
 from zizkadb import ZizkaDB
 
 async def run(user_input: str):
-    async with ZizkaDB("agdb_live_...") as db:
+    async with ZizkaDB("zizkadb_live_...") as db:
         client = anthropic.AsyncAnthropic()
         turn = await db.log(agent="my-bot", event="user_message", data={"text": user_input})
         response = await client.messages.create(
@@ -971,7 +971,7 @@ from langchain_core.messages import HumanMessage
 from zizkadb import ZizkaDB
 from zizkadb_langchain import ZizkaDBCallbackHandler
 
-async with ZizkaDB("agdb_live_...") as db:
+async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
     llm = ChatOpenAI(model="gpt-4o-mini")
     await llm.ainvoke([HumanMessage(content="Hello")], config={"callbacks": [handler]})
@@ -986,7 +986,7 @@ async with ZizkaDB("agdb_live_...") as db:
 from zizkadb import ZizkaDB
 from zizkadb_crewai import ZizkaDBCrewLogger
 
-async with ZizkaDB("agdb_live_...") as db:
+async with ZizkaDB("zizkadb_live_...") as db:
     logger = ZizkaDBCrewLogger(db, agent="research-crew")
     kickoff = await logger.log_kickoff(goal="Research topic X")
     output = crew.kickoff()

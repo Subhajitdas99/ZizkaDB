@@ -8,7 +8,7 @@ without installing any SDK.
 
 Configuration (env vars):
   ZIZKADB_HOST     — defaults to https://db.zizka.ai
-  ZIZKADB_API_KEY  — your API key (agdb_live_...)
+  ZIZKADB_API_KEY  — your API key (zizkadb_live_...)
 
 Usage:
   uvx zizkadb-mcp                          # managed service
@@ -30,7 +30,7 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("ZizkaDB")
 
-DEFAULT_DEV_API_KEY = "agdb_dev_local"
+DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 _HOST = os.getenv("ZIZKADB_HOST", "https://db.zizka.ai").rstrip("/")
 _KEY = os.getenv("ZIZKADB_API_KEY", "")
 

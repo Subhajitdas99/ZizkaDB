@@ -141,7 +141,7 @@ docker compose -f infra/docker-compose.yml up -d`}</Code>
               </tbody>
             </table>
             <p style={p}>
-              <strong>Multi-tenancy:</strong> API keys (<code style={codeInline}>agdb_live_*</code>) scope all reads and writes to a tenant.
+              <strong>Multi-tenancy:</strong> API keys (<code style={codeInline}>zizkadb_live_*</code>) scope all reads and writes to a tenant.
               Dashboard auth uses email OTP → JWT.
             </p>
           </Section>
@@ -302,7 +302,7 @@ docker compose -f infra/docker-compose.yml up -d`}</Code>
             <p style={p}>Cloud default host: <code style={codeInline}>https://db.zizka.ai</code>. Self-host: pass <code style={codeInline}>host=</code> to the SDK or set <code style={codeInline}>ZIZKADB_HOST</code> for MCP.</p>
             <Code lang="python">{`from zizkadb import ZizkaDB
 
-db = ZizkaDB("agdb_live_xxxx")  # managed
+db = ZizkaDB("zizkadb_live_xxxx")  # managed
 # db = ZizkaDB(host="http://localhost:8000")  # self-host
 
 msg = await db.log(agent="bot", event="user_message", data={"text": "..."})
@@ -315,7 +315,7 @@ chain = await db.why(tool.event_id)`}</Code>
     "zizkadb": {
       "command": "uvx",
       "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+      "env": { "ZIZKADB_API_KEY": "zizkadb_live_xxxx" }
     }
   }
 }`}</Code>

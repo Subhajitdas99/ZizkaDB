@@ -108,7 +108,7 @@ const SDK_SNIPPETS: Record<SdkTab, string> = {
   Python: `# pip install zizkadb-sdk
 from zizkadb import ZizkaDB
 
-async with ZizkaDB("agdb_live_xxxx") as db:  # your API key
+async with ZizkaDB("zizkadb_live_xxxx") as db:  # your API key
     result = await db.log(
         agent="my-bot",
         event="tool_call",
@@ -121,7 +121,7 @@ async with ZizkaDB("agdb_live_xxxx") as db:  # your API key
 
   TypeScript: `import { ZizkaDB } from 'zizkadb-sdk'
 
-const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
+const db = new ZizkaDB({ apiKey: 'zizkadb_live_xxxx' })
 
 const result = await db.log({
   agent: 'my-bot',
@@ -141,7 +141,7 @@ chain.print()`,
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "zizkadb_live_xxxx"
       }
     }
   }
@@ -153,7 +153,7 @@ chain.print()`,
   'REST API': `# Works in Python, Go, Ruby, Rust, Java, or anything with HTTP
 
 curl -X POST https://db.zizka.ai/v1/events \\
-  -H "Authorization: Bearer agdb_live_xxxx" \\
+  -H "Authorization: Bearer zizkadb_live_xxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
     "agent": "my-bot",
@@ -171,7 +171,7 @@ const MCP_HERO_CONFIG = `{
     "zizkadb": {
       "command": "uvx",
       "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+      "env": { "ZIZKADB_API_KEY": "zizkadb_live_xxxx" }
     }
   }
 }`
@@ -181,7 +181,7 @@ const INSTALL_CMD = 'pip install zizkadb-sdk'
 const QUICKSTART = `# pip install zizkadb-sdk
 from zizkadb import ZizkaDB
 
-async with ZizkaDB("agdb_live_xxxx") as db:  # your API key
+async with ZizkaDB("zizkadb_live_xxxx") as db:  # your API key
     # 1. Log what your agent does
     msg = await db.log(agent="support-bot", event="user_message",
         data={"text": "why is my bill $200?"})
@@ -203,7 +203,7 @@ import anthropic
 from zizkadb import ZizkaDB
 
 async def run(user_input: str):
-    async with ZizkaDB("agdb_live_xxxx") as db:
+    async with ZizkaDB("zizkadb_live_xxxx") as db:
         client = anthropic.AsyncAnthropic()
 
         # Log the user turn
@@ -234,7 +234,7 @@ from zizkadb import ZizkaDB
 import json
 
 async def run(user_input: str):
-    async with ZizkaDB("agdb_live_xxxx") as db:
+    async with ZizkaDB("zizkadb_live_xxxx") as db:
         client = AsyncOpenAI()
 
         turn = await db.log(
@@ -617,7 +617,7 @@ export default function LandingPage() {
             }}>
               <div><span style={{ color: '#666' }}>1.</span> Sign up at db.zizka.ai/signup</div>
               <div><span style={{ color: '#666' }}>2.</span> Settings → Create API key</div>
-              <div><span style={{ color: '#666' }}>3.</span> ZizkaDB(&quot;agdb_live_…&quot;) — done</div>
+              <div><span style={{ color: '#666' }}>3.</span> ZizkaDB(&quot;zizkadb_live_…&quot;) — done</div>
             </div>
             <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/signup" style={{ padding: '12px 28px', background: BRAND, color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
@@ -952,7 +952,7 @@ export default function LandingPage() {
             <div className="zdb-sdk-info" style={{ display: 'flex', gap: 12, marginTop: 16 }}>
               {[
                 { label: 'Base URL', value: 'https://db.zizka.ai/v1/' },
-                { label: 'Auth header', value: 'Authorization: Bearer agdb_live_...' },
+                { label: 'Auth header', value: 'Authorization: Bearer zizkadb_live_...' },
                 { label: 'Works with', value: 'Go, Rust, Ruby, Java, PHP, any HTTP client' },
               ].map(i => (
                 <div key={i.label} style={{ flex: 1, background: '#f8f8f8', borderRadius: 10, padding: '14px 16px', border: '1px solid #ebebeb' }}>

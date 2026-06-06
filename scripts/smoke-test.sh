@@ -5,7 +5,7 @@
 set -euo pipefail
 
 BASE="${1:-http://localhost:8000}"
-DEV_KEY="${DEV_API_KEY:-agdb_dev_local}"
+DEV_KEY="${DEV_API_KEY:-zizkadb_dev_local}"
 
 echo "→ Health"
 curl -sf "$BASE/health" | grep -q '"status":"ok"'

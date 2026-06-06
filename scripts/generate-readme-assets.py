@@ -131,7 +131,7 @@ def mcp_mock() -> Image.Image:
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_..."
+        "ZIZKADB_API_KEY": "zizkadb_..."
       }
     }
   }

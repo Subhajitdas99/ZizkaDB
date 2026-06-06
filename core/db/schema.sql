@@ -19,7 +19,7 @@ CREATE TABLE api_keys (
     key_id      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id   UUID NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
     key_hash    VARCHAR(255) NOT NULL UNIQUE,  -- SHA-256 hashed
-    key_prefix  VARCHAR(20) NOT NULL,           -- e.g. "agdb_live_xxxx" for display
+    key_prefix  VARCHAR(24) NOT NULL,           -- e.g. "zizkadb_live_xxxx" for display
     name        VARCHAR(255),
     created_at  TIMESTAMPTZ DEFAULT NOW(),
     last_used   TIMESTAMPTZ,

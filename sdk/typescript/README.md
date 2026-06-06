@@ -14,9 +14,9 @@ npm install zizkadb-sdk
 import { ZizkaDB } from 'zizkadb-sdk'
 
 // Managed cloud
-const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
+const db = new ZizkaDB({ apiKey: 'zizkadb_live_xxxx' })
 
-// Self-hosted — auto-sends local dev key (agdb_dev_local)
+// Self-hosted — auto-sends local dev key (zizkadb_dev_local)
 const local = new ZizkaDB({ host: 'http://localhost:8000' })
 
 const result = await local.log({

@@ -26,9 +26,9 @@ Templates: `basic`, `openai`, `langchain`, `crewai`, `mcp-cursor`.
 from zizkadb import ZizkaDB
 
 # Managed cloud (db.zizka.ai)
-db = ZizkaDB("agdb_live_xxxx")
+db = ZizkaDB("zizkadb_live_xxxx")
 
-# Self-hosted — auto-sends local dev key (agdb_dev_local)
+# Self-hosted — auto-sends local dev key (zizkadb_dev_local)
 db = ZizkaDB(host="http://localhost:8000")
 
 async with db:

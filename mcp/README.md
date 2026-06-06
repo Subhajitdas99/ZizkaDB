@@ -12,7 +12,7 @@ Paste into `~/.cursor/mcp.json` (or `.cursor/mcp.json` in your project), then re
     "zizkadb": {
       "command": "uvx",
       "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+      "env": { "ZIZKADB_API_KEY": "zizkadb_live_xxxx" }
     }
   }
 }
@@ -39,7 +39,7 @@ Get an API key at [db.zizka.ai/signup](https://db.zizka.ai/signup), then add Ziz
       "command": "uvx",
       "args": ["zizkadb-mcp"],
       "env": {
-        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+        "ZIZKADB_API_KEY": "zizkadb_live_xxxx"
       }
     }
   }
@@ -62,7 +62,7 @@ Get an API key at [db.zizka.ai/signup](https://db.zizka.ai/signup), then add Ziz
 }
 ```
 
-On localhost, the dev key (`agdb_dev_local`) is auto-injected — no API key needed for local development.
+On localhost, the dev key (`zizkadb_dev_local`) is auto-injected — no API key needed for local development.
 
 ## Environment variables
 

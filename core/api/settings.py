@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 
-from api.deps import get_tenant
+from api.deps import get_tenant, resolve_api_key_tenant
 from services.auth import decode_access_token
 from services.embedding_config import (
     embedding_config_for_response,
@@ -22,7 +22,7 @@ async def require_dashboard_session(
 ) -> dict:
     """JWT only — API keys cannot change tenant embedding settings."""
     token = credentials.credentials
-    if token.startswith("agdb_"):
+    if await resolve_api_key_tenant(token):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Sign in to the dashboard to manage embedding settings",

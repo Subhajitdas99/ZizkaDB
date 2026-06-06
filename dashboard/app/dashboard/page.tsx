@@ -20,6 +20,7 @@ export default function DashboardPage() {
   const [agents, setAgents] = useState<Agent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [lastSync, setLastSync] = useState<Date | null>(null)
 
   useEffect(() => {
     const token = getToken()
@@ -28,17 +29,38 @@ export default function DashboardPage() {
       return
     }
 
-    getAgents(token)
-      .then((data) => setAgents(Array.isArray(data) ? data : []))
-      .catch((e) => {
-        const msg = e instanceof Error ? e.message : 'Could not load your agents'
-        if (msg.includes('401') || msg.toLowerCase().includes('invalid token')) {
-          router.replace('/login')
-          return
-        }
-        setError(msg)
-      })
-      .finally(() => setLoading(false))
+    let cancelled = false
+
+    const loadAgents = (initial: boolean) => {
+      if (initial) setLoading(true)
+      getAgents(token)
+        .then((data) => {
+          if (!cancelled) {
+            setAgents(Array.isArray(data) ? data : [])
+            setLastSync(new Date())
+          }
+        })
+        .catch((e) => {
+          if (cancelled) return
+          const msg = e instanceof Error ? e.message : 'Could not load your agents'
+          if (msg.includes('401') || msg.toLowerCase().includes('invalid token')) {
+            router.replace('/login')
+            return
+          }
+          if (initial) setError(msg)
+        })
+        .finally(() => {
+          if (!cancelled && initial) setLoading(false)
+        })
+    }
+
+    loadAgents(true)
+    const interval = setInterval(() => loadAgents(false), 30_000)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [router])
 
   if (loading) return <PageShell><Skeleton /></PageShell>
@@ -68,9 +90,15 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-white font-semibold text-xl">Agents</h1>
           <p className="text-sm mt-0.5" style={{ color: '#737373' }}>
-            {agents.length} agent{agents.length !== 1 ? 's' : ''} tracked
+            {agents.length} agent{agents.length !== 1 ? 's' : ''} tracked · updates every 30s
           </p>
         </div>
+        {lastSync && (
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#525252' }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
+            Live · synced {formatDistanceToNow(lastSync, { addSuffix: true })}
+          </div>
+        )}
       </div>
 
       {agents.length === 0 ? (

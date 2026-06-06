@@ -256,12 +256,25 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   const [err, setErr]           = useState('')
 
   useEffect(() => {
-    adminOverview(token)
-      .then(setOverview)
-      .catch((e) => {
-        if (String(e?.message).includes('Not Found')) onLogout()
-        else setErr(e instanceof Error ? e.message : 'Failed to load')
-      })
+    let cancelled = false
+
+    const loadOverview = () => {
+      adminOverview(token)
+        .then((data) => { if (!cancelled) setOverview(data) })
+        .catch((e) => {
+          if (cancelled) return
+          if (String(e?.message).includes('Not Found')) onLogout()
+          else setErr(e instanceof Error ? e.message : 'Failed to load')
+        })
+    }
+
+    loadOverview()
+    const interval = setInterval(loadOverview, 30_000)
+
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
   }, [token, onLogout])
 
   return (
@@ -457,6 +470,8 @@ function SubscribersSection({ token }: { token: string }) {
   useEffect(() => {
     adminManagedOverview(token).then(setOverview).catch(() => {})
     load()
+    const interval = setInterval(load, 30_000)
+    return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, statusFilter])
 
@@ -595,9 +610,14 @@ function ManagedSection({ token }: { token: string }) {
   }
 
   useEffect(() => {
-    adminManagedOverview(token).then(setOverview).catch(() => {})
-    adminManagedUsage(token).then(setUsage).catch(() => {})
-    loadUsers()
+    const loadAll = () => {
+      adminManagedOverview(token).then(setOverview).catch(() => {})
+      adminManagedUsage(token).then(setUsage).catch(() => {})
+      loadUsers()
+    }
+    loadAll()
+    const interval = setInterval(loadAll, 30_000)
+    return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, filter])
 

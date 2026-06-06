@@ -5,6 +5,7 @@ from uuid import UUID
 from datetime import datetime
 import hashlib
 import json
+import logging
 
 from api.deps import get_tenant
 from db.connection import get_pool, get_qdrant
@@ -12,6 +13,7 @@ from services.embeddings import generate_embedding, event_to_text
 from qdrant_client.models import PointStruct
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────
@@ -87,42 +89,44 @@ async def log_event(
 
     event_id = str(row["event_id"])
 
-    # Generate and store embedding async (non-blocking)
-    text = event_to_text(body.event, body.data)
-    embedding = await generate_embedding(text, tenant_id)
+    # Embedding + vector index are best-effort — never fail the write after Postgres insert.
+    try:
+        text = event_to_text(body.event, body.data)
+        embedding = await generate_embedding(text, tenant_id)
+        if embedding:
+            await pool.execute(
+                "UPDATE events SET embedding = $1 WHERE event_id = $2",
+                embedding, row["event_id"],
+            )
+            qdrant = get_qdrant()
+            await qdrant.upsert(
+                collection_name="agent_events",
+                points=[PointStruct(
+                    id=event_id,
+                    vector=embedding,
+                    payload={
+                        "tenant_id": tenant_id,
+                        "agent_id": body.agent,
+                        "event_type": body.event,
+                        "timestamp": row["timestamp"].isoformat(),
+                    },
+                )],
+            )
+    except Exception as e:
+        logger.warning("Embedding/index skipped for event %s: %s", event_id, e)
 
-    if embedding:
-        # Store in Postgres
+    try:
         await pool.execute(
-            "UPDATE events SET embedding = $1 WHERE event_id = $2",
-            embedding, row["event_id"],
+            """
+            INSERT INTO usage_daily (tenant_id, date, events_written)
+            VALUES ($1, CURRENT_DATE, 1)
+            ON CONFLICT (tenant_id, date)
+            DO UPDATE SET events_written = usage_daily.events_written + 1
+            """,
+            tenant_id,
         )
-        # Store in Qdrant
-        qdrant = get_qdrant()
-        await qdrant.upsert(
-            collection_name="agent_events",
-            points=[PointStruct(
-                id=event_id,
-                vector=embedding,
-                payload={
-                    "tenant_id": tenant_id,
-                    "agent_id": body.agent,
-                    "event_type": body.event,
-                    "timestamp": row["timestamp"].isoformat(),
-                },
-            )],
-        )
-
-    # Meter usage
-    await pool.execute(
-        """
-        INSERT INTO usage_daily (tenant_id, date, events_written)
-        VALUES ($1, CURRENT_DATE, 1)
-        ON CONFLICT (tenant_id, date)
-        DO UPDATE SET events_written = usage_daily.events_written + 1
-        """,
-        tenant_id,
-    )
+    except Exception as e:
+        logger.warning("usage_daily meter skipped for tenant %s: %s", tenant_id, e)
 
     return {
         "event_id": event_id,

@@ -5,7 +5,7 @@
  * import { ZizkaDB } from 'zizkadb-sdk'
  *
  * // Cloud
- * const db = new ZizkaDB({ apiKey: 'agdb_live_xxxx' })
+ * const db = new ZizkaDB({ apiKey: 'zizkadb_live_xxxx' })
  *
  * // Self-hosted
  * const db = new ZizkaDB({ host: 'http://localhost:8000' })
@@ -41,7 +41,7 @@ export * from './types'
 const CLOUD_HOST = 'https://db.zizka.ai'
 const TELEMETRY_URL = 'https://db.zizka.ai/v1/telemetry'
 const SDK_VERSION = '0.2.1'
-const DEFAULT_DEV_API_KEY = 'agdb_dev_local'
+const DEFAULT_DEV_API_KEY = 'zizkadb_dev_local'
 
 let _telemetrySent = false
 
@@ -114,7 +114,7 @@ export class ZizkaDB {
     if (!config.apiKey && !config.host) {
       throw new ZizkaDBError(
         'Provide an apiKey (cloud) or host (self-hosted).\n' +
-        '  Cloud:       new ZizkaDB({ apiKey: "agdb_live_..." })\n' +
+        '  Cloud:       new ZizkaDB({ apiKey: "zizkadb_live_..." })\n' +
         '  Self-hosted: new ZizkaDB({ host: "http://localhost:8000" })',
       )
     }

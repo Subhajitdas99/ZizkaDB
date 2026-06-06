@@ -5,7 +5,7 @@ Usage:
     from zizkadb import ZizkaDB
 
     # Managed (cloud)
-    db = ZizkaDB("agdb_live_xxxx")
+    db = ZizkaDB("zizkadb_live_xxxx")
 
     # Self-hosted
     db = ZizkaDB(host="http://localhost:8000")
@@ -34,7 +34,7 @@ from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError
 from .telemetry import ping as _telemetry_ping
 
 CLOUD_HOST = "https://db.zizka.ai"
-DEFAULT_DEV_API_KEY = "agdb_dev_local"
+DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 
 
 class ZizkaDB:
@@ -42,7 +42,7 @@ class ZizkaDB:
     ZizkaDB client.
 
     Args:
-        api_key: Your ZizkaDB API key (starts with agdb_live_).
+        api_key: Your ZizkaDB API key (starts with zizkadb_live_).
                  Get one at db.zizka.ai
         host:    URL of your self-hosted instance.
                  Defaults to ZizkaDB Cloud if api_key is provided.
@@ -58,7 +58,7 @@ class ZizkaDB:
         if not api_key and not host:
             raise ZizkaDBError(
                 "Provide an api_key (cloud) or host (self-hosted).\n"
-                "  Cloud:       ZizkaDB('agdb_live_...')\n"
+                "  Cloud:       ZizkaDB('zizkadb_live_...')\n"
                 "  Self-hosted: ZizkaDB(host='http://localhost:8000')"
             )
 

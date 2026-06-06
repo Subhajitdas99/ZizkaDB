@@ -30,7 +30,7 @@
   <section class="slide on"><div class="tag">2026</div><h1>ZizkaDB</h1><p>The operational database for AI agents</p><p style="margin-top:20px">Raising <strong style="color:#fff">$200K</strong> · SAFE (uncapped) · db.zizka.ai</p><p class="fill" style="margin-top:8px;font-size:14px">founder@zizka.ai · [Founder name]</p></section>
   <section class="slide"><div class="tag">Problem</div><h2>Production agents are flying blind</h2><ul><li>No causal trail from bad output → cause</li><li>Chat logs ≠ state at time T</li><li>Silent behavior drift after model/prompt changes</li><li>Vendor memory outside your audit/GDPR boundary</li></ul></section>
   <section class="slide"><div class="tag">Solution</div><h2>One DB for agent decisions</h2><ul><li>Log · Why · At · Search · Baseline · Forget</li><li>Python, TypeScript, MCP, REST</li><li>Self-host (free) or managed cloud</li></ul></section>
-  <section class="slide"><div class="tag">Product</div><h2>Integrate in one line</h2><pre>db = ZizkaDB("agdb_live_xxxx")
+  <section class="slide"><div class="tag">Product</div><h2>Integrate in one line</h2><pre>db = ZizkaDB("zizkadb_live_xxxx")
 await db.log(..., parent_id=msg.event_id)
 await db.why(tool.event_id)</pre></section>
   <section class="slide"><div class="tag">Architecture</div><h2>Product on Postgres + Qdrant + Redis</h2><p>AGPL open core · Managed db.zizka.ai · Category, not a new RDBMS engine</p></section>

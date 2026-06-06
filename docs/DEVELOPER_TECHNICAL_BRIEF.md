@@ -145,7 +145,7 @@ Events are **append-only** with per-event checksums. Position as tamper-evident 
 
 ```python
 from zizkadb import ZizkaDB
-db = ZizkaDB("agdb_live_xxxx")  # API key from dashboard Settings
+db = ZizkaDB("zizkadb_live_xxxx")  # API key from dashboard Settings
 ```
 
 **Self-hosted:**
@@ -170,7 +170,7 @@ db = ZizkaDB(host="http://localhost:8000")  # or DEV_API_KEY for local dev
     "zizkadb": {
       "command": "uvx",
       "args": ["zizkadb-mcp"],
-      "env": { "ZIZKADB_API_KEY": "agdb_live_xxxx" }
+      "env": { "ZIZKADB_API_KEY": "zizkadb_live_xxxx" }
     }
   }
 }
@@ -199,7 +199,7 @@ Base URL: `https://db.zizka.ai` (self-host: your host, port **8000**).
 
 **Auth:** `Authorization: Bearer <token>`
 
-- Production API keys: prefix **`agdb_live_`** (or `agdb_` generally)  
+- Production API keys: prefix **`zizkadb_live_`**
 - Dashboard login uses JWT (OTP email)  
 - Self-host dev: optional `DEV_API_KEY` in `.env` (never in production)
 
@@ -275,7 +275,7 @@ Stack: postgres (pgvector), qdrant, redis, api. Dashboard optional (`npm run dev
 ## 10. Authentication & onboarding flow
 
 1. Sign up at **https://db.zizka.ai/signup** — email OTP, no password.  
-2. Dashboard → **Settings** → **Create API key** (`agdb_live_...`).  
+2. Dashboard → **Settings** → **Create API key** (`zizkadb_live_...`).  
 3. Paste key into SDK, MCP env, or `Authorization: Bearer` header.  
 4. Start logging from agent code or MCP.
 
@@ -372,7 +372,7 @@ import asyncio
 from zizkadb import ZizkaDB
 
 async def main():
-    db = ZizkaDB("agdb_live_xxxx")
+    db = ZizkaDB("zizkadb_live_xxxx")
     r = await db.log(agent="demo-bot", event="started", data={"env": "prod"})
     print(await db.why(r.event_id))
 
@@ -385,7 +385,7 @@ asyncio.run(main())
 
 ```bash
 curl -X POST https://db.zizka.ai/v1/events \
-  -H "Authorization: Bearer agdb_live_xxxx" \
+  -H "Authorization: Bearer zizkadb_live_xxxx" \
   -H "Content-Type: application/json" \
   -d '{"agent":"demo","event":"tool_call","data":{"tool":"search"}}'
 ```
@@ -435,7 +435,7 @@ When unsure: **“Let me connect you to engineering”** or point to **docs + Gi
 Product:     ZizkaDB — operational DB for AI agents
 URL:         db.zizka.ai
 Install:     pip install zizkadb-sdk | npm install zizkadb-sdk | uvx zizkadb-mcp
-Key prefix:  agdb_live_
+Key prefix:  zizkadb_live_
 Core APIs:   log · why · search · at · context_for · baseline · forget
 Different:   causal lineage · time travel · behavioral drift · self-host free
 Not:         vector-only DB · LangChain-only · LLM wrapper

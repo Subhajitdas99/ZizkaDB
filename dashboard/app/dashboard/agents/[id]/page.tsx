@@ -103,6 +103,7 @@ export default function AgentPage() {
   const [stats,      setStats]      = useState<Stats | null>(null)
   const [loading,    setLoading]    = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [lastSync,   setLastSync]   = useState<Date | null>(null)
 
   // ── events tab state ──────────────────────────────────────────────────────
   const [events,        setEvents]        = useState<Event[]>([])
@@ -161,8 +162,38 @@ export default function AgentPage() {
   }, [agentId])
 
   useEffect(() => {
-    Promise.all([loadStats(), loadEvents(1)]).finally(() => setLoading(false))
+    Promise.all([loadStats(), loadEvents(1)])
+      .then(() => setLastSync(new Date()))
+      .finally(() => setLoading(false))
   }, [loadStats, loadEvents])
+
+  // ── live polling (30s) ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (loading) return
+    let cancelled = false
+
+    const poll = async () => {
+      if (cancelled) return
+      await loadStats()
+      if (tab === 'events' && !searchResults) {
+        await loadEvents(1, false, filterSession, filterType)
+      }
+      if (tab === 'behavior') {
+        await loadBaseline(true)
+      }
+      if (tab === 'sessions') {
+        await loadSessions()
+      }
+      if (!cancelled) setLastSync(new Date())
+    }
+
+    const interval = setInterval(poll, 30_000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, tab, filterSession, filterType, searchResults, agentId])
 
   // ── refresh ───────────────────────────────────────────────────────────────
   const refresh = async () => {
@@ -173,6 +204,7 @@ export default function AgentPage() {
     setSearchResults(null)
     setSearchQ('')
     await Promise.all([loadStats(), loadEvents(1, false, filterSession, filterType)])
+    setLastSync(new Date())
     setRefreshing(false)
   }
 
@@ -254,8 +286,8 @@ export default function AgentPage() {
   }
 
   // ── behavior / baseline ───────────────────────────────────────────────────
-  const loadBaseline = async () => {
-    if (baseline) return
+  const loadBaseline = async (force = false) => {
+    if (!force && baseline) return
     setBaselineLoading(true)
     let token: string
     try { token = requireAuth() } catch { return }
@@ -287,7 +319,7 @@ export default function AgentPage() {
   const displayEvents = searchResults ?? events
 
   return (
-    <Shell agentId={agentId}>
+    <Shell agentId={agentId} lastSync={lastSync}>
       {/* ── Stats ── */}
       {stats && <StatsRow stats={stats} />}
 
@@ -1192,7 +1224,15 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   )
 }
 
-function Shell({ agentId, children }: { agentId: string; children: React.ReactNode }) {
+function Shell({
+  agentId,
+  lastSync,
+  children,
+}: {
+  agentId: string
+  lastSync?: Date | null
+  children: React.ReactNode
+}) {
   const router = useRouter()
   return (
     <div className="p-8 max-w-6xl mx-auto">
@@ -1205,7 +1245,15 @@ function Shell({ agentId, children }: { agentId: string; children: React.ReactNo
       >
         <ChevronLeft size={15} /> Agents
       </button>
-      <h1 className="text-white font-semibold text-xl font-mono mb-6">{agentId}</h1>
+      <div className="flex items-center justify-between gap-4 mb-6">
+        <h1 className="text-white font-semibold text-xl font-mono">{agentId}</h1>
+        {lastSync && (
+          <div className="flex items-center gap-2 text-xs shrink-0" style={{ color: '#525252' }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
+            Live · {formatDistanceToNow(lastSync, { addSuffix: true })}
+          </div>
+        )}
+      </div>
       {children}
     </div>
   )

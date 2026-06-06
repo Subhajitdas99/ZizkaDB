@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
-    if os.getenv("ENV", "development") == "development":
+    # Seed dev tenant for local self-host (ENV=development) or when DEV_API_KEY is set.
+    if os.getenv("ENV", "development") == "development" or os.getenv("DEV_API_KEY"):
         await _ensure_dev_tenant(get_pool())
     logger.info("ZizkaDB started")
     yield
