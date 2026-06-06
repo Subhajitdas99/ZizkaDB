@@ -20,6 +20,12 @@ classifiers = [
 ]
 dependencies = ["httpx>=0.27.0"]
 
+[project.scripts]
+zizkadb = "zizkadb.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
 [project.urls]
 Homepage = "https://db.zizka.ai"
 Documentation = "https://db.zizka.ai/docs"
@@ -29,3 +35,6 @@ Issues = "https://github.com/Zizka-ai/ZizkaDB/issues"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["zizkadb*"]
+
+[tool.setuptools.package-data]
+zizkadb = ["templates/**/*", "templates/**/.env.example"]

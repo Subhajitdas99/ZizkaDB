@@ -58,6 +58,21 @@ python scripts/demo-why.py
 
 ---
 
+## Start a new agent project
+
+```bash
+pip install zizkadb-sdk
+zizkadb init my-agent --template basic      # log + why()
+zizkadb init my-agent --template langchain  # LangChain callbacks
+zizkadb init my-agent --template crewai     # CrewAI logger
+zizkadb init my-agent --template openai     # AsyncOpenAI + parent_id
+zizkadb init my-agent --template mcp-cursor # Cursor MCP config
+```
+
+Framework adapters: [`integrations/`](integrations/) · runnable [`examples/`](examples/)
+
+---
+
 ## Development
 
 ### Prerequisites
@@ -157,7 +172,10 @@ Re-record a cinematic terminal GIF: [docs/assets/RECORD_DEMO.md](docs/assets/REC
 
 | Path | Getting started |
 |------|-----------------|
+| **Scaffold** | `zizkadb init my-agent -t langchain` |
 | Python | `pip install zizkadb-sdk` |
+| LangChain | `pip install zizkadb-langchain` — [integrations/langchain](integrations/langchain) |
+| CrewAI | `pip install zizkadb-crewai` — [integrations/crewai](integrations/crewai) |
 | TypeScript | `npm install zizkadb` — [sdk/typescript](sdk/typescript) |
 | MCP | `uvx zizkadb-mcp` — [mcp/README.md](mcp/README.md) |
 | REST | OpenAPI at `/swagger` |

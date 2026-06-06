@@ -11,12 +11,14 @@ import {
   McpSection,
   SelfHostSection,
   ConceptsSection,
+  FrameworksSection,
 } from './sections'
 
 const API_EXPLORER_URL = '/swagger'
 
 type Section =
   | 'overview'
+  | 'frameworks'
   | 'python'
   | 'typescript'
   | 'rest'
@@ -26,6 +28,7 @@ type Section =
 
 const NAV: { id: Section; label: string; group: 'start' | 'integrate' | 'ref' }[] = [
   { id: 'overview',   label: 'Overview',       group: 'start' },
+  { id: 'frameworks', label: 'Frameworks',     group: 'integrate' },
   { id: 'python',     label: 'Python SDK',     group: 'integrate' },
   { id: 'typescript', label: 'TypeScript SDK', group: 'integrate' },
   { id: 'rest',       label: 'REST API',       group: 'integrate' },
@@ -36,6 +39,7 @@ const NAV: { id: Section; label: string; group: 'start' | 'integrate' | 'ref' }[
 
 const MOBILE_LABELS: Record<Section, string> = {
   overview: 'Overview',
+  frameworks: 'Frameworks',
   python: 'Python',
   typescript: 'TypeScript',
   rest: 'REST',
@@ -67,7 +71,7 @@ export default function DocsPage() {
   const [section, setSection] = useState<Section>('overview')
 
   const navigate = (id: string) => {
-    const valid: Section[] = ['overview', 'python', 'typescript', 'rest', 'mcp', 'selfhost', 'concepts']
+    const valid: Section[] = ['overview', 'frameworks', 'python', 'typescript', 'rest', 'mcp', 'selfhost', 'concepts']
     if (valid.includes(id as Section)) setSection(id as Section)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -128,6 +132,7 @@ export default function DocsPage() {
 
         <main className="docs-main" style={S.main}>
           {section === 'overview' && <OverviewSection onNavigate={navigate} />}
+          {section === 'frameworks' && <FrameworksSection />}
           {section === 'python' && <PythonSection />}
           {section === 'typescript' && <TypeScriptSection />}
           {section === 'rest' && <RestSection />}

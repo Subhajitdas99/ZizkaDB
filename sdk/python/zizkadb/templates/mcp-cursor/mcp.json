@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": {
+        "ZIZKADB_API_KEY": "agdb_live_xxxx"
+      }
+    }
+  }
+}

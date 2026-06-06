@@ -110,6 +110,7 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
       <h2 style={{ ...S.h2, marginTop: 24 }}>Choose your integration</h2>
       <div style={{ display: 'grid', gap: 12, marginBottom: 40 }}>
         {[
+          { id: 'frameworks', title: 'Framework starters', desc: 'zizkadb init — LangChain, CrewAI, OpenAI, MCP templates', time: '~2 min' },
           { id: 'python', title: 'Python SDK', desc: 'FastAPI, LangChain, notebooks, batch jobs. pip install zizkadb-sdk', time: '~5 min' },
           { id: 'typescript', title: 'TypeScript SDK', desc: 'Node, Bun, Deno, edge workers. npm install zizkadb-sdk', time: '~5 min' },
           { id: 'mcp', title: 'MCP server', desc: 'Claude Desktop, Cursor, Windsurf — no app code changes', time: '~2 min' },
@@ -900,6 +901,107 @@ bash infra/deploy-selfhost.sh
   )
 }
 
+// ── Frameworks (LangChain, CrewAI, OpenAI) ───────────────────────────────────
+
+export function FrameworksSection() {
+  return (
+    <div>
+      <h1 style={S.h1}>Framework integrations</h1>
+      <p style={S.lead}>
+        Official adapters and starters — same causal <code style={{ fontFamily: 'monospace' }}>log()</code> +{' '}
+        <code style={{ fontFamily: 'monospace' }}>parent_id</code> pattern for every stack.
+      </p>
+
+      <Callout type="tip">
+        <strong>Fastest start:</strong>{' '}
+        <code style={{ fontFamily: 'monospace' }}>pip install zizkadb-sdk</code> then{' '}
+        <code style={{ fontFamily: 'monospace' }}>zizkadb init my-agent --template langchain</code>.
+        Templates: <code style={{ fontFamily: 'monospace' }}>basic</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>openai</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>langchain</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>crewai</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>mcp-cursor</code>.
+      </Callout>
+
+      <h2 style={{ ...S.h2, marginTop: 24 }}>Scaffold a project</h2>
+      <Code lang="bash">{`pip install zizkadb-sdk
+zizkadb init my-agent --template basic
+cd my-agent && cp .env.example .env
+pip install -r requirements.txt
+python agent.py`}</Code>
+
+      <h2 style={S.h2}>OpenAI / Anthropic (SDK)</h2>
+      <p style={S.p}>
+        Use <code style={{ fontFamily: 'monospace' }}>AsyncOpenAI</code> or{' '}
+        <code style={{ fontFamily: 'monospace' }}>AsyncAnthropic</code> inside{' '}
+        <code style={{ fontFamily: 'monospace' }}>async with ZizkaDB(...)</code>. Log the user turn, call the model, log the reply with{' '}
+        <code style={{ fontFamily: 'monospace' }}>parent_id=turn.event_id</code>.
+      </p>
+      <Code lang="python">{`# pip install zizkadb-sdk anthropic
+import anthropic
+from zizkadb import ZizkaDB
+
+async def run(user_input: str):
+    async with ZizkaDB("agdb_live_...") as db:
+        client = anthropic.AsyncAnthropic()
+        turn = await db.log(agent="my-bot", event="user_message", data={"text": user_input})
+        response = await client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1024,
+            messages=[{"role": "user", "content": user_input}],
+        )
+        await db.log(
+            agent="my-bot",
+            event="assistant_response",
+            data={"text": response.content[0].text},
+            parent_id=turn.event_id,
+        )`}</Code>
+
+      <h2 style={S.h2}>LangChain</h2>
+      <p style={S.p}>
+        Install <code style={{ fontFamily: 'monospace' }}>zizkadb-langchain</code> (monorepo:{' '}
+        <code style={{ fontFamily: 'monospace' }}>pip install -e integrations/langchain</code>).
+        Pass <code style={{ fontFamily: 'monospace' }}>ZizkaDBCallbackHandler</code> in{' '}
+        <code style={{ fontFamily: 'monospace' }}>config={'{'}&quot;callbacks&quot;: [handler]{'}'}</code>.
+      </p>
+      <Code lang="python">{`pip install zizkadb-sdk zizkadb-langchain langchain-openai
+
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+from zizkadb import ZizkaDB
+from zizkadb_langchain import ZizkaDBCallbackHandler
+
+async with ZizkaDB("agdb_live_...") as db:
+    handler = ZizkaDBCallbackHandler(db, agent="my-bot")
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    await llm.ainvoke([HumanMessage(content="Hello")], config={"callbacks": [handler]})
+    (await db.why(handler.last_event_id)).print()`}</Code>
+
+      <h2 style={S.h2}>CrewAI</h2>
+      <p style={S.p}>
+        <code style={{ fontFamily: 'monospace' }}>ZizkaDBCrewLogger</code> logs kickoff, tasks, and final output with lineage.
+      </p>
+      <Code lang="python">{`pip install zizkadb-sdk zizkadb-crewai crewai
+
+from zizkadb import ZizkaDB
+from zizkadb_crewai import ZizkaDBCrewLogger
+
+async with ZizkaDB("agdb_live_...") as db:
+    logger = ZizkaDBCrewLogger(db, agent="research-crew")
+    kickoff = await logger.log_kickoff(goal="Research topic X")
+    output = crew.kickoff()
+    await logger.log_output(str(output), parent_id=kickoff.event_id)`}</Code>
+
+      <h2 style={S.h2}>Examples in the repo</h2>
+      <p style={S.p}>
+        Runnable trees under <code style={{ fontFamily: 'monospace' }}>examples/</code> on{' '}
+        <a href="https://github.com/Zizka-ai/ZizkaDB" style={{ color: '#1e40af' }}>GitHub</a>:
+        minimal-python, openai-agent, langchain-agent, crewai-agent, mcp-cursor.
+      </p>
+    </div>
+  )
+}
+
 // ── Concepts ──────────────────────────────────────────────────────────────────
 
 export function ConceptsSection({ onNavigate }: { onNavigate: (s: string) => void }) {
@@ -910,9 +1012,10 @@ export function ConceptsSection({ onNavigate }: { onNavigate: (s: string) => voi
         How ZizkaDB thinks about agent memory — events, causality, search, replay, and drift.
       </p>
       <Callout type="info">
-        Runnable Python examples live in the{' '}
-        <button type="button" onClick={() => onNavigate('python')} style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>
-          Python SDK guide
+        Runnable examples: <code style={{ fontFamily: 'monospace' }}>zizkadb init my-agent</code> or the{' '}
+        <code style={{ fontFamily: 'monospace' }}>examples/</code> folder on GitHub. Framework guides in{' '}
+        <button type="button" onClick={() => onNavigate('frameworks')} style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>
+          Framework integrations
         </button>.
       </Callout>
 

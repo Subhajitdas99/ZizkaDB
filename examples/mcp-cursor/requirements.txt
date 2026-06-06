@@ -1,0 +1,3 @@
+# MCP runs via uvx — no Python deps required for the IDE path.
+# Optional local API stack:
+# bash ../../../scripts/setup-local.sh  (from ZizkaDB repo root)

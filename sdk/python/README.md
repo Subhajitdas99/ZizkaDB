@@ -10,6 +10,16 @@ pip install zizkadb-sdk
 
 > **Note:** There is an unrelated package called `agentdb` on PyPI. Install **`zizkadb-sdk`**. Import: `from zizkadb import ZizkaDB`.
 
+## Scaffold a project
+
+```bash
+pip install zizkadb-sdk
+zizkadb init my-agent --template basic
+cd my-agent && cp .env.example .env && pip install -r requirements.txt
+```
+
+Templates: `basic`, `openai`, `langchain`, `crewai`, `mcp-cursor`.
+
 ## Quickstart
 
 ```python

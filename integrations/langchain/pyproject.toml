@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zizkadb-langchain"
+version = "0.1.0"
+description = "LangChain callbacks for ZizkaDB causal agent logging"
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+requires-python = ">=3.10"
+dependencies = [
+    "zizkadb-sdk>=0.2.1",
+    "langchain-core>=0.3.0",
+]
+
+[project.urls]
+Repository = "https://github.com/Zizka-ai/ZizkaDB"
+Documentation = "https://db.zizka.ai/docs"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["zizkadb_langchain*"]

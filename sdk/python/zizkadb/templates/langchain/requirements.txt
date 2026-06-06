@@ -1,0 +1,4 @@
+zizkadb-sdk>=0.2.1
+zizkadb-langchain @ git+https://github.com/Zizka-ai/ZizkaDB.git@main#subdirectory=integrations/langchain
+langchain-openai>=0.2.0
+langchain-core>=0.3.0

@@ -1,0 +1,4 @@
+zizkadb-sdk>=0.2.1
+zizkadb-crewai @ git+https://github.com/Zizka-ai/ZizkaDB.git@main#subdirectory=integrations/crewai
+crewai>=0.80.0
+langchain-openai>=0.2.0

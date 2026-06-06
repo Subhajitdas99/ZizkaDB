@@ -1,0 +1,30 @@
+# ZizkaDB examples
+
+Runnable reference implementations. Fastest path: **`zizkadb init`** (ships with the SDK).
+
+```bash
+pip install zizkadb-sdk
+zizkadb init my-agent --template basic      # log + why()
+zizkadb init my-agent --template openai     # AsyncOpenAI + parent_id
+zizkadb init my-agent --template langchain  # callback handler
+zizkadb init my-agent --template crewai     # crew logger
+zizkadb init my-agent --template mcp-cursor # ~/.cursor/mcp.json
+```
+
+## In this folder
+
+| Example | Description |
+|---------|-------------|
+| [minimal-python](minimal-python/) | `log` → `parent_id` → `why()` |
+| [openai-agent](openai-agent/) | AsyncOpenAI causal logging |
+| [langchain-agent](langchain-agent/) | LangChain callbacks |
+| [crewai-agent](crewai-agent/) | CrewAI kickoff + output |
+| [mcp-cursor](mcp-cursor/) | MCP config for Cursor |
+
+## Local API
+
+```bash
+bash scripts/setup-local.sh
+export ZIZKADB_HOST=http://localhost:8000
+python examples/minimal-python/agent.py
+```

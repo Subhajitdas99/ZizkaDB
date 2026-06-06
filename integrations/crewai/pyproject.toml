@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zizkadb-crewai"
+version = "0.1.0"
+description = "CrewAI logging helpers for ZizkaDB causal agent memory"
+readme = "README.md"
+license = { text = "AGPL-3.0" }
+requires-python = ">=3.10"
+dependencies = [
+    "zizkadb-sdk>=0.2.1",
+]
+
+[project.urls]
+Repository = "https://github.com/Zizka-ai/ZizkaDB"
+Documentation = "https://db.zizka.ai/docs"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["zizkadb_crewai*"]
