@@ -48,6 +48,11 @@ function isLocalHost(host: string): boolean {
   return h.includes('localhost') || h.includes('127.0.0.1') || h.includes('0.0.0.0')
 }
 
+/** ZIZKADB_API_KEY preferred; AGENTDB_API_KEY for legacy managed-cloud users. */
+function apiKeyFromEnv(): string | undefined {
+  return process.env.ZIZKADB_API_KEY ?? process.env.AGENTDB_API_KEY
+}
+
 let _telemetrySent = false
 
 function _sendTelemetry(mode: 'cloud' | 'self-hosted'): void {
@@ -131,11 +136,11 @@ export class ZizkaDB {
     if (!apiKey && config.host) {
       if (isLocalHost(config.host)) {
         apiKey =
-          process.env.ZIZKADB_API_KEY ??
+          apiKeyFromEnv() ??
           process.env.DEV_API_KEY ??
           DEFAULT_DEV_API_KEY
       } else {
-        apiKey = process.env.ZIZKADB_API_KEY
+        apiKey = apiKeyFromEnv()
         if (!apiKey) {
           throw new ZizkaDBError(
             `Cloud host requires an apiKey or ZIZKADB_API_KEY env var. Host: ${config.host}`,

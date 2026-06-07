@@ -239,7 +239,10 @@ export default function SettingsPage() {
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-4">Create API key</h2>
         <p className="text-xs mb-3" style={{ color: '#525252' }}>
-          Keys start with <span className="font-mono">zizkadb_live_</span> — use in SDK, MCP, or REST. Your dashboard updates live as events arrive.
+          New keys use <span className="font-mono">zizkadb_live_</span>. Legacy{' '}
+          <span className="font-mono">agdb_live_</span> keys from earlier signups still work — no need to rotate.
+          Use the same key in SDK, MCP (<span className="font-mono">ZIZKADB_API_KEY</span> or{' '}
+          <span className="font-mono">AGENTDB_API_KEY</span>), or REST.
         </p>
         <form onSubmit={handleCreate} className="flex gap-3">
           <input

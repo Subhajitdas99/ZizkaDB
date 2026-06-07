@@ -30,7 +30,11 @@ def generate_api_key() -> tuple[str, str]:
 
 
 async def verify_api_key(raw_key: str) -> dict | None:
-    """Returns tenant info if valid, None if invalid."""
+    """Returns tenant info if valid, None if invalid.
+
+    Legacy managed-cloud keys (``agdb_live_...``) and new keys
+    (``zizkadb_live_...``) both authenticate the same way.
+    """
     key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
     pool = get_pool()
 

@@ -27,7 +27,12 @@ def looks_like_jwt(token: str) -> bool:
 
 
 async def resolve_api_key_tenant(token: str) -> dict | None:
-    """Verify API key by hash — works for all issued keys regardless of prefix."""
+    """Verify API key by hash.
+
+    Works for every key ever issued on managed cloud, including legacy
+    ``agdb_live_...`` keys from the AgentDB era and new ``zizkadb_live_...``
+    keys. Prefix is not checked — only the SHA-256 hash in ``api_keys``.
+    """
     if looks_like_jwt(token):
         return None
     return await verify_api_key(token)

@@ -42,12 +42,17 @@ def _is_local_host(host: str) -> bool:
     return "localhost" in h or "127.0.0.1" in h or "0.0.0.0" in h
 
 
+def _api_key_from_env() -> str | None:
+    """ZIZKADB_API_KEY preferred; AGENTDB_API_KEY kept for legacy managed users."""
+    return os.getenv("ZIZKADB_API_KEY") or os.getenv("AGENTDB_API_KEY")
+
+
 class ZizkaDB:
     """
     ZizkaDB client.
 
     Args:
-        api_key: Your ZizkaDB API key (starts with zizkadb_live_).
+        api_key: Your ZizkaDB API key (zizkadb_live_... or legacy agdb_live_...).
                  Get one at db.zizka.ai
         host:    URL of your self-hosted instance.
                  Defaults to ZizkaDB Cloud if api_key is provided.
@@ -70,12 +75,12 @@ class ZizkaDB:
         if not api_key and host:
             if _is_local_host(host):
                 api_key = (
-                    os.getenv("ZIZKADB_API_KEY")
+                    _api_key_from_env()
                     or os.getenv("DEV_API_KEY")
                     or DEFAULT_DEV_API_KEY
                 )
             else:
-                api_key = os.getenv("ZIZKADB_API_KEY")
+                api_key = _api_key_from_env()
                 if not api_key:
                     raise ZizkaDBError(
                         "Cloud host requires an API key.\n"

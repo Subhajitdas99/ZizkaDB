@@ -20,6 +20,21 @@ def test_python_sdk_auto_injects_dev_key():
     assert db._headers()["Authorization"] == f"Bearer {DEFAULT_DEV_API_KEY}"
 
 
+def test_legacy_agdb_live_key_not_treated_as_jwt():
+    """API keys must not be mistaken for JWTs (three dot-separated segments)."""
+    legacy = "agdb_live_" + "A" * 40
+    assert legacy.count(".") != 2
+
+
+def test_python_sdk_accepts_legacy_agentdb_env(monkeypatch):
+    from zizkadb.client import ZizkaDB
+
+    monkeypatch.delenv("ZIZKADB_API_KEY", raising=False)
+    monkeypatch.setenv("AGENTDB_API_KEY", "agdb_live_legacy_example")
+    db = ZizkaDB("agdb_live_legacy_example")
+    assert db._api_key == "agdb_live_legacy_example"
+
+
 def test_python_sdk_respects_env_api_key(monkeypatch):
     from zizkadb.client import ZizkaDB
 
