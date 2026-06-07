@@ -40,8 +40,13 @@ export * from './types'
 
 const CLOUD_HOST = 'https://db.zizka.ai'
 const TELEMETRY_URL = 'https://db.zizka.ai/v1/telemetry'
-const SDK_VERSION = '0.2.1'
+const SDK_VERSION = '0.2.3'
 const DEFAULT_DEV_API_KEY = 'zizkadb_dev_local'
+
+function isLocalHost(host: string): boolean {
+  const h = host.toLowerCase()
+  return h.includes('localhost') || h.includes('127.0.0.1') || h.includes('0.0.0.0')
+}
 
 let _telemetrySent = false
 
@@ -122,13 +127,22 @@ export class ZizkaDB {
     this.baseUrl = config.host?.replace(/\/$/, '') ?? CLOUD_HOST
     this.timeout = config.timeout ?? 10_000
 
-    const apiKey =
-      config.apiKey ??
-      (config.host
-        ? (process.env.ZIZKADB_API_KEY ??
+    let apiKey = config.apiKey
+    if (!apiKey && config.host) {
+      if (isLocalHost(config.host)) {
+        apiKey =
+          process.env.ZIZKADB_API_KEY ??
           process.env.DEV_API_KEY ??
-          DEFAULT_DEV_API_KEY)
-        : undefined)
+          DEFAULT_DEV_API_KEY
+      } else {
+        apiKey = process.env.ZIZKADB_API_KEY
+        if (!apiKey) {
+          throw new ZizkaDBError(
+            `Cloud host requires an apiKey or ZIZKADB_API_KEY env var. Host: ${config.host}`,
+          )
+        }
+      }
+    }
 
     this.headers = {
       'Content-Type': 'application/json',

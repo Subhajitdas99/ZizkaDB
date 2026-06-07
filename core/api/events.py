@@ -3,17 +3,13 @@ from pydantic import BaseModel
 from typing import Any
 from uuid import UUID
 from datetime import datetime
-import hashlib
 import json
-import logging
 
 from api.deps import get_tenant
-from db.connection import get_pool, get_qdrant
-from services.embeddings import generate_embedding, event_to_text
-from qdrant_client.models import PointStruct
+from db.connection import get_pool
+from services.event_write import write_event
 
 router = APIRouter()
-logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────
@@ -49,91 +45,15 @@ async def log_event(
     body: LogEventRequest,
     tenant: dict = Depends(get_tenant),
 ):
-    pool = get_pool()
-    tenant_id = tenant["tenant_id"]
-
-    # Upsert agent
-    await pool.execute(
-        """
-        INSERT INTO agents (agent_id, tenant_id)
-        VALUES ($1, $2)
-        ON CONFLICT (agent_id, tenant_id)
-        DO UPDATE SET last_seen = NOW(), event_count = agents.event_count + 1
-        """,
-        body.agent, tenant_id,
+    return await write_event(
+        tenant_id=tenant["tenant_id"],
+        agent=body.agent,
+        event=body.event,
+        data=body.data,
+        parent_id=body.parent_id,
+        session_id=body.session_id,
+        metadata=body.metadata,
     )
-
-    # Compute checksum
-    content = json.dumps({"event": body.event, "data": body.data}, sort_keys=True)
-    checksum = hashlib.sha256(content.encode()).hexdigest()
-
-    # Insert event
-    row = await pool.fetchrow(
-        """
-        INSERT INTO events (
-            tenant_id, agent_id, event_type, data,
-            parent_event_id, session_id, checksum, metadata
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING event_id, timestamp, sequence_no
-        """,
-        tenant_id,
-        body.agent,
-        body.event,
-        json.dumps(body.data),
-        body.parent_id,
-        body.session_id,
-        checksum,
-        json.dumps(body.metadata) if body.metadata else None,
-    )
-
-    event_id = str(row["event_id"])
-
-    # Embedding + vector index are best-effort — never fail the write after Postgres insert.
-    try:
-        text = event_to_text(body.event, body.data)
-        embedding = await generate_embedding(text, tenant_id)
-        if embedding:
-            await pool.execute(
-                "UPDATE events SET embedding = $1 WHERE event_id = $2",
-                embedding, row["event_id"],
-            )
-            qdrant = get_qdrant()
-            await qdrant.upsert(
-                collection_name="agent_events",
-                points=[PointStruct(
-                    id=event_id,
-                    vector=embedding,
-                    payload={
-                        "tenant_id": tenant_id,
-                        "agent_id": body.agent,
-                        "event_type": body.event,
-                        "timestamp": row["timestamp"].isoformat(),
-                    },
-                )],
-            )
-    except Exception as e:
-        logger.warning("Embedding/index skipped for event %s: %s", event_id, e)
-
-    try:
-        await pool.execute(
-            """
-            INSERT INTO usage_daily (tenant_id, date, events_written)
-            VALUES ($1, CURRENT_DATE, 1)
-            ON CONFLICT (tenant_id, date)
-            DO UPDATE SET events_written = usage_daily.events_written + 1
-            """,
-            tenant_id,
-        )
-    except Exception as e:
-        logger.warning("usage_daily meter skipped for tenant %s: %s", tenant_id, e)
-
-    return {
-        "event_id": event_id,
-        "timestamp": row["timestamp"].isoformat(),
-        "sequence_no": row["sequence_no"],
-        "checksum": checksum,
-    }
 
 
 # ─────────────────────────────────────────

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getApiKeys, createApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings } from '@/lib/api'
+import { getApiKeys, createApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
 import { Key, Plus, Copy, Check } from 'lucide-react'
 
@@ -30,6 +30,9 @@ export default function SettingsPage() {
   const [usePlatformKey, setUsePlatformKey] = useState(true)
   const [customApiKey, setCustomApiKey] = useState('')
   const [embReady, setEmbReady] = useState(false)
+  const [testBusy, setTestBusy] = useState(false)
+  const [testMsg, setTestMsg] = useState('')
+  const [testErr, setTestErr] = useState('')
 
   useEffect(() => {
     let token: string
@@ -194,6 +197,43 @@ export default function SettingsPage() {
           </button>
         </div>
       )}
+
+      {/* Connection test */}
+      <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
+        <h2 className="text-sm font-medium text-white mb-1">Test event logging</h2>
+        <p className="text-xs mb-4" style={{ color: '#737373' }}>
+          Sends a test event to your tenant using your dashboard session. If this works but SDK/MCP does not,
+          your API key env var is missing or wrong.
+        </p>
+        <button
+          type="button"
+          disabled={testBusy}
+          onClick={async () => {
+            setTestBusy(true)
+            setTestErr('')
+            setTestMsg('')
+            try {
+              const token = requireAuth()
+              const res = await sendTestEvent(token)
+              setTestMsg(res.message ?? `Event ${res.event_id} recorded`)
+            } catch (e) {
+              setTestErr(e instanceof Error ? e.message : 'Test failed')
+            } finally {
+              setTestBusy(false)
+            }
+          }}
+          className="px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40"
+          style={{ background: '#22c55e' }}
+        >
+          {testBusy ? 'Sending…' : 'Send test event'}
+        </button>
+        {testMsg && (
+          <p className="text-xs mt-3" style={{ color: '#22c55e' }}>{testMsg}</p>
+        )}
+        {testErr && (
+          <p className="text-xs mt-3" style={{ color: '#f87171' }}>{testErr}</p>
+        )}
+      </div>
 
       {/* Create new key */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>

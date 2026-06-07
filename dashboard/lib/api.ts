@@ -34,6 +34,10 @@ export async function getAgents(token: string) {
   return apiFetch('/v1/agents', token)
 }
 
+export async function sendTestEvent(token: string) {
+  return apiFetch('/v1/auth/test-event', token, { method: 'POST' })
+}
+
 export async function getAgentStats(token: string, agentId: string) {
   return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/stats`, token)
 }

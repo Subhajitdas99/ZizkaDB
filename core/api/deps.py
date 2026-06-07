@@ -48,10 +48,16 @@ async def get_tenant(
             )
         return _DEV_TENANT
 
-    # API key (zizkadb_live_* — verified by hash, not prefix)
+    # API key (verified by hash, not prefix)
     tenant = await resolve_api_key_tenant(token)
     if tenant:
         return tenant
+
+    if not looks_like_jwt(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or revoked API key",
+        )
 
     # JWT (dashboard sessions)
     try:

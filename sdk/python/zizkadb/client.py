@@ -37,6 +37,11 @@ CLOUD_HOST = "https://db.zizka.ai"
 DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 
 
+def _is_local_host(host: str) -> bool:
+    h = host.lower()
+    return "localhost" in h or "127.0.0.1" in h or "0.0.0.0" in h
+
+
 class ZizkaDB:
     """
     ZizkaDB client.
@@ -63,11 +68,20 @@ class ZizkaDB:
             )
 
         if not api_key and host:
-            api_key = (
-                os.getenv("ZIZKADB_API_KEY")
-                or os.getenv("DEV_API_KEY")
-                or DEFAULT_DEV_API_KEY
-            )
+            if _is_local_host(host):
+                api_key = (
+                    os.getenv("ZIZKADB_API_KEY")
+                    or os.getenv("DEV_API_KEY")
+                    or DEFAULT_DEV_API_KEY
+                )
+            else:
+                api_key = os.getenv("ZIZKADB_API_KEY")
+                if not api_key:
+                    raise ZizkaDBError(
+                        "Cloud host requires an API key.\n"
+                        "  ZizkaDB('zizkadb_live_...') or set ZIZKADB_API_KEY in your environment.\n"
+                        f"  Host: {host}"
+                    )
 
         self._api_key = api_key
         self._base_url = host.rstrip("/") if host else CLOUD_HOST

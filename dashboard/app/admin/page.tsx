@@ -269,7 +269,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     }
 
     loadOverview()
-    const interval = setInterval(loadOverview, 30_000)
+    const interval = setInterval(loadOverview, 10_000)
 
     return () => {
       cancelled = true
@@ -470,7 +470,7 @@ function SubscribersSection({ token }: { token: string }) {
   useEffect(() => {
     adminManagedOverview(token).then(setOverview).catch(() => {})
     load()
-    const interval = setInterval(load, 30_000)
+    const interval = setInterval(load, 10_000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, statusFilter])
@@ -616,7 +616,7 @@ function ManagedSection({ token }: { token: string }) {
       loadUsers()
     }
     loadAll()
-    const interval = setInterval(loadAll, 30_000)
+    const interval = setInterval(loadAll, 10_000)
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, filter])

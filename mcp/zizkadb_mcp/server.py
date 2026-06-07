@@ -34,7 +34,13 @@ DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 _HOST = os.getenv("ZIZKADB_HOST", "https://db.zizka.ai").rstrip("/")
 _KEY = os.getenv("ZIZKADB_API_KEY", "")
 
-if not _KEY and _HOST and ("localhost" in _HOST or "127.0.0.1" in _HOST):
+
+def _is_local_host(host: str) -> bool:
+    h = host.lower()
+    return "localhost" in h or "127.0.0.1" in h or "0.0.0.0" in h
+
+
+if not _KEY and _HOST and _is_local_host(_HOST):
     _KEY = os.getenv("DEV_API_KEY", DEFAULT_DEV_API_KEY)
 
 # ── Anonymous telemetry (opt-out: ZIZKADB_TELEMETRY=false) ────────────────────
@@ -83,9 +89,16 @@ threading.Thread(target=_telemetry_ping, daemon=True).start()
 
 
 async def _api(method: str, path: str, body: dict | None = None) -> dict:
-    headers = {"Content-Type": "application/json"}
-    if _KEY:
-        headers["Authorization"] = f"Bearer {_KEY}"
+    if not _KEY:
+        return {
+            "error": (
+                "ZIZKADB_API_KEY is not set. "
+                "Sign up at https://db.zizka.ai → Settings → Create API key, "
+                "then add it to your MCP config env."
+            ),
+            "status": 401,
+        }
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {_KEY}"}
 
     async with httpx.AsyncClient(timeout=15) as client:
         url = f"{_HOST}/v1{path}"

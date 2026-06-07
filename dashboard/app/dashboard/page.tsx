@@ -55,7 +55,7 @@ export default function DashboardPage() {
     }
 
     loadAgents(true)
-    const interval = setInterval(() => loadAgents(false), 30_000)
+    const interval = setInterval(() => loadAgents(false), 10_000)
 
     return () => {
       cancelled = true
@@ -90,7 +90,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-white font-semibold text-xl">Agents</h1>
           <p className="text-sm mt-0.5" style={{ color: '#737373' }}>
-            {agents.length} agent{agents.length !== 1 ? 's' : ''} tracked · updates every 30s
+            {agents.length} agent{agents.length !== 1 ? 's' : ''} tracked · updates every 10s
           </p>
         </div>
         {lastSync && (

@@ -6,6 +6,7 @@ from services.auth import request_otp, verify_otp, generate_api_key, _issue_toke
 from api.deps import get_tenant
 from fastapi import Depends
 from db.connection import get_pool
+from services.event_write import write_event
 
 router = APIRouter()
 
@@ -141,6 +142,24 @@ async def _ensure_dev_tenant(pool) -> None:
         """,
         _DEV_USER_ID, _DEV_EMAIL, _DEV_TENANT_ID,
     )
+
+
+@router.post("/test-event")
+async def test_event(tenant: dict = Depends(get_tenant)):
+    """
+    Log a test event using the dashboard session (JWT).
+    Verifies the tenant pipeline without an API key.
+    """
+    result = await write_event(
+        tenant_id=tenant["tenant_id"],
+        agent="dashboard-connection-test",
+        event="connection_test",
+        data={"source": "dashboard_settings", "ok": True},
+    )
+    return {
+        **result,
+        "message": "Test event recorded. Check Agents — dashboard-connection-test should appear within seconds.",
+    }
 
 
 @router.get("/api-keys")
