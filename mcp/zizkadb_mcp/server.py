@@ -31,6 +31,13 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("ZizkaDB")
 
+try:
+    from importlib.metadata import version as _pkg_version
+
+    __version__ = _pkg_version("zizkadb-mcp")
+except Exception:
+    __version__ = "0.1.3"
+
 DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 _HOST = (
     os.getenv("ZIZKADB_HOST")
@@ -74,7 +81,7 @@ def _telemetry_ping() -> None:
         payload = json.dumps({
             "install_id":  _get_install_id(),
             "sdk":         "mcp",
-            "sdk_version": "0.1.1",
+            "sdk_version": __version__,
             "python":      f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
             "os":          platform.system(),
             "mode":        mode,

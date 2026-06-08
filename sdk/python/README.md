@@ -2,6 +2,12 @@
 
 Python SDK for [ZizkaDB](https://db.zizka.ai) — the operational database for AI agents.
 
+## Setup (managed cloud)
+
+1. [Sign up](https://db.zizka.ai/signup) at db.zizka.ai  
+2. **Settings → Create API key** (`zizkadb_live_…`; legacy `agdb_live_…` still works)  
+3. Pass the key to the SDK (constructor or `ZIZKADB_API_KEY` env var)  
+
 ## Install
 
 ```bash
@@ -15,7 +21,9 @@ pip install zizkadb-sdk
 ```bash
 pip install zizkadb-sdk
 zizkadb init my-agent --template basic
-cd my-agent && cp .env.example .env && pip install -r requirements.txt
+cd my-agent && cp .env.example .env   # paste your key into ZIZKADB_API_KEY
+pip install -r requirements.txt
+python agent.py
 ```
 
 Templates: `basic`, `openai`, `langchain`, `crewai`, `mcp-cursor`.
@@ -25,8 +33,11 @@ Templates: `basic`, `openai`, `langchain`, `crewai`, `mcp-cursor`.
 ```python
 from zizkadb import ZizkaDB
 
-# Managed cloud (db.zizka.ai)
+# Managed cloud — paste your key from db.zizka.ai Settings
 db = ZizkaDB("zizkadb_live_xxxx")
+
+# Or use env: export ZIZKADB_API_KEY=zizkadb_live_xxxx
+# db = ZizkaDB("zizkadb_live_xxxx")  # same as os.getenv("ZIZKADB_API_KEY")
 
 # Self-hosted — auto-sends local dev key (zizkadb_dev_local)
 db = ZizkaDB(host="http://localhost:8000")
@@ -40,6 +51,17 @@ async with db:
     chain = await db.why(result.event_id)
     chain.print()
 ```
+
+Cloud host without an API key raises an error at init (no silent 401s).
+
+## Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `ZIZKADB_API_KEY` | Your cloud API key (preferred) |
+| `AGENTDB_API_KEY` | Legacy alias for `ZIZKADB_API_KEY` |
+| `ZIZKADB_HOST` | Self-hosted API URL |
+| `ZIZKADB_TELEMETRY` | Set `false` to opt out |
 
 ## Self-host dashboard
 
