@@ -1,35 +1,59 @@
 #!/usr/bin/env bash
 # Publish zizkadb-sdk (PyPI + npm) and zizkadb-mcp (PyPI).
 #
-# Prerequisites:
-#   PyPI:  export TWINE_USERNAME=__token__
-#          export TWINE_PASSWORD=pypi-...   # API token with upload scope
-#   npm:   npm login   (must own zizkadb-sdk on npmjs.com)
+# PyPI 403 Forbidden usually means:
+#   - Token is from a PyPI account that does NOT own zizkadb-sdk / zizkadb-mcp
+#   - TWINE_USERNAME is not exactly __token__
+#   - Token scope is "single project" but wrong project name
+#   - Token expired or copied with extra whitespace/newlines
+#
+# Fix: https://pypi.org/manage/account/token/
+#   - Use account that published 0.2.1 / 0.1.1 originally
+#   - Scope: "Entire account" (or both zizkadb-sdk + zizkadb-mcp)
+#   - export TWINE_USERNAME=__token__
+#   - export TWINE_PASSWORD=pypi-AgEIcHlwaS5vcmcC...   # full token, no quotes
 #
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-echo "→ Build Python SDK"
-pip install -q build twine
-(cd sdk/python && python3 -m build)
+SDK_VER="$(grep '^version' sdk/python/pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')"
+MCP_VER="$(grep '^version' mcp/pyproject.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')"
 
-echo "→ Build MCP"
-(cd mcp && python3 -m build)
+if [[ "${TWINE_USERNAME:-}" != "__token__" ]]; then
+  echo "Set PyPI credentials before running:"
+  echo '  export TWINE_USERNAME=__token__'
+  echo '  export TWINE_PASSWORD=pypi-...'
+  exit 1
+fi
+
+if [[ -z "${TWINE_PASSWORD:-}" ]]; then
+  echo "TWINE_PASSWORD is empty."
+  exit 1
+fi
+
+echo "→ Build Python SDK ${SDK_VER}"
+pip install -q build twine
+(cd sdk/python && rm -rf dist build && python3 -m build)
+
+echo "→ Build MCP ${MCP_VER}"
+(cd mcp && rm -rf dist build && python3 -m build)
 
 echo "→ Build TypeScript SDK"
 (cd sdk/typescript && npm ci -q && npm run build)
 
-echo "→ Upload to PyPI"
-twine upload sdk/python/dist/zizkadb_sdk-0.2.3*
-twine upload mcp/dist/zizkadb_mcp-0.1.3*
+echo "→ Upload zizkadb-sdk ${SDK_VER} to PyPI"
+twine upload --verbose "sdk/python/dist/zizkadb_sdk-${SDK_VER}"*
 
-echo "→ Publish to npm"
+echo "→ Upload zizkadb-mcp ${MCP_VER} to PyPI"
+twine upload --verbose "mcp/dist/zizkadb_mcp-${MCP_VER}"*
+
+echo "→ Publish to npm (run: npm login --auth-type=web  if not logged in)"
 (cd sdk/typescript && npm publish --access public)
 
 echo ""
-echo "Done. Verify:"
+echo "Verify (run each command separately):"
 echo "  pip index versions zizkadb-sdk"
 echo "  pip index versions zizkadb-mcp"
 echo "  npm view zizkadb-sdk version"

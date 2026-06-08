@@ -6,7 +6,9 @@
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Zizka-ai/ZizkaDB?label=release)](https://github.com/Zizka-ai/ZizkaDB/releases)
-[![Python SDK](https://img.shields.io/badge/PyPI-zizkadb--sdk-orange)](https://pypi.org/project/zizkadb-sdk/)
+[![Python SDK](https://img.shields.io/pypi/v/zizkadb-sdk?label=PyPI%20SDK)](https://pypi.org/project/zizkadb-sdk/)
+[![MCP](https://img.shields.io/pypi/v/zizkadb-mcp?label=PyPI%20MCP)](https://pypi.org/project/zizkadb-mcp/)
+[![npm SDK](https://img.shields.io/npm/v/zizkadb-sdk?label=npm%20SDK)](https://www.npmjs.com/package/zizkadb-sdk)
 [![Website](https://img.shields.io/badge/demo-db.zizka.ai-orange)](https://db.zizka.ai)
 
 [Try it live](https://db.zizka.ai) · [Documentation](https://db.zizka.ai/docs) · [Architecture](https://db.zizka.ai/trust) · [Development](#development)
