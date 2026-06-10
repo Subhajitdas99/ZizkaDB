@@ -40,7 +40,7 @@ async def verify_api_key(raw_key: str) -> dict | None:
 
     row = await pool.fetchrow(
         """
-        SELECT ak.tenant_id, ak.key_id, ak.revoked
+        SELECT ak.tenant_id, ak.key_id, ak.agent_id, ak.revoked
         FROM api_keys ak
         WHERE ak.key_hash = $1
         """,
@@ -56,7 +56,11 @@ async def verify_api_key(raw_key: str) -> dict | None:
         key_hash,
     )
 
-    return {"tenant_id": str(row["tenant_id"]), "key_id": str(row["key_id"])}
+    return {
+        "tenant_id": str(row["tenant_id"]),
+        "key_id": str(row["key_id"]),
+        "agent_id": row["agent_id"],
+    }
 
 
 # ─────────────────────────────────────────

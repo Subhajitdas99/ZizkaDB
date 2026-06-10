@@ -5,7 +5,7 @@ from uuid import UUID
 from datetime import datetime
 import json
 
-from api.deps import get_tenant
+from api.deps import get_tenant, assert_agent_allowed
 from db.connection import get_pool
 from services.event_write import write_event
 
@@ -45,6 +45,7 @@ async def log_event(
     body: LogEventRequest,
     tenant: dict = Depends(get_tenant),
 ):
+    assert_agent_allowed(tenant, body.agent)
     return await write_event(
         tenant_id=tenant["tenant_id"],
         agent=body.agent,
@@ -71,6 +72,7 @@ async def query_events(
     session_id: str | None = None,
     tenant: dict = Depends(get_tenant),
 ):
+    assert_agent_allowed(tenant, agent)
     pool = get_pool()
     tenant_id = tenant["tenant_id"]
 

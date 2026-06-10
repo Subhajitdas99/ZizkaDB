@@ -18,12 +18,15 @@ CREATE TABLE tenants (
 CREATE TABLE api_keys (
     key_id      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     tenant_id   UUID NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+    agent_id    VARCHAR(255),  -- NULL = legacy tenant-wide key; set = scoped to one agent
     key_hash    VARCHAR(255) NOT NULL UNIQUE,  -- SHA-256 hashed
     key_prefix  VARCHAR(24) NOT NULL,           -- e.g. "zizkadb_live_xxxx" for display
     name        VARCHAR(255),
     created_at  TIMESTAMPTZ DEFAULT NOW(),
     last_used   TIMESTAMPTZ,
-    revoked     BOOLEAN DEFAULT FALSE
+    revoked     BOOLEAN DEFAULT FALSE,
+    CONSTRAINT fk_api_keys_agent FOREIGN KEY (agent_id, tenant_id)
+        REFERENCES agents (agent_id, tenant_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_api_keys_hash ON api_keys (key_hash);

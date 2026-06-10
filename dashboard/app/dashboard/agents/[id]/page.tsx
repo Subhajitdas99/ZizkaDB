@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { AgentApiKeys } from '@/components/AgentApiKeys'
 import {
   getEvents, getWhyChain, getAgentStats,
   getAgentSessions, getMemoryDiff, timeTravel, searchEvents,
@@ -108,7 +109,7 @@ export default function AgentPage() {
   const [deleting,   setDeleting]   = useState(false)
 
   async function handleDeleteAgent() {
-    if (!window.confirm(`Delete agent "${agentId}" and all its events? This cannot be undone.`)) {
+    if (!window.confirm(`Delete agent "${agentId}", its API keys, and all events? This cannot be undone.`)) {
       return
     }
     setDeleting(true)
@@ -341,6 +342,7 @@ export default function AgentPage() {
 
   return (
     <Shell agentId={agentId} lastSync={lastSync} onDelete={handleDeleteAgent} deleting={deleting}>
+      <AgentApiKeys agentId={agentId} />
       {/* ── Stats ── */}
       {stats && <StatsRow stats={stats} />}
 

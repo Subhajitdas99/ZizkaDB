@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Any
 
-from api.deps import get_tenant
+from api.deps import get_tenant, assert_agent_allowed
 from db.connection import get_pool, get_qdrant
 from services.embeddings import generate_embedding
 
@@ -21,6 +21,9 @@ async def semantic_search(
     tenant: dict = Depends(get_tenant),
 ):
     tenant_id = tenant["tenant_id"]
+    agent = body.agent or tenant.get("agent_id")
+    if agent:
+        assert_agent_allowed(tenant, agent)
 
     embedding = await generate_embedding(body.query, tenant_id)
     if not embedding:
@@ -35,12 +38,12 @@ async def semantic_search(
     qdrant = get_qdrant()
 
     query_filter = None
-    if body.agent:
+    if agent:
         from qdrant_client.models import Filter, FieldCondition, MatchValue
         query_filter = Filter(
             must=[
                 FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)),
-                FieldCondition(key="agent_id", match=MatchValue(value=body.agent)),
+                FieldCondition(key="agent_id", match=MatchValue(value=agent)),
             ]
         )
     else:

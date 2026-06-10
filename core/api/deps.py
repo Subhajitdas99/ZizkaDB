@@ -38,6 +38,16 @@ async def resolve_api_key_tenant(token: str) -> dict | None:
     return await verify_api_key(token)
 
 
+def assert_agent_allowed(tenant: dict, agent_id: str) -> None:
+    """Agent-scoped API keys may only access their bound agent."""
+    scoped = tenant.get("agent_id")
+    if scoped and scoped != agent_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"This API key is scoped to agent '{scoped}' only",
+        )
+
+
 async def get_tenant(
     credentials: HTTPAuthorizationCredentials = Security(bearer),
 ) -> dict:

@@ -2,7 +2,8 @@ import os
 import time
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, EmailStr
-from services.auth import request_otp, verify_otp, generate_api_key, _issue_tokens
+from services.auth import request_otp, verify_otp, _issue_tokens
+from services.api_keys import create_api_key_record, revoke_api_key_record
 from api.deps import get_tenant
 from fastapi import Depends
 from db.connection import get_pool
@@ -89,25 +90,14 @@ async def create_api_key(
     body: CreateAPIKeyBody,
     tenant: dict = Depends(get_tenant),
 ):
-    raw_key, key_hash, prefix = generate_api_key()
+    """Legacy tenant-wide keys. Prefer POST /v1/agents/{agent_id}/api-keys."""
     pool = get_pool()
-
-    row = await pool.fetchrow(
-        """
-        INSERT INTO api_keys (tenant_id, key_hash, key_prefix, name)
-        VALUES ($1, $2, $3, $4)
-        RETURNING key_id
-        """,
-        tenant["tenant_id"], key_hash, prefix, body.name,
+    return await create_api_key_record(
+        pool,
+        tenant_id=tenant["tenant_id"],
+        name=body.name,
+        agent_id=None,
     )
-
-    return {
-        "key_id": str(row["key_id"]),
-        "key": raw_key,  # shown once only
-        "prefix": prefix,
-        "name": body.name,
-        "warning": "Save this key — it will not be shown again.",
-    }
 
 
 @router.delete("/api-keys/{key_id}")
@@ -117,14 +107,7 @@ async def revoke_api_key(
 ):
     """Revoke an API key. The key stops working immediately."""
     pool = get_pool()
-    result = await pool.execute(
-        """
-        UPDATE api_keys SET revoked = TRUE
-        WHERE key_id = $1::uuid AND tenant_id = $2::uuid AND revoked = FALSE
-        """,
-        key_id, tenant["tenant_id"],
-    )
-    if result == "UPDATE 0":
+    if not await revoke_api_key_record(pool, tenant["tenant_id"], key_id):
         raise HTTPException(status_code=404, detail="API key not found")
     return {"revoked": True, "key_id": key_id}
 
@@ -188,7 +171,7 @@ async def list_api_keys(tenant: dict = Depends(get_tenant)):
     pool = get_pool()
     rows = await pool.fetch(
         """
-        SELECT key_id, key_prefix, name, created_at, last_used
+        SELECT key_id, key_prefix, name, agent_id, created_at, last_used
         FROM api_keys
         WHERE tenant_id = $1 AND revoked = FALSE
         ORDER BY created_at DESC
@@ -200,6 +183,7 @@ async def list_api_keys(tenant: dict = Depends(get_tenant)):
             "key_id": str(r["key_id"]),
             "prefix": r["key_prefix"],
             "name": r["name"],
+            "agent_id": r["agent_id"],
             "created_at": r["created_at"].isoformat(),
             "last_used": r["last_used"].isoformat() if r["last_used"] else None,
         }

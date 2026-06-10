@@ -6,6 +6,11 @@ from pydantic import BaseModel, Field
 
 from api.deps import get_tenant
 from db.connection import get_pool
+from services.api_keys import (
+    create_api_key_record,
+    list_api_keys_for_agent,
+    revoke_api_key_record,
+)
 
 router = APIRouter()
 
@@ -25,6 +30,11 @@ def _validate_agent_id(agent_id: str) -> str:
 class CreateAgentBody(BaseModel):
     agent_id: str = Field(..., min_length=1, max_length=255)
     metadata: dict | None = None
+    key_name: str | None = None
+
+
+class CreateAgentKeyBody(BaseModel):
+    name: str | None = None
 
 
 @router.get("")
@@ -32,10 +42,19 @@ async def list_agents(tenant: dict = Depends(get_tenant)):
     pool = get_pool()
     rows = await pool.fetch(
         """
-        SELECT agent_id, first_seen, last_seen, event_count, metadata
-        FROM agents
-        WHERE tenant_id = $1
-        ORDER BY last_seen DESC
+        SELECT
+            a.agent_id,
+            a.first_seen,
+            a.last_seen,
+            a.event_count,
+            a.metadata,
+            COUNT(ak.key_id) FILTER (WHERE ak.revoked = FALSE) AS api_key_count
+        FROM agents a
+        LEFT JOIN api_keys ak
+            ON ak.tenant_id = a.tenant_id AND ak.agent_id = a.agent_id
+        WHERE a.tenant_id = $1
+        GROUP BY a.agent_id, a.first_seen, a.last_seen, a.event_count, a.metadata
+        ORDER BY a.last_seen DESC
         """,
         tenant["tenant_id"],
     )
@@ -45,6 +64,7 @@ async def list_agents(tenant: dict = Depends(get_tenant)):
             "first_seen": r["first_seen"].isoformat(),
             "last_seen": r["last_seen"].isoformat(),
             "event_count": r["event_count"],
+            "api_key_count": int(r["api_key_count"] or 0),
         }
         for r in rows
     ]
@@ -55,7 +75,7 @@ async def create_agent(
     body: CreateAgentBody,
     tenant: dict = Depends(get_tenant),
 ):
-    """Pre-register an agent id before logging events."""
+    """Create an agent and its first API key (shown once)."""
     agent_id = _validate_agent_id(body.agent_id)
     pool = get_pool()
     tenant_id = tenant["tenant_id"]
@@ -74,9 +94,19 @@ async def create_agent(
         """,
         agent_id, tenant_id, json.dumps(body.metadata or {}),
     )
+
+    key_name = body.key_name or f"{agent_id} production"
+    api_key = await create_api_key_record(
+        pool,
+        tenant_id=tenant_id,
+        name=key_name,
+        agent_id=agent_id,
+    )
+
     return {
         "agent": agent_id,
-        "message": "Agent created. Log events with this agent id via SDK, MCP, or REST.",
+        "api_key": api_key,
+        "message": "Agent and API key created. Save the key now — use it as ZIZKADB_API_KEY or AGENTDB_API_KEY.",
     }
 
 
@@ -114,6 +144,65 @@ async def delete_agent(
         "agent": agent_id,
         "events_deleted": int(row["event_count"] or 0),
     }
+
+
+@router.get("/{agent_id}/api-keys")
+async def list_agent_api_keys(
+    agent_id: str,
+    tenant: dict = Depends(get_tenant),
+):
+    agent_id = _validate_agent_id(agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    exists = await pool.fetchrow(
+        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    if not exists:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    return await list_api_keys_for_agent(pool, tenant_id, agent_id)
+
+
+@router.post("/{agent_id}/api-keys", status_code=201)
+async def create_agent_api_key(
+    agent_id: str,
+    body: CreateAgentKeyBody,
+    tenant: dict = Depends(get_tenant),
+):
+    agent_id = _validate_agent_id(agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    exists = await pool.fetchrow(
+        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    if not exists:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    return await create_api_key_record(
+        pool,
+        tenant_id=tenant_id,
+        name=body.name or f"{agent_id} key",
+        agent_id=agent_id,
+    )
+
+
+@router.delete("/{agent_id}/api-keys/{key_id}")
+async def revoke_agent_api_key(
+    agent_id: str,
+    key_id: str,
+    tenant: dict = Depends(get_tenant),
+):
+    agent_id = _validate_agent_id(agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    if not await revoke_api_key_record(pool, tenant_id, key_id, agent_id):
+        raise HTTPException(status_code=404, detail="API key not found")
+    return {"revoked": True, "key_id": key_id, "agent": agent_id}
 
 
 @router.get("/{agent_id}/stats")

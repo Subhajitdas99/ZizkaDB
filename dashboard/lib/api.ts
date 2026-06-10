@@ -34,11 +34,30 @@ export async function getAgents(token: string) {
   return apiFetch('/v1/agents', token)
 }
 
-export async function createAgent(token: string, agentId: string) {
+export async function createAgent(token: string, agentId: string, keyName?: string) {
   return apiFetch('/v1/agents', token, {
     method: 'POST',
-    body: JSON.stringify({ agent_id: agentId }),
+    body: JSON.stringify({ agent_id: agentId, key_name: keyName }),
   })
+}
+
+export async function getAgentApiKeys(token: string, agentId: string) {
+  return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/api-keys`, token)
+}
+
+export async function createAgentApiKey(token: string, agentId: string, name?: string) {
+  return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/api-keys`, token, {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  })
+}
+
+export async function revokeAgentApiKey(token: string, agentId: string, keyId: string) {
+  return apiFetch(
+    `/v1/agents/${encodeURIComponent(agentId)}/api-keys/${encodeURIComponent(keyId)}`,
+    token,
+    { method: 'DELETE' },
+  )
 }
 
 export async function deleteAgent(token: string, agentId: string) {

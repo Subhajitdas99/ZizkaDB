@@ -1,24 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getApiKeys, createApiKey, revokeApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
+import Link from 'next/link'
+import { getApiKeys, revokeApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
-import { Key, Plus, Copy, Check, Trash2 } from 'lucide-react'
+import { Key, Trash2 } from 'lucide-react'
 
 interface ApiKey {
   key_id: string
   prefix: string
   name: string | null
+  agent_id: string | null
   created_at: string
   last_used: string | null
 }
 
 export default function SettingsPage() {
   const [keys, setKeys] = useState<ApiKey[]>([])
-  const [newKey, setNewKey] = useState<string | null>(null)
-  const [name, setName] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const [embLoading, setEmbLoading] = useState(true)
   const [embSaving, setEmbSaving] = useState(false)
@@ -53,26 +51,6 @@ export default function SettingsPage() {
       .finally(() => setEmbLoading(false))
   }, [])
 
-  async function handleCreate(e: React.FormEvent) {
-    e.preventDefault()
-    setCreating(true)
-    try {
-      const token = requireAuth()
-      const res = await createApiKey(token, name || 'Default')
-      setNewKey(res.key)
-      setKeys(prev => [{ key_id: res.key_id ?? '', prefix: res.prefix, name: res.name, created_at: new Date().toISOString(), last_used: null }, ...prev])
-      setName('')
-    } finally {
-      setCreating(false)
-    }
-  }
-
-  function copy(text: string) {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   async function handleRevoke(key: ApiKey) {
     const label = key.name ?? key.prefix
     if (!window.confirm(`Revoke "${label}"? Apps using this key will stop working immediately.`)) {
@@ -93,10 +71,13 @@ export default function SettingsPage() {
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-white font-semibold text-xl mb-1">Settings</h1>
-      <p className="text-sm mb-4" style={{ color: '#737373' }}>API keys and embedding model for semantic search.</p>
+      <p className="text-sm mb-4" style={{ color: '#737373' }}>Embeddings and account-wide overview.</p>
       <p className="text-xs mb-8 rounded-lg px-3 py-2" style={{ color: '#a3a3a3', background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
-        Use these keys in your SDK, MCP, or REST calls. Your dashboard only shows data logged with keys from this account.
-        Self-host: if you use email login here, replace the auto dev key in your agent code with a key created below.
+        API keys belong to an agent.{' '}
+        <Link href="/dashboard" className="underline" style={{ color: '#22c55e' }}>
+          Create an agent
+        </Link>{' '}
+        to get a key, or open an agent to add more keys. Legacy tenant-wide keys (no agent) still work.
       </p>
 
       {/* Embeddings */}
@@ -187,35 +168,6 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* New key revealed */}
-      {newKey && (
-        <div className="rounded-xl p-4 mb-6" style={{ background: '#0d2010', border: '1px solid #22c55e40' }}>
-          <p className="text-sm font-medium mb-2" style={{ color: '#22c55e' }}>
-            ✓ API key created — save it now, it won't be shown again.
-          </p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 text-xs font-mono rounded-lg px-3 py-2.5 truncate"
-                  style={{ background: '#0a0a0a', color: '#e5e5e5' }}>
-              {newKey}
-            </code>
-            <button
-              onClick={() => copy(newKey)}
-              className="shrink-0 p-2 rounded-lg transition"
-              style={{ background: '#1a1a1a' }}
-            >
-              {copied ? <Check size={14} style={{ color: '#22c55e' }} /> : <Copy size={14} style={{ color: '#737373' }} />}
-            </button>
-          </div>
-          <button
-            onClick={() => setNewKey(null)}
-            className="text-xs mt-3 block"
-            style={{ color: '#525252' }}
-          >
-            I've saved my key — dismiss
-          </button>
-        </div>
-      )}
-
       {/* Connection test */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Test event logging</h2>
@@ -253,41 +205,10 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {/* Create new key */}
-      <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
-        <h2 className="text-sm font-medium text-white mb-4">Create API key</h2>
-        <p className="text-xs mb-3" style={{ color: '#525252' }}>
-          New keys use <span className="font-mono">zizkadb_live_</span>. Legacy{' '}
-          <span className="font-mono">agdb_live_</span> keys from earlier signups still work — no need to rotate.
-          Use the same key in SDK, MCP (<span className="font-mono">ZIZKADB_API_KEY</span> or{' '}
-          <span className="font-mono">AGENTDB_API_KEY</span>), or REST.
-        </p>
-        <form onSubmit={handleCreate} className="flex gap-3">
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            placeholder="Key name (e.g. production)"
-            className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none"
-            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
-            onFocus={e => (e.target.style.borderColor = '#22c55e')}
-            onBlur={e => (e.target.style.borderColor = '#2a2a2a')}
-          />
-          <button
-            type="submit"
-            disabled={creating}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40 transition"
-            style={{ background: '#22c55e' }}
-          >
-            <Plus size={14} />
-            {creating ? 'Creating...' : 'Create'}
-          </button>
-        </form>
-      </div>
-
-      {/* Key list */}
+      {/* Key list (overview) */}
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #1f1f1f' }}>
         <div className="px-5 py-3 border-b" style={{ background: '#111', borderColor: '#1f1f1f' }}>
-          <span className="text-xs font-medium" style={{ color: '#737373' }}>API KEYS</span>
+          <span className="text-xs font-medium" style={{ color: '#737373' }}>ALL API KEYS (OVERVIEW)</span>
         </div>
         {loading ? (
           <div className="p-5 space-y-2">
@@ -295,7 +216,7 @@ export default function SettingsPage() {
           </div>
         ) : keys.length === 0 ? (
           <div className="p-8 text-center text-sm" style={{ color: '#737373', background: '#111' }}>
-            No API keys yet.
+            No API keys yet. Create an agent on the dashboard to get one.
           </div>
         ) : (
           <div style={{ background: '#111' }}>
@@ -311,6 +232,11 @@ export default function SettingsPage() {
                     <div className="text-sm text-white">{key.name ?? 'Unnamed'}</div>
                     <div className="text-xs font-mono mt-0.5" style={{ color: '#525252' }}>
                       {key.prefix}...
+                      {key.agent_id ? (
+                        <span className="ml-2" style={{ color: '#737373' }}>· agent: {key.agent_id}</span>
+                      ) : (
+                        <span className="ml-2" style={{ color: '#737373' }}>· tenant-wide (legacy)</span>
+                      )}
                     </div>
                   </div>
                 </div>

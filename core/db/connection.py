@@ -73,6 +73,28 @@ async def init_db():
     """)
 
     await _pg_pool.execute("""
+        ALTER TABLE api_keys ADD COLUMN IF NOT EXISTS agent_id VARCHAR(255);
+    """)
+    await _pg_pool.execute("""
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_constraint WHERE conname = 'fk_api_keys_agent'
+            ) THEN
+                ALTER TABLE api_keys
+                    ADD CONSTRAINT fk_api_keys_agent
+                    FOREIGN KEY (agent_id, tenant_id)
+                    REFERENCES agents (agent_id, tenant_id)
+                    ON DELETE CASCADE;
+            END IF;
+        END $$;
+    """)
+    await _pg_pool.execute("""
+        CREATE INDEX IF NOT EXISTS idx_api_keys_agent
+        ON api_keys (tenant_id, agent_id) WHERE revoked = FALSE;
+    """)
+
+    await _pg_pool.execute("""
         CREATE TABLE IF NOT EXISTS sdk_telemetry (
             install_id   TEXT PRIMARY KEY,
             sdk          TEXT    NOT NULL DEFAULT 'unknown',

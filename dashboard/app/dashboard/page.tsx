@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getAgents, createAgent, deleteAgent } from '@/lib/api'
 import { getToken, requireAuth } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
-import { Zap, Plus, Trash2 } from 'lucide-react'
+import { Zap, Plus, Trash2, Copy, Check } from 'lucide-react'
 import { GettingStartedChecklist } from '@/components/ConnectionStatus'
 
 interface Agent {
@@ -13,6 +13,7 @@ interface Agent {
   first_seen: string
   last_seen: string
   event_count: number
+  api_key_count?: number
 }
 
 export default function DashboardPage() {
@@ -25,6 +26,9 @@ export default function DashboardPage() {
   const [creating, setCreating] = useState(false)
   const [createErr, setCreateErr] = useState('')
   const [deletingAgent, setDeletingAgent] = useState<string | null>(null)
+  const [newAgentKey, setNewAgentKey] = useState<string | null>(null)
+  const [newAgentName, setNewAgentName] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const token = getToken()
@@ -75,8 +79,12 @@ export default function DashboardPage() {
     setCreateErr('')
     try {
       const token = requireAuth()
-      await createAgent(token, agentId)
+      const res = await createAgent(token, agentId)
       setNewAgentId('')
+      if (res.api_key?.key) {
+        setNewAgentKey(res.api_key.key)
+        setNewAgentName(agentId)
+      }
       const data = await getAgents(token)
       setAgents(Array.isArray(data) ? data : [])
       setLastSync(new Date())
@@ -88,7 +96,7 @@ export default function DashboardPage() {
   }
 
   async function handleDeleteAgent(agentId: string) {
-    if (!window.confirm(`Delete agent "${agentId}" and all its events? This cannot be undone.`)) {
+    if (!window.confirm(`Delete agent "${agentId}", its API keys, and all events? This cannot be undone.`)) {
       return
     }
     setDeletingAgent(agentId)
@@ -144,9 +152,49 @@ export default function DashboardPage() {
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Create agent</h2>
         <p className="text-xs mb-3" style={{ color: '#737373' }}>
-          Pre-register an agent id (e.g. <span className="font-mono">my-app</span>,{' '}
-          <span className="font-mono">conv-user123</span>). Events logged with this id will appear here.
+          Creates an agent and its first API key (shown once). Use the key as{' '}
+          <span className="font-mono">ZIZKADB_API_KEY</span> or{' '}
+          <span className="font-mono">AGENTDB_API_KEY</span> in your app.
         </p>
+        {newAgentKey && (
+          <div className="rounded-lg p-4 mb-3" style={{ background: '#0d2010', border: '1px solid #22c55e40' }}>
+            <p className="text-xs font-medium mb-2" style={{ color: '#22c55e' }}>
+              Agent &quot;{newAgentName}&quot; created — save this API key now
+            </p>
+            <div className="flex items-center gap-2">
+              <code
+                className="flex-1 text-xs font-mono rounded-lg px-3 py-2 truncate"
+                style={{ background: '#0a0a0a', color: '#e5e5e5' }}
+              >
+                {newAgentKey}
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(newAgentKey)
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 2000)
+                }}
+                className="p-2 rounded-lg shrink-0"
+                style={{ background: '#1a1a1a' }}
+              >
+                {copied ? (
+                  <Check size={14} style={{ color: '#22c55e' }} />
+                ) : (
+                  <Copy size={14} style={{ color: '#737373' }} />
+                )}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setNewAgentKey(null); setNewAgentName(null) }}
+              className="text-xs mt-2"
+              style={{ color: '#525252' }}
+            >
+              I&apos;ve saved my key — dismiss
+            </button>
+          </div>
+        )}
         <form onSubmit={handleCreateAgent} className="flex gap-3">
           <input
             value={newAgentId}
@@ -238,9 +286,15 @@ function AgentCard({
               <div className="text-white font-semibold font-mono">
                 {agent.event_count.toLocaleString()}
               </div>
-              <div className="text-xs" style={{ color: '#737373' }}>events</div>
+            <div className="text-xs" style={{ color: '#737373' }}>events</div>
+          </div>
+          <div>
+            <div className="text-white font-semibold font-mono">
+              {(agent.api_key_count ?? 0).toLocaleString()}
             </div>
-            <span style={{ color: '#525252' }}>→</span>
+            <div className="text-xs" style={{ color: '#737373' }}>keys</div>
+          </div>
+          <span style={{ color: '#525252' }}>→</span>
           </div>
         </div>
       </button>
