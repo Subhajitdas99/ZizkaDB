@@ -5,8 +5,11 @@ Python SDK for [ZizkaDB](https://db.zizka.ai) — the operational database for A
 ## Setup (managed cloud)
 
 1. [Sign up](https://db.zizka.ai/signup) at db.zizka.ai  
-2. **Settings → Create API key** (`zizkadb_live_…`; legacy `agdb_live_…` still works)  
-3. Pass the key to the SDK (constructor or `ZIZKADB_API_KEY` env var)  
+2. **Dashboard → Create agent** (e.g. `my-bot`) — you get an API key for that agent  
+3. Use the **same agent name** in every `db.log()` call  
+4. Set `ZIZKADB_API_KEY` (or pass the key to the constructor)
+
+> **Important:** The `agent` in `db.log(agent="...", ...)` must match the agent you created in the dashboard. A mismatch returns **403 AgentScopeError**.
 
 ## Install
 
@@ -33,18 +36,12 @@ Templates: `basic`, `openai`, `langchain`, `crewai`, `mcp-cursor`.
 ```python
 from zizkadb import ZizkaDB
 
-# Managed cloud — paste your key from db.zizka.ai Settings
+# Key from Dashboard → Agents → create "my-bot" → copy key
 db = ZizkaDB("zizkadb_live_xxxx")
-
-# Or use env: export ZIZKADB_API_KEY=zizkadb_live_xxxx
-# db = ZizkaDB("zizkadb_live_xxxx")  # same as os.getenv("ZIZKADB_API_KEY")
-
-# Self-hosted — auto-sends local dev key (zizkadb_dev_local)
-db = ZizkaDB(host="http://localhost:8000")
 
 async with db:
     result = await db.log(
-        agent="my-bot",
+        agent="my-bot",  # must match dashboard agent name
         event="tool_call",
         data={"tool": "search", "query": "billing"},
     )
@@ -52,7 +49,17 @@ async with db:
     chain.print()
 ```
 
-Cloud host without an API key raises an error at init (no silent 401s).
+## Multi-agent apps (one key, many agent names)
+
+If your app logs to **different agent ids** per user (e.g. `conv-alice`, `conv-bob`), create a **tenant-wide key** in **Settings → Tenant-wide API key**. Per-agent keys only work for that one agent name.
+
+## Errors
+
+| Exception | Meaning |
+|-----------|---------|
+| `AuthError` | Invalid or revoked API key |
+| `AgentScopeError` | Key is for agent A but you logged to agent B |
+| `NotFoundError` | Event or agent not found |
 
 ## Environment variables
 
@@ -68,13 +75,6 @@ Cloud host without an API key raises an error at init (no silent 401s).
 1. `docker compose -f infra/docker-compose.yml up -d`
 2. `NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev` in `dashboard/`
 3. Open http://localhost:3000/login → **Open my dashboard →**
-4. Settings → create a named API key for production
-
-## Telemetry opt-out
-
-```bash
-export ZIZKADB_TELEMETRY=false
-```
 
 ## Links
 

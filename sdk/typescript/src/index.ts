@@ -34,7 +34,7 @@ import type {
   QueryOptions,
   SearchOptions,
 } from './types'
-import { ZizkaDBError, AuthError, NotFoundError } from './types'
+import { ZizkaDBError, AuthError, NotFoundError, AgentScopeError } from './types'
 
 export * from './types'
 
@@ -499,8 +499,16 @@ export class ZizkaDB {
   private async handle(res: Response): Promise<unknown> {
     if (res.status === 401) {
       throw new AuthError(
-        'Invalid API key. Check your key at db.zizka.ai/settings/api-keys',
+        'Invalid API key. Create an agent at db.zizka.ai/dashboard and copy its key.',
       )
+    }
+    if (res.status === 403) {
+      let detail = res.statusText
+      try {
+        const json = await res.json() as Record<string, unknown>
+        detail = (json.detail as string) ?? detail
+      } catch {}
+      throw new AgentScopeError(`Agent mismatch (403): ${detail}`)
     }
     if (res.status === 404) {
       throw new NotFoundError('Resource not found')

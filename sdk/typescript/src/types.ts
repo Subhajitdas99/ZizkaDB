@@ -96,3 +96,10 @@ export class NotFoundError extends ZizkaDBError {
     this.name = 'NotFoundError'
   }
 }
+
+export class AgentScopeError extends ZizkaDBError {
+  constructor(message: string) {
+    super(message, 403)
+    this.name = 'AgentScopeError'
+  }
+}

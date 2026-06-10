@@ -342,7 +342,7 @@ export default function AgentPage() {
 
   return (
     <Shell agentId={agentId} lastSync={lastSync} onDelete={handleDeleteAgent} deleting={deleting}>
-      <AgentApiKeys agentId={agentId} />
+      <AgentApiKeys agentId={agentId} onTestSuccess={refresh} />
       {/* ── Stats ── */}
       {stats && <StatsRow stats={stats} />}
 

@@ -134,15 +134,18 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
 
       <h3 style={S.h3}>Path A — Managed cloud (easiest)</h3>
       <p style={S.p}>Best if you don&apos;t want to run servers. Everything at <strong>db.zizka.ai</strong>.</p>
-      <Step n={1} title="Sign up & create API key">
+      <Step n={1} title="Sign up & create an agent">
         <p style={S.p}>
           <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> with email OTP →{' '}
-          <Link href="/dashboard/settings" style={{ color: '#111', fontWeight: 500 }}>Dashboard → Settings</Link> →{' '}
-          <strong>Create API key</strong> (<code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>zizkadb_live_…</code>).
+          <Link href="/dashboard" style={{ color: '#111', fontWeight: 500 }}>Dashboard → Create agent</Link> → copy the API key (
+          <code style={{ fontFamily: 'monospace', background: '#f0f0f0', padding: '2px 6px', borderRadius: 4 }}>zizkadb_live_…</code>).
         </p>
       </Step>
       <Step n={2} title="Connect SDK, MCP, or REST">
-        <p style={S.p}>Use your API key — all integrations write to <strong>your</strong> tenant automatically.</p>
+        <p style={S.p}>
+          Use your API key and the <strong>same agent name</strong> in every <code style={{ fontFamily: 'monospace' }}>db.log(agent=…)</code> call.
+          Multi-agent apps: Settings → <strong>Tenant-wide API key</strong>.
+        </p>
       </Step>
       <Step n={3} title="Open your dashboard">
         <p style={S.p}>
@@ -343,8 +346,9 @@ asyncio.run(run_turn("Hello", "sess_001"))`}</Code>
       <div style={{ display: 'grid', gap: 12 }}>
         {[
           { q: 'SyntaxError: await outside async function', a: 'Wrap code in async def main() and asyncio.run(main()).' },
-          { q: '401 Invalid API key', a: 'Managed: check key in Dashboard → Settings. Self-host: use host= with dev dashboard login, or paste the API key from Settings into your SDK.' },
-          { q: 'Dashboard empty but SDK works', a: 'SDK and dashboard must share the same tenant. Self-host: use "Open my dashboard →" (not email login) with host= SDK. Or create an API key in Settings and use that key in your SDK.' },
+          { q: '401 Invalid API key', a: 'Copy the full key from Dashboard → Agents (no spaces). Use ZIZKADB_API_KEY or AGENTDB_API_KEY in your env.' },
+          { q: '403 Agent mismatch', a: 'Your key is scoped to one agent (e.g. my-bot) but code logged to a different agent name. Use the same name in db.log(), or create a tenant-wide key in Settings.' },
+          { q: 'Dashboard empty but SDK works', a: 'Check you are viewing the same agent name your code logs to. Click Test agent on the agent page. Settings test event goes to dashboard-connection-test, not your app agent.' },
           { q: 'Search returns nothing', a: 'Configure embeddings in Settings. Log a few events first so there is history to search.' },
           { q: 'baseline shows warming_up', a: 'Log more sessions with session_id on each event. Drift needs volume.' },
         ].map(item => (
@@ -683,9 +687,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uvx --version</Code>
       </Step>
 
-      <Step n={2} title="Get your API key">
+      <Step n={2} title="Create an agent & copy key">
         <p style={S.p}>
-          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Dashboard → Settings → Create API key.
+          <Link href="/signup" style={{ color: '#111', fontWeight: 500 }}>Sign up</Link> → Dashboard → Create agent → copy key.
+          Use the same agent name when calling <code style={{ fontFamily: 'monospace' }}>log_event</code>.
         </p>
       </Step>
 

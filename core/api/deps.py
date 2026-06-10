@@ -44,7 +44,11 @@ def assert_agent_allowed(tenant: dict, agent_id: str) -> None:
     if scoped and scoped != agent_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"This API key is scoped to agent '{scoped}' only",
+            detail=(
+                f"This API key is scoped to agent '{scoped}' only, but the request used "
+                f"'{agent_id}'. Use agent='{scoped}' in db.log() / POST /v1/events, or create "
+                f"a separate agent + key for '{agent_id}'."
+            ),
         )
 
 

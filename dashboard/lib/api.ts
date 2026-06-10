@@ -70,6 +70,12 @@ export async function sendTestEvent(token: string) {
   return apiFetch('/v1/auth/test-event', token, { method: 'POST' })
 }
 
+export async function sendAgentTestEvent(token: string, agentId: string) {
+  return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/test-event`, token, {
+    method: 'POST',
+  })
+}
+
 export async function getAgentStats(token: string, agentId: string) {
   return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}/stats`, token)
 }

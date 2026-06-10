@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { getApiKeys, revokeApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
+import { getApiKeys, createApiKey, revokeApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
-import { Key, Trash2 } from 'lucide-react'
+import { Key, Trash2, Plus, Copy, Check } from 'lucide-react'
 
 interface ApiKey {
   key_id: string
@@ -32,6 +32,10 @@ export default function SettingsPage() {
   const [testMsg, setTestMsg] = useState('')
   const [testErr, setTestErr] = useState('')
   const [revokingId, setRevokingId] = useState<string | null>(null)
+  const [tenantKeyName, setTenantKeyName] = useState('')
+  const [tenantKeyCreating, setTenantKeyCreating] = useState(false)
+  const [tenantNewKey, setTenantNewKey] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     let token: string
@@ -172,8 +176,8 @@ export default function SettingsPage() {
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Test event logging</h2>
         <p className="text-xs mb-4" style={{ color: '#737373' }}>
-          Sends a test event to your tenant using your dashboard session. If this works but SDK/MCP does not,
-          your API key env var is missing or wrong.
+          Logs to agent <span className="font-mono">dashboard-connection-test</span> (not your app agent).
+          To test a specific agent, open that agent and click <strong>Test agent</strong>.
         </p>
         <button
           type="button"
@@ -203,6 +207,67 @@ export default function SettingsPage() {
         {testErr && (
           <p className="text-xs mt-3" style={{ color: '#f87171' }}>{testErr}</p>
         )}
+      </div>
+
+      {/* Tenant-wide key (multi-agent apps) */}
+      <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
+        <h2 className="text-sm font-medium text-white mb-1">Tenant-wide API key</h2>
+        <p className="text-xs mb-3" style={{ color: '#737373' }}>
+          For apps that log to <strong>many agent names</strong> with one key (e.g. one key →{' '}
+          <span className="font-mono">conv-user1</span>, <span className="font-mono">conv-user2</span>).
+          Most users should create per-agent keys on the{' '}
+          <Link href="/dashboard" className="underline" style={{ color: '#22c55e' }}>Agents</Link> page instead.
+        </p>
+        {tenantNewKey && (
+          <div className="rounded-lg p-3 mb-3" style={{ background: '#0d2010', border: '1px solid #22c55e40' }}>
+            <p className="text-xs mb-2" style={{ color: '#22c55e' }}>Tenant-wide key — copy now</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-xs font-mono truncate rounded px-2 py-1.5" style={{ background: '#0a0a0a' }}>
+                {tenantNewKey}
+              </code>
+              <button type="button" onClick={() => { navigator.clipboard.writeText(tenantNewKey); setCopied(true); setTimeout(() => setCopied(false), 2000) }} className="p-1.5 rounded" style={{ background: '#1a1a1a' }}>
+                {copied ? <Check size={14} style={{ color: '#22c55e' }} /> : <Copy size={14} style={{ color: '#737373' }} />}
+              </button>
+            </div>
+          </div>
+        )}
+        <form
+          className="flex gap-3"
+          onSubmit={async (e) => {
+            e.preventDefault()
+            setTenantKeyCreating(true)
+            try {
+              const token = requireAuth()
+              const res = await createApiKey(token, tenantKeyName || 'tenant-wide')
+              setTenantNewKey(res.key)
+              setKeys(prev => [{
+                key_id: res.key_id ?? '',
+                prefix: res.prefix,
+                name: res.name,
+                agent_id: null,
+                created_at: new Date().toISOString(),
+                last_used: null,
+              }, ...prev])
+              setTenantKeyName('')
+            } catch (err) {
+              alert(err instanceof Error ? err.message : 'Failed to create key')
+            } finally {
+              setTenantKeyCreating(false)
+            }
+          }}
+        >
+          <input
+            value={tenantKeyName}
+            onChange={e => setTenantKeyName(e.target.value)}
+            placeholder="Key name (e.g. zizka.ai production)"
+            className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none"
+            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+          />
+          <button type="submit" disabled={tenantKeyCreating} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40" style={{ background: '#22c55e' }}>
+            <Plus size={14} />
+            {tenantKeyCreating ? 'Creating…' : 'Create'}
+          </button>
+        </form>
       </div>
 
       {/* Key list (overview) */}

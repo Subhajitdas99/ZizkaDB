@@ -11,6 +11,7 @@ from services.api_keys import (
     list_api_keys_for_agent,
     revoke_api_key_record,
 )
+from services.event_write import write_event
 
 router = APIRouter()
 
@@ -143,6 +144,36 @@ async def delete_agent(
         "deleted": True,
         "agent": agent_id,
         "events_deleted": int(row["event_count"] or 0),
+    }
+
+
+@router.post("/{agent_id}/test-event", status_code=201)
+async def test_agent_event(
+    agent_id: str,
+    tenant: dict = Depends(get_tenant),
+):
+    """Log a test event to this agent (dashboard JWT). Verifies the pipeline for this agent."""
+    agent_id = _validate_agent_id(agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    exists = await pool.fetchrow(
+        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    if not exists:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    result = await write_event(
+        tenant_id=tenant_id,
+        agent=agent_id,
+        event="connection_test",
+        data={"source": "dashboard_agent_page", "ok": True},
+    )
+    return {
+        **result,
+        "agent": agent_id,
+        "message": f"Test event recorded for '{agent_id}'. Refresh Events — it should appear within seconds.",
     }
 
 

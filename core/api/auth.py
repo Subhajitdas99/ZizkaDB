@@ -90,7 +90,7 @@ async def create_api_key(
     body: CreateAPIKeyBody,
     tenant: dict = Depends(get_tenant),
 ):
-    """Legacy tenant-wide keys. Prefer POST /v1/agents/{agent_id}/api-keys."""
+    """Tenant-wide key (no agent scope). Use for multi-agent apps. Per-agent keys: POST /v1/agents/{id}/api-keys."""
     pool = get_pool()
     return await create_api_key_record(
         pool,

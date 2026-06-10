@@ -5,8 +5,11 @@ TypeScript SDK for [ZizkaDB](https://db.zizka.ai) — causal lineage, time trave
 ## Setup (managed cloud)
 
 1. [Sign up](https://db.zizka.ai/signup) at db.zizka.ai  
-2. **Settings → Create API key** (`zizkadb_live_…`; legacy `agdb_live_…` still works)  
-3. Pass the key to the SDK (constructor or `ZIZKADB_API_KEY` env var)  
+2. **Dashboard → Create agent** (e.g. `my-bot`) — you get an API key for that agent  
+3. Use the **same agent name** in every `db.log()` call  
+4. Set `ZIZKADB_API_KEY` (or pass the key to the constructor)
+
+> **Important:** The `agent` in `db.log({ agent: '...' })` must match the agent you created in the dashboard. A mismatch returns **403 AgentScopeError**.
 
 ## Install
 
@@ -19,25 +22,28 @@ npm install zizkadb-sdk
 ```typescript
 import { ZizkaDB } from 'zizkadb-sdk'
 
-// Managed cloud — paste your key from db.zizka.ai Settings
 const db = new ZizkaDB({ apiKey: 'zizkadb_live_xxxx' })
 
-// Or: new ZizkaDB({ apiKey: process.env.ZIZKADB_API_KEY! })
-
-// Self-hosted — auto-sends local dev key (zizkadb_dev_local)
-const local = new ZizkaDB({ host: 'http://localhost:8000' })
-
-const result = await local.log({
-  agent: 'my-bot',
+const result = await db.log({
+  agent: 'my-bot', // must match dashboard agent name
   event: 'tool_call',
   data: { tool: 'search' },
 })
 
-const chain = await local.why(result.eventId)
+const chain = await db.why(result.eventId)
 chain.print()
 ```
 
-Cloud host without an API key raises an error at init (no silent 401s).
+## Multi-agent apps (one key, many agent names)
+
+If your app logs to **different agent ids** per user (e.g. `conv-alice`, `conv-bob`), create a **tenant-wide key** in **Settings → Tenant-wide API key**. Per-agent keys only work for that one agent name.
+
+## Errors
+
+| Error | Meaning |
+|-------|---------|
+| `AuthError` | Invalid or revoked API key |
+| `AgentScopeError` | Key is for agent A but you logged to agent B |
 
 ## Environment variables
 
@@ -47,12 +53,6 @@ Cloud host without an API key raises an error at init (no silent 401s).
 | `AGENTDB_API_KEY` | Legacy alias for `ZIZKADB_API_KEY` |
 | `ZIZKADB_HOST` | Self-hosted API URL |
 | `ZIZKADB_TELEMETRY` | Set `false` to opt out |
-
-## Telemetry opt-out
-
-```bash
-export ZIZKADB_TELEMETRY=false
-```
 
 ## Links
 

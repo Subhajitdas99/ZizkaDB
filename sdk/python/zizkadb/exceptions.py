@@ -16,3 +16,7 @@ class NotFoundError(ZizkaDBError):
 
 class RateLimitError(ZizkaDBError):
     """Too many requests."""
+
+
+class AgentScopeError(ZizkaDBError):
+    """API key is scoped to a different agent than the request."""

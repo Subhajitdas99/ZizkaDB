@@ -5,11 +5,14 @@ MCP server for [ZizkaDB](https://db.zizka.ai). Gives any MCP-compatible AI agent
 ## Setup (managed cloud)
 
 1. [Sign up](https://db.zizka.ai/signup) at db.zizka.ai  
-2. **Settings → Create API key** (starts with `zizkadb_live_…`; legacy `agdb_live_…` keys still work)  
+2. **Dashboard → Create agent** (e.g. `cursor-agent`) — copy the API key shown once  
 3. Paste the key into your MCP config (see below)  
-4. Reload MCP in Cursor — events appear on your [dashboard](https://db.zizka.ai/dashboard) within seconds  
+4. Reload MCP in Cursor — use the **same agent name** in `log_event` calls  
+5. Events appear on your [dashboard](https://db.zizka.ai/dashboard) within seconds  
 
-> **Signup alone does not log events.** You must create an API key and add it to `ZIZKADB_API_KEY`.
+> **Agent name must match.** If your key is for `cursor-agent`, log with `agent="cursor-agent"`. For many dynamic agent names, use a **tenant-wide key** (Settings).
+
+> **Signup alone does not log events.** You must create an agent + key and add it to `ZIZKADB_API_KEY`.
 
 ## Cursor — 30 second setup
 

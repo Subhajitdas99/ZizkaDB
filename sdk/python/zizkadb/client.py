@@ -30,7 +30,7 @@ from datetime import datetime
 from typing import Any
 
 from .models import Event, LogResult, CausalChain, AgentState, AgentInfo
-from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError
+from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError, AgentScopeError
 from .telemetry import ping as _telemetry_ping
 
 CLOUD_HOST = "https://db.zizka.ai"
@@ -493,8 +493,17 @@ class ZizkaDB:
     def _handle(self, resp: httpx.Response) -> Any:
         if resp.status_code == 401:
             raise AuthError(
-                "Invalid API key. Check your key at db.zizka.ai/settings/api-keys",
+                "Invalid API key. Create an agent at db.zizka.ai/dashboard and copy its key.",
                 status_code=401,
+            )
+        if resp.status_code == 403:
+            try:
+                detail = resp.json().get("detail", resp.text)
+            except Exception:
+                detail = resp.text
+            raise AgentScopeError(
+                f"Agent mismatch (403): {detail}",
+                status_code=403,
             )
         if resp.status_code == 404:
             raise NotFoundError("Resource not found", status_code=404)

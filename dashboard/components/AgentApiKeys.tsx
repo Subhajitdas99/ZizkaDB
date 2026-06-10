@@ -1,9 +1,9 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { createAgentApiKey, getAgentApiKeys, revokeAgentApiKey } from '@/lib/api'
+import { createAgentApiKey, getAgentApiKeys, revokeAgentApiKey, sendAgentTestEvent } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
-import { Key, Plus, Copy, Check, Trash2 } from 'lucide-react'
+import { Key, Plus, Copy, Check, Trash2, Zap } from 'lucide-react'
 
 export interface AgentApiKey {
   key_id: string
@@ -14,7 +14,13 @@ export interface AgentApiKey {
   last_used: string | null
 }
 
-export function AgentApiKeys({ agentId }: { agentId: string }) {
+export function AgentApiKeys({
+  agentId,
+  onTestSuccess,
+}: {
+  agentId: string
+  onTestSuccess?: () => void
+}) {
   const [keys, setKeys] = useState<AgentApiKey[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -22,6 +28,8 @@ export function AgentApiKeys({ agentId }: { agentId: string }) {
   const [newKey, setNewKey] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [err, setErr] = useState('')
+  const [testBusy, setTestBusy] = useState(false)
+  const [testMsg, setTestMsg] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -89,17 +97,48 @@ export function AgentApiKeys({ agentId }: { agentId: string }) {
             <span className="font-mono">AGENTDB_API_KEY</span> in your app.
           </p>
         </div>
-        <button
-          type="button"
-          disabled={creating}
-          onClick={handleCreate}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-black disabled:opacity-40 shrink-0"
-          style={{ background: '#22c55e' }}
-        >
-          <Plus size={13} />
-          {creating ? 'Creating…' : 'New key'}
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            disabled={testBusy}
+            onClick={async () => {
+              setTestBusy(true)
+              setTestMsg('')
+              setErr('')
+              try {
+                const token = requireAuth()
+                const res = await sendAgentTestEvent(token, agentId)
+                setTestMsg(res.message ?? 'Test event sent')
+                onTestSuccess?.()
+              } catch (e) {
+                setErr(e instanceof Error ? e.message : 'Test failed')
+              } finally {
+                setTestBusy(false)
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium disabled:opacity-40"
+            style={{ background: '#1a1a1a', color: '#e5e5e5', border: '1px solid #2a2a2a' }}
+          >
+            <Zap size={13} style={{ color: '#22c55e' }} />
+            {testBusy ? 'Sending…' : 'Test agent'}
+          </button>
+          <button
+            type="button"
+            disabled={creating}
+            onClick={handleCreate}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-black disabled:opacity-40"
+            style={{ background: '#22c55e' }}
+          >
+            <Plus size={13} />
+            {creating ? 'Creating…' : 'New key'}
+          </button>
+        </div>
       </div>
+      {testMsg && (
+        <p className="px-5 py-2 text-xs" style={{ color: '#22c55e', background: '#111', borderBottom: '1px solid #1f1f1f' }}>
+          {testMsg}
+        </p>
+      )}
 
       {newKey && (
         <div className="px-5 py-4" style={{ background: '#0d2010', borderBottom: '1px solid #1f1f1f' }}>
