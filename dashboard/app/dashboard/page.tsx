@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getAgents } from '@/lib/api'
-import { getToken } from '@/lib/auth'
+import { getAgents, createAgent, deleteAgent } from '@/lib/api'
+import { getToken, requireAuth } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
-import { Zap } from 'lucide-react'
+import { Zap, Plus, Trash2 } from 'lucide-react'
 import { GettingStartedChecklist } from '@/components/ConnectionStatus'
 
 interface Agent {
@@ -21,6 +21,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [lastSync, setLastSync] = useState<Date | null>(null)
+  const [newAgentId, setNewAgentId] = useState('')
+  const [creating, setCreating] = useState(false)
+  const [createErr, setCreateErr] = useState('')
+  const [deletingAgent, setDeletingAgent] = useState<string | null>(null)
 
   useEffect(() => {
     const token = getToken()
@@ -63,6 +67,42 @@ export default function DashboardPage() {
     }
   }, [router])
 
+  async function handleCreateAgent(e: React.FormEvent) {
+    e.preventDefault()
+    const agentId = newAgentId.trim()
+    if (!agentId) return
+    setCreating(true)
+    setCreateErr('')
+    try {
+      const token = requireAuth()
+      await createAgent(token, agentId)
+      setNewAgentId('')
+      const data = await getAgents(token)
+      setAgents(Array.isArray(data) ? data : [])
+      setLastSync(new Date())
+    } catch (err) {
+      setCreateErr(err instanceof Error ? err.message : 'Failed to create agent')
+    } finally {
+      setCreating(false)
+    }
+  }
+
+  async function handleDeleteAgent(agentId: string) {
+    if (!window.confirm(`Delete agent "${agentId}" and all its events? This cannot be undone.`)) {
+      return
+    }
+    setDeletingAgent(agentId)
+    try {
+      const token = requireAuth()
+      await deleteAgent(token, agentId)
+      setAgents(prev => prev.filter(a => a.agent !== agentId))
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete agent')
+    } finally {
+      setDeletingAgent(null)
+    }
+  }
+
   if (loading) return <PageShell><Skeleton /></PageShell>
 
   if (error) {
@@ -101,6 +141,37 @@ export default function DashboardPage() {
         )}
       </div>
 
+      <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
+        <h2 className="text-sm font-medium text-white mb-1">Create agent</h2>
+        <p className="text-xs mb-3" style={{ color: '#737373' }}>
+          Pre-register an agent id (e.g. <span className="font-mono">my-app</span>,{' '}
+          <span className="font-mono">conv-user123</span>). Events logged with this id will appear here.
+        </p>
+        <form onSubmit={handleCreateAgent} className="flex gap-3">
+          <input
+            value={newAgentId}
+            onChange={e => setNewAgentId(e.target.value)}
+            placeholder="agent-id"
+            className="flex-1 rounded-lg px-3 py-2 text-sm text-white font-mono outline-none"
+            style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
+            onFocus={e => (e.target.style.borderColor = '#22c55e')}
+            onBlur={e => (e.target.style.borderColor = '#2a2a2a')}
+          />
+          <button
+            type="submit"
+            disabled={creating || !newAgentId.trim()}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40"
+            style={{ background: '#22c55e' }}
+          >
+            <Plus size={14} />
+            {creating ? 'Creating…' : 'Create'}
+          </button>
+        </form>
+        {createErr && (
+          <p className="text-xs mt-2" style={{ color: '#f87171' }}>{createErr}</p>
+        )}
+      </div>
+
       {agents.length === 0 ? (
         <GettingStartedChecklist />
       ) : (
@@ -109,6 +180,8 @@ export default function DashboardPage() {
             <AgentCard
               key={agent.agent}
               agent={agent}
+              deleting={deletingAgent === agent.agent}
+              onDelete={() => handleDeleteAgent(agent.agent)}
               onClick={() => router.push(`/dashboard/agents/${encodeURIComponent(agent.agent)}`)}
             />
           ))}
@@ -118,49 +191,70 @@ export default function DashboardPage() {
   )
 }
 
-function AgentCard({ agent, onClick }: { agent: Agent; onClick: () => void }) {
+function AgentCard({
+  agent,
+  onClick,
+  onDelete,
+  deleting,
+}: {
+  agent: Agent
+  onClick: () => void
+  onDelete: () => void
+  deleting: boolean
+}) {
   const lastSeen = formatDistanceToNow(new Date(agent.last_seen), { addSuffix: true })
   const isRecent = Date.now() - new Date(agent.last_seen).getTime() < 5 * 60 * 1000
 
   return (
-    <button
-      onClick={onClick}
-      className="w-full text-left rounded-xl p-5 transition group"
+    <div
+      className="w-full rounded-xl p-5 transition group flex items-center justify-between gap-3"
       style={{ background: '#111', border: '1px solid #1f1f1f' }}
       onMouseEnter={e => (e.currentTarget.style.borderColor = '#2a2a2a')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = '#1f1f1f')}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-               style={{ background: '#1a1a1a' }}>
-            <Zap size={16} style={{ color: '#22c55e' }} />
-          </div>
-          <div>
-            <div className="text-white font-medium font-mono text-sm">{agent.agent}</div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              {isRecent && (
-                <span className="w-1.5 h-1.5 rounded-full inline-block"
-                      style={{ background: '#22c55e' }} />
-              )}
-              <span className="text-xs" style={{ color: '#737373' }}>
-                Active {lastSeen}
-              </span>
+      <button type="button" onClick={onClick} className="flex-1 text-left min-w-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                 style={{ background: '#1a1a1a' }}>
+              <Zap size={16} style={{ color: '#22c55e' }} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-white font-medium font-mono text-sm truncate">{agent.agent}</div>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                {isRecent && (
+                  <span className="w-1.5 h-1.5 rounded-full inline-block shrink-0"
+                        style={{ background: '#22c55e' }} />
+                )}
+                <span className="text-xs" style={{ color: '#737373' }}>
+                  Active {lastSeen}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-6 text-right">
-          <div>
-            <div className="text-white font-semibold font-mono">
-              {agent.event_count.toLocaleString()}
+          <div className="flex items-center gap-6 text-right shrink-0 ml-4">
+            <div>
+              <div className="text-white font-semibold font-mono">
+                {agent.event_count.toLocaleString()}
+              </div>
+              <div className="text-xs" style={{ color: '#737373' }}>events</div>
             </div>
-            <div className="text-xs" style={{ color: '#737373' }}>events</div>
+            <span style={{ color: '#525252' }}>→</span>
           </div>
-          <span style={{ color: '#525252' }}>→</span>
         </div>
-      </div>
-    </button>
+      </button>
+      <button
+        type="button"
+        disabled={deleting}
+        onClick={onDelete}
+        className="p-2 rounded-lg shrink-0 disabled:opacity-40"
+        style={{ background: '#1a1a1a' }}
+        title="Delete agent"
+      >
+        <Trash2 size={14} style={{ color: '#f87171' }} />
+      </button>
+    </div>
   )
 }
 

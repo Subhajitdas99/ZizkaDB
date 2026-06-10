@@ -6,13 +6,14 @@ import {
   getEvents, getWhyChain, getAgentStats,
   getAgentSessions, getMemoryDiff, timeTravel, searchEvents,
   getAgentBaseline,
+  deleteAgent,
 } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
 import { formatDistanceToNow, format, formatDuration, intervalToDuration } from 'date-fns'
 import {
   ChevronLeft, RefreshCw, Search, Clock, GitBranch,
   BarChart2, Layers, Rewind, ChevronDown, ChevronRight,
-  AlertCircle, Zap, ArrowRight, Activity, TrendingUp, TrendingDown,
+  AlertCircle, Zap, ArrowRight, Activity, TrendingUp, TrendingDown, Trash2,
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -104,6 +105,22 @@ export default function AgentPage() {
   const [loading,    setLoading]    = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [lastSync,   setLastSync]   = useState<Date | null>(null)
+  const [deleting,   setDeleting]   = useState(false)
+
+  async function handleDeleteAgent() {
+    if (!window.confirm(`Delete agent "${agentId}" and all its events? This cannot be undone.`)) {
+      return
+    }
+    setDeleting(true)
+    try {
+      const token = requireAuth()
+      await deleteAgent(token, agentId)
+      router.push('/dashboard')
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to delete agent')
+      setDeleting(false)
+    }
+  }
 
   // ── events tab state ──────────────────────────────────────────────────────
   const [events,        setEvents]        = useState<Event[]>([])
@@ -314,12 +331,16 @@ export default function AgentPage() {
     } finally { setTtLoading(false) }
   }
 
-  if (loading) return <Shell agentId={agentId}><Skeleton /></Shell>
+  if (loading) return (
+    <Shell agentId={agentId} onDelete={handleDeleteAgent} deleting={deleting}>
+      <Skeleton />
+    </Shell>
+  )
 
   const displayEvents = searchResults ?? events
 
   return (
-    <Shell agentId={agentId} lastSync={lastSync}>
+    <Shell agentId={agentId} lastSync={lastSync} onDelete={handleDeleteAgent} deleting={deleting}>
       {/* ── Stats ── */}
       {stats && <StatsRow stats={stats} />}
 
@@ -1227,10 +1248,14 @@ function MetaRow({ label, value }: { label: string; value: string }) {
 function Shell({
   agentId,
   lastSync,
+  onDelete,
+  deleting,
   children,
 }: {
   agentId: string
   lastSync?: Date | null
+  onDelete?: () => void
+  deleting?: boolean
   children: React.ReactNode
 }) {
   const router = useRouter()
@@ -1247,12 +1272,26 @@ function Shell({
       </button>
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="text-white font-semibold text-xl font-mono">{agentId}</h1>
-        {lastSync && (
-          <div className="flex items-center gap-2 text-xs shrink-0" style={{ color: '#525252' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
-            Live · {formatDistanceToNow(lastSync, { addSuffix: true })}
-          </div>
-        )}
+        <div className="flex items-center gap-3 shrink-0">
+          {lastSync && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: '#525252' }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
+              Live · {formatDistanceToNow(lastSync, { addSuffix: true })}
+            </div>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              disabled={deleting}
+              onClick={onDelete}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs disabled:opacity-40"
+              style={{ background: '#1a1a1a', color: '#f87171', border: '1px solid #2a2a2a' }}
+            >
+              <Trash2 size={13} />
+              {deleting ? 'Deleting…' : 'Delete agent'}
+            </button>
+          )}
+        </div>
       </div>
       {children}
     </div>

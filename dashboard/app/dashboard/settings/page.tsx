@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getApiKeys, createApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
+import { getApiKeys, createApiKey, revokeApiKey, getEmbeddingCatalog, getEmbeddingSettings, updateEmbeddingSettings, sendTestEvent } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
-import { Key, Plus, Copy, Check } from 'lucide-react'
+import { Key, Plus, Copy, Check, Trash2 } from 'lucide-react'
 
 interface ApiKey {
   key_id: string
@@ -33,6 +33,7 @@ export default function SettingsPage() {
   const [testBusy, setTestBusy] = useState(false)
   const [testMsg, setTestMsg] = useState('')
   const [testErr, setTestErr] = useState('')
+  const [revokingId, setRevokingId] = useState<string | null>(null)
 
   useEffect(() => {
     let token: string
@@ -70,6 +71,23 @@ export default function SettingsPage() {
     navigator.clipboard.writeText(text)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleRevoke(key: ApiKey) {
+    const label = key.name ?? key.prefix
+    if (!window.confirm(`Revoke "${label}"? Apps using this key will stop working immediately.`)) {
+      return
+    }
+    setRevokingId(key.key_id)
+    try {
+      const token = requireAuth()
+      await revokeApiKey(token, key.key_id)
+      setKeys(prev => prev.filter(k => k.key_id !== key.key_id))
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Failed to revoke key')
+    } finally {
+      setRevokingId(null)
+    }
   }
 
   return (
@@ -296,10 +314,22 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="text-xs" style={{ color: '#525252' }}>
-                  {key.last_used
-                    ? `Last used ${new Date(key.last_used).toLocaleDateString()}`
-                    : 'Never used'}
+                <div className="flex items-center gap-3">
+                  <div className="text-xs" style={{ color: '#525252' }}>
+                    {key.last_used
+                      ? `Last used ${new Date(key.last_used).toLocaleDateString()}`
+                      : 'Never used'}
+                  </div>
+                  <button
+                    type="button"
+                    disabled={!key.key_id || revokingId === key.key_id}
+                    onClick={() => handleRevoke(key)}
+                    className="p-1.5 rounded-lg transition disabled:opacity-40"
+                    style={{ background: '#1a1a1a' }}
+                    title="Revoke key"
+                  >
+                    <Trash2 size={14} style={{ color: '#f87171' }} />
+                  </button>
                 </div>
               </div>
             ))}

@@ -34,6 +34,19 @@ export async function getAgents(token: string) {
   return apiFetch('/v1/agents', token)
 }
 
+export async function createAgent(token: string, agentId: string) {
+  return apiFetch('/v1/agents', token, {
+    method: 'POST',
+    body: JSON.stringify({ agent_id: agentId }),
+  })
+}
+
+export async function deleteAgent(token: string, agentId: string) {
+  return apiFetch(`/v1/agents/${encodeURIComponent(agentId)}`, token, {
+    method: 'DELETE',
+  })
+}
+
 export async function sendTestEvent(token: string) {
   return apiFetch('/v1/auth/test-event', token, { method: 'POST' })
 }
@@ -193,6 +206,12 @@ export async function createApiKey(token: string, name: string) {
   return apiFetch('/v1/auth/api-keys', token, {
     method: 'POST',
     body: JSON.stringify({ name }),
+  })
+}
+
+export async function revokeApiKey(token: string, keyId: string) {
+  return apiFetch(`/v1/auth/api-keys/${encodeURIComponent(keyId)}`, token, {
+    method: 'DELETE',
   })
 }
 

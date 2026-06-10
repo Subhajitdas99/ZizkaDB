@@ -1,9 +1,30 @@
-from fastapi import APIRouter, Depends, Query
+import json
+import re
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from api.deps import get_tenant
 from db.connection import get_pool
 
 router = APIRouter()
+
+_AGENT_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$")
+
+
+def _validate_agent_id(agent_id: str) -> str:
+    agent_id = agent_id.strip()
+    if not agent_id or not _AGENT_ID_RE.match(agent_id):
+        raise HTTPException(
+            status_code=400,
+            detail="agent_id must be 1–255 chars: letters, numbers, dots, dashes, underscores",
+        )
+    return agent_id
+
+
+class CreateAgentBody(BaseModel):
+    agent_id: str = Field(..., min_length=1, max_length=255)
+    metadata: dict | None = None
 
 
 @router.get("")
@@ -27,6 +48,72 @@ async def list_agents(tenant: dict = Depends(get_tenant)):
         }
         for r in rows
     ]
+
+
+@router.post("", status_code=201)
+async def create_agent(
+    body: CreateAgentBody,
+    tenant: dict = Depends(get_tenant),
+):
+    """Pre-register an agent id before logging events."""
+    agent_id = _validate_agent_id(body.agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    existing = await pool.fetchrow(
+        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Agent already exists")
+
+    await pool.execute(
+        """
+        INSERT INTO agents (agent_id, tenant_id, metadata)
+        VALUES ($1, $2, $3::jsonb)
+        """,
+        agent_id, tenant_id, json.dumps(body.metadata or {}),
+    )
+    return {
+        "agent": agent_id,
+        "message": "Agent created. Log events with this agent id via SDK, MCP, or REST.",
+    }
+
+
+@router.delete("/{agent_id}")
+async def delete_agent(
+    agent_id: str,
+    tenant: dict = Depends(get_tenant),
+):
+    """Delete an agent and all of its events. Cannot be undone."""
+    agent_id = _validate_agent_id(agent_id)
+    pool = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    row = await pool.fetchrow(
+        "SELECT event_count FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Agent not found")
+
+    await pool.execute(
+        "UPDATE events SET parent_event_id = NULL WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    await pool.execute(
+        "DELETE FROM events WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    await pool.execute(
+        "DELETE FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+        tenant_id, agent_id,
+    )
+    return {
+        "deleted": True,
+        "agent": agent_id,
+        "events_deleted": int(row["event_count"] or 0),
+    }
 
 
 @router.get("/{agent_id}/stats")
