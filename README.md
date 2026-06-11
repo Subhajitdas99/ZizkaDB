@@ -11,7 +11,7 @@
 [![npm SDK](https://img.shields.io/npm/v/zizkadb-sdk?label=npm%20SDK)](https://www.npmjs.com/package/zizkadb-sdk)
 [![Website](https://img.shields.io/badge/demo-db.zizka.ai-orange)](https://db.zizka.ai)
 
-[Try it live](https://db.zizka.ai) · [Documentation](https://db.zizka.ai/docs) · [Architecture](https://db.zizka.ai/trust) · [Development](#development)
+[Try it live](https://db.zizka.ai) · [Documentation](https://db.zizka.ai/docs) · [Wiki](https://github.com/Zizka-ai/ZizkaDB/wiki) · [Architecture](https://db.zizka.ai/trust) · [Development](#development)
 
 </div>
 
