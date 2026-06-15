@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
+const TAGLINE =
+  'Operational database for AI agents, causal lineage (why()), semantic memory, live dashboards, MCP + Python/TypeScript SDK. Self-host or use db.zizka.ai.'
+
 export const metadata: Metadata = {
   title: {
-    default: 'ZizkaDB — Open-source agent memory for Cursor & Claude (MCP)',
+    default: 'ZizkaDB — Operational database for AI agents',
     template: '%s · ZizkaDB',
   },
-  description:
-    'Open-source operational database for AI agents. Connect via MCP in 30 seconds — or self-host free with Docker. Causal lineage, search, and drift detection.',
+  description: TAGLINE,
   metadataBase: new URL('https://db.zizka.ai'),
   icons: {
     icon: [
@@ -18,9 +20,8 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'ZizkaDB — Open-source agent memory for Cursor & Claude (MCP)',
-    description:
-      'Connect via MCP in 30 seconds or self-host free. Causal lineage, semantic search, and drift detection for any AI agent.',
+    title: 'ZizkaDB — Operational database for AI agents',
+    description: TAGLINE,
     url: 'https://db.zizka.ai',
     siteName: 'ZizkaDB',
     type: 'website',
@@ -28,9 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZizkaDB',
-    description:
-      'ZizkaDB watches every agent session, builds a behavioral baseline, and flags the ones that drift.',
+    title: 'ZizkaDB — Operational database for AI agents',
+    description: TAGLINE,
     images: ['/opengraph-image'],
   },
 }

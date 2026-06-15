@@ -974,7 +974,7 @@ async def run(user_input: str):
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from zizkadb import ZizkaDB
-from zizkadb_langchain import ZizkaDBCallbackHandler
+from zizkadb.integrations.langchain import ZizkaDBCallbackHandler
 
 async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
@@ -989,7 +989,7 @@ async with ZizkaDB("zizkadb_live_...") as db:
       <Code lang="python">{`pip install zizkadb-sdk zizkadb-crewai crewai
 
 from zizkadb import ZizkaDB
-from zizkadb_crewai import ZizkaDBCrewLogger
+from zizkadb.integrations.crewai import ZizkaDBCrewLogger
 
 async with ZizkaDB("zizkadb_live_...") as db:
     logger = ZizkaDBCrewLogger(db, agent="research-crew")

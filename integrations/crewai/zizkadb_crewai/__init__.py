@@ -1,3 +1,3 @@
-from .logger import ZizkaDBCrewLogger
+from zizkadb.integrations.crewai import ZizkaDBCrewLogger
 
 __all__ = ["ZizkaDBCrewLogger"]

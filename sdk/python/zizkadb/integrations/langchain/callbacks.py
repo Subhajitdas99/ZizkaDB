@@ -1,0 +1,150 @@
+"""LangChain async callback handler → ZizkaDB causal events."""
+
+from __future__ import annotations
+
+from typing import Any
+from uuid import UUID
+
+from langchain_core.callbacks import AsyncCallbackHandler
+from langchain_core.outputs import LLMResult
+
+from zizkadb import ZizkaDB
+from zizkadb.models import LogResult
+
+
+class ZizkaDBCallbackHandler(AsyncCallbackHandler):
+    """
+    Log LangChain LLM and tool steps to ZizkaDB with parent_id lineage.
+
+    Usage:
+        handler = ZizkaDBCallbackHandler(db, agent="my-bot")
+        await llm.ainvoke(messages, config={"callbacks": [handler]})
+    """
+
+    def __init__(
+        self,
+        db: ZizkaDB,
+        agent: str,
+        session_id: str | None = None,
+    ) -> None:
+        self.db = db
+        self.agent = agent
+        self.session_id = session_id
+        self.last_event_id: str | None = None
+        self._run_parents: dict[UUID, str] = {}
+
+    async def on_chat_model_start(
+        self,
+        serialized: dict[str, Any],
+        messages: list[list[Any]],
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        flat = []
+        for batch in messages:
+            for m in batch:
+                role = getattr(m, "type", m.__class__.__name__)
+                content = getattr(m, "content", str(m))
+                flat.append({"role": role, "content": str(content)[:2000]})
+        result = await self._log(
+            event="llm_start",
+            data={"messages": flat, "model": serialized.get("name", "chat")},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self._run_parents[run_id] = result.event_id
+        self.last_event_id = result.event_id
+
+    async def on_llm_end(
+        self,
+        response: LLMResult,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        texts = []
+        for gen_list in response.generations:
+            for gen in gen_list:
+                texts.append(gen.text[:4000] if gen.text else "")
+        result = await self._log(
+            event="llm_end",
+            data={"text": "\n".join(texts), "generation_count": len(texts)},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+
+    async def on_tool_start(
+        self,
+        serialized: dict[str, Any],
+        input_str: str,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        result = await self._log(
+            event="tool_start",
+            data={"tool": serialized.get("name", "tool"), "input": input_str[:2000]},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self._run_parents[run_id] = result.event_id
+        self.last_event_id = result.event_id
+
+    async def on_tool_end(
+        self,
+        output: str,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        text = output if isinstance(output, str) else str(output)
+        result = await self._log(
+            event="tool_end",
+            data={"output": text[:4000]},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+
+    async def on_chain_error(
+        self,
+        error: BaseException,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        result = await self._log(
+            event="chain_error",
+            data={"error": str(error), "type": type(error).__name__},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+
+    async def _log(
+        self,
+        event: str,
+        data: dict[str, Any],
+        run_id: UUID,
+        parent_run_id: UUID | None,
+    ) -> LogResult:
+        parent_id = None
+        if parent_run_id and parent_run_id in self._run_parents:
+            parent_id = self._run_parents[parent_run_id]
+        data = {**data, "run_id": str(run_id)}
+        result = await self.db.log(
+            agent=self.agent,
+            event=event,
+            data=data,
+            parent_id=parent_id,
+            session_id=self.session_id,
+        )
+        self._run_parents[run_id] = result.event_id
+        return result

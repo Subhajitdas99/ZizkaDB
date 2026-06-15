@@ -466,7 +466,12 @@ class ZizkaDB:
     async def _post(self, path: str, body: dict) -> dict:
         client = await self._get_client()
         try:
-            resp = await client.post(path, json=body)
+            try:
+                resp = await client.post(path, json=body)
+            except httpx.ConnectError as e:
+                raise ZizkaDBError(
+                    f"Could not connect to ZizkaDB at {self._base_url}: {e}"
+                ) from e
             return self._handle(resp)
         finally:
             if not self._client:
@@ -475,7 +480,12 @@ class ZizkaDB:
     async def _get(self, path: str, params: dict) -> Any:
         client = await self._get_client()
         try:
-            resp = await client.get(path, params=params)
+            try:
+                resp = await client.get(path, params=params)
+            except httpx.ConnectError as e:
+                raise ZizkaDBError(
+                    f"Could not connect to ZizkaDB at {self._base_url}: {e}"
+                ) from e
             return self._handle(resp)
         finally:
             if not self._client:
@@ -484,7 +494,12 @@ class ZizkaDB:
     async def _delete(self, path: str, body: dict) -> Any:
         client = await self._get_client()
         try:
-            resp = await client.request("DELETE", path, json=body)
+            try:
+                resp = await client.request("DELETE", path, json=body)
+            except httpx.ConnectError as e:
+                raise ZizkaDBError(
+                    f"Could not connect to ZizkaDB at {self._base_url}: {e}"
+                ) from e
             return self._handle(resp)
         finally:
             if not self._client:

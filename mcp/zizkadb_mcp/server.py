@@ -36,7 +36,7 @@ try:
 
     __version__ = _pkg_version("zizkadb-mcp")
 except Exception:
-    __version__ = "0.1.3"
+    __version__ = "0.1.4"
 
 DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 _HOST = (
@@ -263,10 +263,10 @@ async def query_events(
     Returns:
         List of events ordered by time (most recent first)
     """
-    qs = f"?agent={agent}&limit={limit}"
+    params: dict[str, str | int] = {"agent": agent, "limit": limit}
     if event_type:
-        qs += f"&event_type={event_type}"
-    return await _api("GET", f"/events{qs}")
+        params["event_type"] = event_type
+    return await _api("GET", f"/events?{urlencode(params)}")
 
 
 @mcp.tool()
