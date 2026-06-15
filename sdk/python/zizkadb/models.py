@@ -69,7 +69,12 @@ class CausalChain:
 
         for i, event in enumerate(self.chain):
             indent = "    " * i
-            connector = "└── " if i > 0 else ""
+            if i == 0:
+                connector = ""
+            elif i == len(self.chain) - 1:
+                connector = "└── "
+            else:
+                connector = "├── "
             print(
                 f"{indent}{connector}"
                 f"{event.event}: {_truncate(str(event.data), 60)}"

@@ -34,7 +34,7 @@ import type {
   QueryOptions,
   SearchOptions,
 } from './types'
-import { ZizkaDBError, AuthError, NotFoundError, AgentScopeError } from './types'
+import { ZizkaDBError, AuthError, NotFoundError, AgentScopeError, RateLimitError } from './types'
 
 export * from './types'
 
@@ -226,7 +226,10 @@ export class ZizkaDB {
         }
         chain.forEach((event: AgentEvent, i: number) => {
           const indent = '    '.repeat(i)
-          const connector = i > 0 ? '└── ' : ''
+          let connector = ''
+          if (i > 0) {
+            connector = i === chain.length - 1 ? '└── ' : '├── '
+          }
           const data = JSON.stringify(event.data).slice(0, 60)
           const time = event.timestamp.toTimeString().slice(0, 8)
           console.log(`${indent}${connector}${event.event}: ${data}  [${time}]`)
@@ -512,6 +515,9 @@ export class ZizkaDB {
     }
     if (res.status === 404) {
       throw new NotFoundError('Resource not found')
+    }
+    if (res.status === 429) {
+      throw new RateLimitError('Rate limit exceeded')
     }
     if (res.status >= 400) {
       let detail = res.statusText

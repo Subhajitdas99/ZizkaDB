@@ -103,3 +103,10 @@ export class AgentScopeError extends ZizkaDBError {
     this.name = 'AgentScopeError'
   }
 }
+
+export class RateLimitError extends ZizkaDBError {
+  constructor(message: string) {
+    super(message, 429)
+    this.name = 'RateLimitError'
+  }
+}
