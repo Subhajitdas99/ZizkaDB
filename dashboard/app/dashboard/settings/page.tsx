@@ -222,7 +222,10 @@ export default function SettingsPage() {
           <div className="rounded-lg p-3 mb-3" style={{ background: '#0d2010', border: '1px solid #22c55e40' }}>
             <p className="text-xs mb-2" style={{ color: '#22c55e' }}>Tenant-wide key — copy now</p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono truncate rounded px-2 py-1.5" style={{ background: '#0a0a0a' }}>
+              <code
+                className="flex-1 text-xs font-mono truncate rounded px-2 py-1.5"
+                style={{ background: '#0a0a0a', color: '#e5e7eb' }}
+              >
                 {tenantNewKey}
               </code>
               <button type="button" onClick={() => { navigator.clipboard.writeText(tenantNewKey); setCopied(true); setTimeout(() => setCopied(false), 2000) }} className="p-1.5 rounded" style={{ background: '#1a1a1a' }}>
