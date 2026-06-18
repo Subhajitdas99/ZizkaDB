@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { brandCtaStyle, brandLogoStyle } from './brand'
-import { ENTERPRISE_URL } from '@/lib/enterprise'
+import { ENTERPRISE_PATH } from '@/lib/enterprise'
 
-export type SiteNavActive = 'docs' | 'community' | 'trust' | 'explorer' | 'home'
+export type SiteNavActive = 'docs' | 'community' | 'trust' | 'explorer' | 'home' | 'enterprise'
 
 type SiteNavProps = {
   active?: SiteNavActive
@@ -52,7 +52,7 @@ export function SiteNav({ active, suffix }: SiteNavProps) {
       </Link>
 
       <div className="site-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={linkStyle(false)}>Enterprise</a>
+        <Link href={ENTERPRISE_PATH} style={linkStyle(active === 'enterprise')}>Enterprise</Link>
         <Link href="/docs" style={linkStyle(active === 'docs')}>Docs</Link>
         <Link href="/community" style={linkStyle(active === 'community')}>Community</Link>
         <a href="/swagger" style={linkStyle(active === 'explorer')}>API Explorer</a>

@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { BRAND, BRAND_DARK, BRAND_LIGHT, BRAND_MUTED, BRAND_PALE, brandLogoStyle } from '@/components/brand'
 
-import { ENTERPRISE_URL, ENTERPRISE_CONTACT } from '@/lib/enterprise'
+import { ENTERPRISE_PATH, ENTERPRISE_CONTACT } from '@/lib/enterprise'
 
 // ── Live user counters ─────────────────────────────────────────────────────
 
@@ -516,12 +516,12 @@ export default function LandingPage() {
                 ))}
               </ul>
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{
+                <Link href={ENTERPRISE_PATH} style={{
                   flex: 1, minWidth: 140, padding: '12px 18px', background: '#4f46e5', color: '#fff',
                   borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14, textAlign: 'center',
                 }}>
                   Enterprise →
-                </a>
+                </Link>
                 <a href={ENTERPRISE_CONTACT} style={{
                   flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
                   borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
@@ -769,9 +769,9 @@ export default function LandingPage() {
               <div><span style={{ color: '#818cf8' }}>3.</span> Fleet governance + incident runbooks</div>
             </div>
             <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{ padding: '12px 28px', background: '#4f46e5', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
+              <Link href={ENTERPRISE_PATH} style={{ padding: '12px 28px', background: '#4f46e5', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
                 Explore Enterprise →
-              </a>
+              </Link>
               <a href={ENTERPRISE_CONTACT} style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
                 Contact sales
               </a>
@@ -870,12 +870,12 @@ export default function LandingPage() {
               </p>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{
+              <Link href={ENTERPRISE_PATH} style={{
                 padding: '12px 22px', background: '#4f46e5', color: '#fff', borderRadius: 10,
                 textDecoration: 'none', fontWeight: 600, fontSize: 14,
               }}>
                 Enterprise →
-              </a>
+              </Link>
               <a href={ENTERPRISE_CONTACT} style={{
                 padding: '12px 22px', background: '#fff', color: '#111', borderRadius: 10,
                 textDecoration: 'none', fontWeight: 500, fontSize: 14, border: '1px solid #ddd',
@@ -1347,7 +1347,7 @@ export default function LandingPage() {
           </h2>
           <p style={{ fontSize: 16, color: '#9ca3af', marginBottom: 36, lineHeight: 1.6 }}>
             Developers start on db.zizka.ai or self-host. Production fleets and regulated teams use{' '}
-            <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{ color: '#a5b4fc', fontWeight: 600, textDecoration: 'none' }}>Zizka Enterprise</a>.
+            <Link href={ENTERPRISE_PATH} style={{ color: '#a5b4fc', fontWeight: 600, textDecoration: 'none' }}>Zizka Enterprise</Link>.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
             <Link href="/signup" style={{
@@ -1357,13 +1357,13 @@ export default function LandingPage() {
             }}>
               Start managed free →
             </Link>
-            <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{
+            <Link href={ENTERPRISE_PATH} style={{
               padding: '16px 32px', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
               color: '#fff', borderRadius: 12, textDecoration: 'none',
               fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(99,102,241,0.35)',
             }}>
               Enterprise →
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => copy(MCP_HERO_CONFIG, 'final-mcp')}
@@ -1377,9 +1377,9 @@ export default function LandingPage() {
             </button>
           </div>
           <p style={{ fontSize: 14, color: '#6b7280' }}>
-            <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
+            <Link href={ENTERPRISE_PATH} style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
               Enterprise
-            </a>
+            </Link>
             {' '}·{' '}
             <Link href="#pricing" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
               View pricing
@@ -1444,7 +1444,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          {[['Docs', '/docs'], ['Enterprise', ENTERPRISE_URL], ['Managed', '#managed'], ['Pricing', '#pricing'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Sign in', '/login']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Enterprise', ENTERPRISE_PATH], ['Managed', '#managed'], ['Pricing', '#pricing'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Sign in', '/login']].map(([l, h]) => (
             h.startsWith('http') ? (
               <a key={l} href={h} target="_blank" rel="noreferrer" style={{ color: '#999', textDecoration: 'none' }}>{l}</a>
             ) : (
