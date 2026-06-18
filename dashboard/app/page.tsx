@@ -165,6 +165,8 @@ curl -X POST https://db.zizka.ai/v1/events \\
 }
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
+const ENTERPRISE_GITHUB = 'https://github.com/Zizka-ai/Zizka-Enterprise'
+const ENTERPRISE_CONTACT = 'mailto:founder@zizka.ai?subject=ZizkaDB%20Enterprise'
 
 const MCP_HERO_CONFIG = `{
   "mcpServers": {
@@ -283,6 +285,7 @@ export default function LandingPage() {
           .zdb-hero-dark { padding: 48px 20px 56px !important; }
           .zdb-hero-grid { grid-template-columns: 1fr !important; }
           .zdb-path-grid { grid-template-columns: 1fr !important; }
+          .zdb-offerings-grid { grid-template-columns: 1fr !important; }
           .zdb-grid-3 { grid-template-columns: 1fr !important; }
           .zdb-grid-2 { grid-template-columns: 1fr !important; }
           .zdb-price-grid { grid-template-columns: 1fr !important; }
@@ -430,6 +433,103 @@ export default function LandingPage() {
             }}>
               Reload MCP in Cursor → ask &quot;log that we chose Postgres&quot; → it calls{' '}
               <code style={{ color: BRAND_LIGHT }}>log_event</code> natively
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Cloud vs Enterprise — equal weight */}
+      <section id="offerings" className="zdb-section" style={{ padding: '56px 40px 48px', background: '#fff', borderBottom: '1px solid #eee' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 700, letterSpacing: 1.2, textTransform: 'uppercase', color: '#888', marginBottom: 12 }}>
+            Two ways to run ZizkaDB
+          </p>
+          <h2 style={{ fontSize: 28, fontWeight: 700, textAlign: 'center', marginBottom: 36, letterSpacing: -0.5 }}>
+            Developer cloud &amp; open source — or Enterprise for production fleets
+          </h2>
+          <div className="zdb-path-grid zdb-offerings-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>
+            {/* Cloud / OSS */}
+            <div style={{
+              background: '#fff', borderRadius: 16, padding: '36px 32px',
+              border: `2px solid ${BRAND}`, position: 'relative',
+              boxShadow: '0 8px 32px rgba(249,115,22,0.1)',
+            }}>
+              <div style={{
+                position: 'absolute', top: -11, left: 20,
+                background: BRAND, color: '#fff', fontSize: 10, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
+              }}>
+                ZIZKADB CLOUD &amp; OPEN SOURCE
+              </div>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>☁️</div>
+              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Start in minutes</h3>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
+                Managed at db.zizka.ai, MCP in Cursor, or self-host free on Docker. Same causal engine — AGPL on GitHub.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Free trial — no credit card', 'Python, TypeScript, MCP, REST', 'Fleet dashboard + drift baselines', 'Self-host forever on your infra'].map(item => (
+                  <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
+                    <span style={{ color: BRAND, fontWeight: 700 }}>✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/signup" style={{
+                  flex: 1, minWidth: 140, padding: '12px 18px', background: BRAND, color: '#fff',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14, textAlign: 'center',
+                }}>
+                  Start free →
+                </Link>
+                <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{
+                  flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  border: '1px solid #ddd', textAlign: 'center',
+                }}>
+                  GitHub ↗
+                </a>
+              </div>
+            </div>
+
+            {/* Enterprise */}
+            <div id="enterprise" style={{
+              background: '#fff', borderRadius: 16, padding: '36px 32px',
+              border: '2px solid #6366f1', position: 'relative',
+              boxShadow: '0 8px 32px rgba(99,102,241,0.12)',
+            }}>
+              <div style={{
+                position: 'absolute', top: -11, left: 20,
+                background: '#4f46e5', color: '#fff', fontSize: 10, fontWeight: 700,
+                padding: '3px 10px', borderRadius: 100, letterSpacing: 0.5,
+              }}>
+                ZIZKA ENTERPRISE
+              </div>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>🏢</div>
+              <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 10 }}>Production agentic fleets</h3>
+              <p style={{ fontSize: 14, color: '#555', lineHeight: 1.65, marginBottom: 20 }}>
+                VPC or dedicated deploy, commercial license, SSO + RBAC, multi-agent governance, and integration sprints for regulated teams.
+              </p>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Your cloud — data stays yours', 'SSO, audit export, retention policies', 'Multi-agent + drift at fleet scale', 'SLA + 4-week Launch package'].map(item => (
+                  <li key={item} style={{ fontSize: 13.5, color: '#444', display: 'flex', gap: 8 }}>
+                    <span style={{ color: '#4f46e5', fontWeight: 700 }}>✓</span> {item}
+                  </li>
+                ))}
+              </ul>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <Link href="/enterprise" style={{
+                  flex: 1, minWidth: 140, padding: '12px 18px', background: '#4f46e5', color: '#fff',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 14, textAlign: 'center',
+                }}>
+                  Enterprise →
+                </Link>
+                <a href={ENTERPRISE_CONTACT} style={{
+                  flex: 1, minWidth: 120, padding: '12px 18px', background: '#fff', color: '#111',
+                  borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 14,
+                  border: '1px solid #ddd', textAlign: 'center',
+                }}>
+                  Contact →
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -635,6 +735,60 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Enterprise — mirrors managed section weight */}
+      <section id="enterprise-detail" className="zdb-section" style={{ padding: '64px 40px', background: '#f8fafc', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <h2 style={{ fontSize: 30, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
+            Enterprise — governed multi-agent operations
+          </h2>
+          <p style={{ textAlign: 'center', color: '#555', fontSize: 15, marginBottom: 48, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+            Same ZizkaDB engine — causal lineage, semantic memory, fleet drift — with commercial license,
+            VPC deployment, and services to ship agentic AI without operational blind spots.
+          </p>
+          <div className="zdb-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, marginBottom: 32 }}>
+            {[
+              { icon: '🔐', title: 'Deploy in your VPC', desc: 'Dedicated or customer cloud. Data residency, commercial license, SSO + RBAC for ops and compliance teams.' },
+              { icon: '🤖', title: 'Multi-agent at scale', desc: 'Tenant-wide keys, per-team namespaces, prod/staging separation — one operational layer for hundreds of agents.' },
+              { icon: '🔗', title: 'Agentic integration sprint', desc: '4-week done-with-you: instrument orchestration, parent_id lineage, why() runbooks, handoff to your team.' },
+              { icon: '📋', title: 'Audit & alerting', desc: 'Export causal chains for incidents, configurable retention, drift alerts to Slack or PagerDuty.' },
+            ].map(item => (
+              <div key={item.title} style={{ background: '#fff', borderRadius: 12, padding: '24px 22px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
+                <div style={{ fontWeight: 600, fontSize: 15, marginBottom: 8 }}>{item.title}</div>
+                <div style={{ fontSize: 13.5, color: '#444', lineHeight: 1.6 }}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              display: 'inline-block', background: '#312e81', borderRadius: 12, padding: '20px 28px',
+              fontFamily: 'monospace', fontSize: 13, color: '#c7d2fe', lineHeight: 1.8, textAlign: 'left',
+            }}>
+              <div><span style={{ color: '#818cf8' }}>1.</span> Discovery workshop — map agentic flows</div>
+              <div><span style={{ color: '#818cf8' }}>2.</span> VPC pilot + instrumentation</div>
+              <div><span style={{ color: '#818cf8' }}>3.</span> Fleet governance + incident runbooks</div>
+            </div>
+            <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Link href="/enterprise" style={{ padding: '12px 28px', background: '#4f46e5', color: '#fff', borderRadius: 10, textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
+                Explore Enterprise →
+              </Link>
+              <a href={ENTERPRISE_CONTACT} style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
+                Contact sales
+              </a>
+              <a href={ENTERPRISE_GITHUB} target="_blank" rel="noreferrer" style={{ padding: '12px 28px', background: '#fff', color: '#111', borderRadius: 10, textDecoration: 'none', fontWeight: 500, fontSize: 15, border: '1px solid #ddd' }}>
+                Enterprise repo ↗
+              </a>
+            </div>
+            <p style={{ fontSize: 13, color: '#888', marginTop: 16 }}>
+              Developers start on{' '}
+              <Link href="/signup" style={{ color: BRAND_DARK, fontWeight: 500 }}>managed cloud</Link>
+              {' '}or{' '}
+              <Link href="#opensource" style={{ color: BRAND_DARK, fontWeight: 500 }}>self-host</Link>.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="zdb-section" style={{ padding: '64px 40px', background: '#fafafa' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -704,10 +858,37 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <div style={{
+            marginTop: 32, background: '#fff', borderRadius: 14, padding: '28px 32px',
+            border: '2px solid #6366f1', display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+            justifyContent: 'space-between', gap: 20,
+          }}>
+            <div style={{ flex: '1 1 280px' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                Enterprise
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Custom — VPC &amp; multi-agent fleets</div>
+              <p style={{ fontSize: 14, color: '#555', margin: 0, lineHeight: 1.6 }}>
+                Commercial license, SSO + RBAC, dedicated deploy, integration sprint, SLA. Annual contract.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <Link href="/enterprise" style={{
+                padding: '12px 22px', background: '#4f46e5', color: '#fff', borderRadius: 10,
+                textDecoration: 'none', fontWeight: 600, fontSize: 14,
+              }}>
+                Enterprise →
+              </Link>
+              <a href={ENTERPRISE_CONTACT} style={{
+                padding: '12px 22px', background: '#fff', color: '#111', borderRadius: 10,
+                textDecoration: 'none', fontWeight: 500, fontSize: 14, border: '1px solid #ddd',
+              }}>
+                Contact sales
+              </a>
+            </div>
+          </div>
         </div>
       </section>
-
-      {/* Embeddings — managed feature */}
       <section className="zdb-section" style={{ padding: '56px 40px', background: '#fff', borderTop: '1px solid #eee' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <h2 style={{ fontSize: 26, fontWeight: 700, textAlign: 'center', marginBottom: 12, letterSpacing: -0.5 }}>
@@ -1165,10 +1346,11 @@ export default function LandingPage() {
             Ready to start?
           </p>
           <h2 style={{ fontSize: 36, fontWeight: 800, color: '#fff', marginBottom: 16, letterSpacing: -0.8, lineHeight: 1.15 }}>
-            Managed cloud, MCP,<br />or self-host — your choice.
+            Cloud, Enterprise,<br />MCP, or self-host.
           </h2>
           <p style={{ fontSize: 16, color: '#9ca3af', marginBottom: 36, lineHeight: 1.6 }}>
-            Most teams start on db.zizka.ai — free trial, no credit card. Developers also connect Cursor via MCP or clone the open-source stack.
+            Developers start on db.zizka.ai or self-host. Production fleets and regulated teams use{' '}
+            <Link href="/enterprise" style={{ color: '#a5b4fc', fontWeight: 600, textDecoration: 'none' }}>Zizka Enterprise</Link>.
           </p>
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
             <Link href="/signup" style={{
@@ -1177,6 +1359,13 @@ export default function LandingPage() {
               fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(249,115,22,0.45)',
             }}>
               Start managed free →
+            </Link>
+            <Link href="/enterprise" style={{
+              padding: '16px 32px', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+              color: '#fff', borderRadius: 12, textDecoration: 'none',
+              fontWeight: 700, fontSize: 16, boxShadow: '0 4px 24px rgba(99,102,241,0.35)',
+            }}>
+              Enterprise →
             </Link>
             <button
               type="button"
@@ -1191,6 +1380,10 @@ export default function LandingPage() {
             </button>
           </div>
           <p style={{ fontSize: 14, color: '#6b7280' }}>
+            <Link href="/enterprise" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
+              Enterprise
+            </Link>
+            {' '}·{' '}
             <Link href="#pricing" style={{ color: BRAND_PALE, fontWeight: 500, textDecoration: 'none' }}>
               View pricing
             </Link>
@@ -1254,7 +1447,7 @@ export default function LandingPage() {
           <span>by Zizka AI</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
-          {[['Docs', '/docs'], ['Managed', '#managed'], ['Pricing', '#pricing'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Sign in', '/login']].map(([l, h]) => (
+          {[['Docs', '/docs'], ['Enterprise', '/enterprise'], ['Managed', '#managed'], ['Pricing', '#pricing'], ['GitHub', GITHUB_URL], ['Technical', '/trust'], ['Community', '/community'], ['Sign in', '/login']].map(([l, h]) => (
             h.startsWith('http') ? (
               <a key={l} href={h} target="_blank" rel="noreferrer" style={{ color: '#999', textDecoration: 'none' }}>{l}</a>
             ) : (
