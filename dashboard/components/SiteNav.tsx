@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
 import { brandCtaStyle, brandLogoStyle } from './brand'
-
-const ENTERPRISE_REPO = 'https://github.com/Zizka-ai/ZIZKADB-Enterprise'
+import { ENTERPRISE_URL } from '@/lib/enterprise'
 
 export type SiteNavActive = 'docs' | 'community' | 'trust' | 'explorer' | 'home'
 
@@ -53,7 +52,7 @@ export function SiteNav({ active, suffix }: SiteNavProps) {
       </Link>
 
       <div className="site-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-        <a href={ENTERPRISE_REPO} target="_blank" rel="noreferrer" style={linkStyle(false)}>Enterprise</a>
+        <a href={ENTERPRISE_URL} target="_blank" rel="noreferrer" style={linkStyle(false)}>Enterprise</a>
         <Link href="/docs" style={linkStyle(active === 'docs')}>Docs</Link>
         <Link href="/community" style={linkStyle(active === 'community')}>Community</Link>
         <a href="/swagger" style={linkStyle(active === 'explorer')}>API Explorer</a>
