@@ -19,6 +19,11 @@ if [ ! -f infra/.env ]; then
   echo "  Tip: add OPENAI_API_KEY for semantic search (logging works without it)"
 else
   echo "✓ Using existing infra/.env"
+  if grep -q '^DEV_API_KEY=agdb_dev_local' infra/.env 2>/dev/null; then
+    sed -i.bak 's/^DEV_API_KEY=agdb_dev_local/DEV_API_KEY=zizkadb_dev_local/' infra/.env
+    rm -f infra/.env.bak
+    echo "✓ Migrated DEV_API_KEY agdb_dev_local → zizkadb_dev_local"
+  fi
 fi
 
 echo "→ Starting API + Postgres + Qdrant + Redis + Dashboard..."

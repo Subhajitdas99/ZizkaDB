@@ -10,6 +10,8 @@ bearer = HTTPBearer()
 # Never set this in production managed cloud.
 _DEV_API_KEY = os.getenv("DEV_API_KEY", "")
 _IS_PRODUCTION = os.getenv("ENV", "development") == "production"
+# SDK/MCP default vs legacy self-host .env — accept both in local dev only.
+_KNOWN_DEV_KEYS = frozenset({"zizkadb_dev_local", "agdb_dev_local"})
 
 # Same IDs as /v1/auth/dev-token (core/api/auth.py)
 _DEV_TENANT_ID = "00000000-0000-0000-0000-000000000001"
@@ -52,6 +54,19 @@ def assert_agent_allowed(tenant: dict, agent_id: str) -> None:
         )
 
 
+def _dev_key_accepted(token: str) -> bool:
+    if _IS_PRODUCTION:
+        return False
+    if _DEV_API_KEY:
+        if token == _DEV_API_KEY:
+            return True
+        # Transition: old infra/.env used agdb_dev_local; SDK/MCP use zizkadb_dev_local.
+        if _DEV_API_KEY in _KNOWN_DEV_KEYS and token in _KNOWN_DEV_KEYS:
+            return True
+        return False
+    return token in _KNOWN_DEV_KEYS
+
+
 async def get_tenant(
     credentials: HTTPAuthorizationCredentials = Security(bearer),
 ) -> dict:
@@ -59,12 +74,7 @@ async def get_tenant(
     token = credentials.credentials
 
     # Dev key bypass (self-hosted local development only)
-    if _DEV_API_KEY and token == _DEV_API_KEY:
-        if _IS_PRODUCTION:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid or revoked API key",
-            )
+    if _dev_key_accepted(token):
         return _DEV_TENANT
 
     # API key (verified by hash, not prefix)
