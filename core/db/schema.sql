@@ -13,6 +13,21 @@ CREATE TABLE tenants (
 );
 
 -- ─────────────────────────────────────────
+-- AGENTS
+-- ─────────────────────────────────────────
+CREATE TABLE agents (
+    agent_id    VARCHAR(255) NOT NULL,
+    tenant_id   UUID NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
+    first_seen  TIMESTAMPTZ DEFAULT NOW(),
+    last_seen   TIMESTAMPTZ DEFAULT NOW(),
+    event_count BIGINT DEFAULT 0,
+    metadata    JSONB,
+    PRIMARY KEY (agent_id, tenant_id)
+);
+
+CREATE INDEX idx_agents_tenant ON agents (tenant_id, last_seen DESC);
+
+-- ─────────────────────────────────────────
 -- API KEYS
 -- ─────────────────────────────────────────
 CREATE TABLE api_keys (
@@ -62,21 +77,6 @@ CREATE TABLE auth_otps (
 );
 
 CREATE INDEX idx_otps_email ON auth_otps (email, expires_at);
-
--- ─────────────────────────────────────────
--- AGENTS
--- ─────────────────────────────────────────
-CREATE TABLE agents (
-    agent_id    VARCHAR(255) NOT NULL,
-    tenant_id   UUID NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
-    first_seen  TIMESTAMPTZ DEFAULT NOW(),
-    last_seen   TIMESTAMPTZ DEFAULT NOW(),
-    event_count BIGINT DEFAULT 0,
-    metadata    JSONB,
-    PRIMARY KEY (agent_id, tenant_id)
-);
-
-CREATE INDEX idx_agents_tenant ON agents (tenant_id, last_seen DESC);
 
 -- ─────────────────────────────────────────
 -- EVENTS (core append-only table)
