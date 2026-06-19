@@ -60,7 +60,7 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production}
       ENV: ${ENV:-development}
       # Local dev only — leave unset on managed cloud (ENV=production)
-      DEV_API_KEY: ${DEV_API_KEY:-agdb_dev_local}
+      DEV_API_KEY: ${DEV_API_KEY:-zizkadb_dev_local}
       # Email — optional; enables OTP login on self-hosted dashboard
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT:-465}

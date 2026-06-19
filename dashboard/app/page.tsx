@@ -147,7 +147,19 @@ chain.print()`,
   }
 }
 
-# Self-host: use "ZIZKADB_HOST": "http://localhost:8000" instead of API key
+# Self-host (after bash scripts/setup-local.sh):
+{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": {
+        "ZIZKADB_HOST": "http://localhost:8000"
+      }
+    }
+  }
+}
+
 # Tools: log_event · search_memory · get_context · why · time_travel · memory_diff · forget`,
 
   'REST API': `# Works in Python, Go, Ruby, Rust, Java, or anything with HTTP

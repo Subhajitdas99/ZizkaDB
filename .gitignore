@@ -31,4 +31,5 @@ redis_data/
 # IDE
 .idea/
 .vscode/
+.cursor/mcp.json
 *.swp
