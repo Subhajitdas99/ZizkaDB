@@ -33,3 +33,6 @@ redis_data/
 .vscode/
 .cursor/mcp.json
 *.swp
+
+# Postgres backups (created by infra/backup-postgres.sh)
+infra/backups/

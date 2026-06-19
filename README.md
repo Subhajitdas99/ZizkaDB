@@ -139,11 +139,19 @@ asyncio.run(main())
 ### Production on a VPS
 
 ```bash
+bash infra/deploy-production.sh   # backs up Postgres first — never uses -v
+```
+
+Or API-only self-host:
+
+```bash
 docker compose -f infra/docker-compose.yml up -d
 bash infra/deploy-selfhost.sh
 ```
 
-Configure `EMAIL_*` in `infra/.env` for team OTP login. On managed cloud set `ENV=production` and leave `DEV_API_KEY` unset. Full guide: [db.zizka.ai/docs](https://db.zizka.ai/docs).
+**Never** run `docker compose down -v` on a server with real users — it wipes all accounts. Local dev reset only: `bash scripts/reset-local-db.sh`.
+
+Configure `EMAIL_*` in `infra/.env` for team OTP login. On managed cloud set `ENV=production` and leave `DEV_API_KEY` unset. Full guide: [db.zizka.ai/docs](https://db.zizka.ai/docs) · [Production Deployment wiki](https://github.com/Zizka-ai/ZizkaDB/wiki/Production-Deployment).
 
 ### Refresh README assets
 

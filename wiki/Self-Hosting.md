@@ -48,8 +48,16 @@ MCP:
 ## Production self-host
 
 ```bash
-docker compose -f infra/docker-compose.yml up -d
+bash infra/deploy-production.sh   # backup first — never uses docker compose down -v
 bash infra/deploy-selfhost.sh
+```
+
+**Never** `docker compose down -v` on a server with real users.
+
+Local laptop reset only:
+
+```bash
+bash scripts/reset-local-db.sh
 ```
 
 Configure in `infra/.env`:
