@@ -40,7 +40,7 @@ export * from './types'
 
 const CLOUD_HOST = 'https://db.zizka.ai'
 const TELEMETRY_URL = 'https://db.zizka.ai/v1/telemetry'
-const SDK_VERSION = '0.2.3'
+const SDK_VERSION = '0.2.4'
 const DEFAULT_DEV_API_KEY = 'zizkadb_dev_local'
 
 function isLocalHost(host: string): boolean {

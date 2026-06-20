@@ -112,6 +112,28 @@ python scripts/demo-why.py
 
 Localhost uses an auto-injected dev key — no API key required.
 
+### Tests
+
+Core unit/smoke tests can run without the Docker stack:
+
+```bash
+cd core
+python -m pip install -r requirements.txt -r requirements-dev.txt
+python -m pytest tests -q
+```
+
+Integration tests require a running local ZizkaDB stack:
+
+```bash
+# from the repository root
+bash scripts/setup-local.sh
+
+cd core
+ZIZKADB_RUN_INTEGRATION=1 python -m pytest tests -q -m integration
+```
+
+You can also pass `--run-integration` instead of setting `ZIZKADB_RUN_INTEGRATION=1`.
+
 ### Managed cloud (same SDK)
 
 ```bash
