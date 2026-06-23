@@ -77,6 +77,6 @@ async def test_dev_token_and_log_event():
                 "data": {"ok": True},
             },
         )
-    assert log_res.status_code == 200
+    assert log_res.status_code == 201
     body = log_res.json()
     assert "event_id" in body
