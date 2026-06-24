@@ -1,0 +1,59 @@
+---
+description: ZizkaDB testing requirements, markers, and scenario coverage
+globs: core/tests/**/*,core/**/*.py,sdk/**/*,scripts/**/*,.github/**/*
+alwaysApply: false
+---
+
+# ZizkaDB Testing Conventions
+
+## Run tests
+```bash
+# Unit only (no stack)
+pytest core/tests/ -m "not integration" -v
+
+# Integration (stack on :8000)
+pytest core/tests/ -m integration -v
+
+# Skip OpenAI-dependent tests
+pytest core/tests/ -m "integration and not requires_openai" -v
+
+# Pre-push
+bash scripts/verify-release.sh
+
+# Full workflow
+bash scripts/test-e2e-workflow.sh
+```
+
+## Pytest markers (`core/pytest.ini`)
+- `integration` — requires Docker stack
+- `requires_openai` — needs `OPENAI_API_KEY`
+- `security` — auth/isolation tests
+- `slow` — load tests
+
+## When adding API behavior
+1. Find scenario in `.cursor/skills/zizkadb-testing/scenario-catalog.md`
+2. Add test in `core/tests/test_integration_*.py`
+3. Use fixtures from `core/tests/conftest.py` (`dev_headers`, `jwt_headers`, `api_base`)
+4. Never skip tenant isolation (B9) or agent scope (B6/B7) for new routes
+
+## P0 regressions (must always pass)
+- B6/B7 agent-scoped key enforcement
+- B9 cross-tenant isolation
+- C1 log event, C2 causal why chain
+- E1 search 400 without embedding key
+- E11 GDPR forget removes events
+
+## Test file layout
+- `test_smoke.py` — unit + legacy integration
+- `test_integration_auth.py` — auth matrix
+- `test_integration_events.py` — log, query, why, at
+- `test_integration_search.py` — search, context, forget
+
+## SDK changes
+- Python unit tests in `core/tests/` or `sdk/python/tests/`
+- Manual or future automated TS parity check
+
+## Do not
+- Commit secrets in test fixtures
+- Rely on smoke-test.sh alone for new features
+- Skip integration tests for cross-service paths (PG + Qdrant)

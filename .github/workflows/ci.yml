@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r core/requirements-dev.txt -r core/requirements.txt
+          pip install -e sdk/python
+
+      - name: Unit tests
+        working-directory: core
+        run: pytest tests/ -m "not integration" -v
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: |
+          cp .env.example infra/.env
+          # Empty placeholder so E1 (search without embeddings) is deterministic in CI
+          sed -i 's/^OPENAI_API_KEY=.*/OPENAI_API_KEY=/' infra/.env
+          docker compose -f infra/docker-compose.yml up -d --build
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/health && break
+            sleep 2
+          done
+          curl -sf http://localhost:8000/health
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Integration tests
+        run: |
+          pip install -r core/requirements-dev.txt -r core/requirements.txt
+          pip install -e sdk/python
+          cd core && pytest tests/ -m "integration and not requires_openai" -v
+
+      - name: E2E workflow script
+        run: bash scripts/test-e2e-workflow.sh
+
+      - name: Smoke test
+        run: bash scripts/smoke-test.sh
+
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+
+      - name: Dashboard build
+        working-directory: dashboard
+        run: |
+          npm ci
+          npm run build

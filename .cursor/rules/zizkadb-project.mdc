@@ -1,0 +1,81 @@
+---
+description: ZizkaDB project architecture, conventions, and maintenance guide
+alwaysApply: true
+---
+
+# ZizkaDB — Project Context
+
+## What this is
+Operational database for AI agents (NOT an agent runtime, NOT document RAG). Combines:
+- Event logging with causal lineage (`parent_id` → `why()`)
+- Semantic search + prompt memory (`search`, `context_for`)
+- Time-travel state (`at()` / `GET /v1/events/at`)
+- Behavioral drift baselines (`baseline()`)
+- GDPR forget (`forget()`)
+
+## Stack
+| Layer | Path / Tech |
+|-------|-------------|
+| API | `core/` — FastAPI, Python 3.12 |
+| DB | PostgreSQL 16 + pgvector (`core/db/schema.sql`) |
+| Vector search | Qdrant collection `agent_events` (1536-dim cosine) |
+| Cache | Redis — embedding cache (`core/services/embeddings.py`) |
+| Dashboard | `dashboard/` — Next.js 14 |
+| Python SDK | `sdk/python/` — PyPI `zizkadb-sdk` |
+| TypeScript SDK | `sdk/typescript/` — npm `zizkadb-sdk` |
+| MCP | `mcp/` — MIT, PyPI `zizkadb-mcp` |
+| Integrations | `integrations/langchain/`, `integrations/crewai/` |
+| Infra | `infra/docker-compose.yml`, `infra/nginx.conf` |
+
+## Where to change what
+- New API endpoint → `core/api/` + register in `core/main.py`
+- Shared logic → `core/services/` (prefer over fat route handlers)
+- DB pools / init → `core/db/connection.py`
+- Event write (single source of truth) → `core/services/event_write.py`
+- Auth / tenant → `core/api/deps.py`, `core/services/auth.py`
+- SDK method → `sdk/python/zizkadb/client.py` AND `sdk/typescript/src/index.ts`
+- MCP tool → `mcp/zizkadb_mcp/server.py`
+- Public docs → `wiki/`, in-app → `dashboard/app/docs/sections.tsx`
+
+## Critical data flows
+**Log:** `POST /v1/events` → `write_event()` → Postgres INSERT → embed (OpenAI) → PG embedding UPDATE → Qdrant upsert (id = `event_id`).
+
+**Search:** Embed query → Qdrant (filter `tenant_id` [+ `agent_id`) → Postgres hydrate.
+
+**Context:** Recent (Postgres) + semantic (Qdrant) → dedupe → token budget (~4 chars/token).
+
+## Multi-tenancy & auth
+- All authenticated routes: `get_tenant()` in `core/api/deps.py`
+- API keys: SHA-256 in `api_keys`; prefix `zizkadb_live_` (legacy `agdb_live_` works)
+- JWT: dashboard sessions (HS256, `JWT_SECRET`)
+- Agent-scoped keys: `assert_agent_allowed(tenant, agent_id)` on routes with `agent`
+- Dev bypass: `DEV_API_KEY` only when `ENV != production`
+- Settings PUT `/v1/settings/embeddings`: JWT only
+
+## Code principles
+1. Minimal diff — match surrounding patterns
+2. SDK parity — Python + TypeScript for public methods
+3. Parameterized SQL only
+4. All event creation via `write_event()`
+5. Embedding failures log warning, don't fail the log
+6. License: core/SDK AGPL-3.0; MCP MIT
+
+## Known gaps
+- No LangGraph/AutoGen native adapters
+- No API rate limits on `/v1/events`
+- No re-embedding on model change
+- Search uses Qdrant, not Postgres pgvector HNSW
+- `time_travel` / `memory/context` may lack `assert_agent_allowed`
+
+## Local dev
+```bash
+bash scripts/setup-local.sh   # API :8000, Dashboard :3001, dev key zizkadb_dev_local
+```
+
+## Before merging API changes
+- [ ] Tenant isolation on all new queries
+- [ ] Agent scope check where applicable
+- [ ] SDK parity (Python + TS)
+- [ ] MCP tool if user-facing primitive
+- [ ] Integration test in `core/tests/`
+- [ ] Update docs if public API changed
