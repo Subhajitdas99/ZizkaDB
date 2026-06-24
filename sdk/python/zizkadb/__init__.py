@@ -1,5 +1,19 @@
 from .client import ZizkaDB
-from .exceptions import ZizkaDBError, AuthError, NotFoundError, AgentScopeError
+from .exceptions import ZizkaDBError, AuthError, NotFoundError, RateLimitError, AgentScopeError
 
-__all__ = ["ZizkaDB", "ZizkaDBError", "AuthError", "NotFoundError", "AgentScopeError"]
-__version__ = "0.2.3"
+try:
+    from importlib.metadata import version as _pkg_version
+
+    __version__ = _pkg_version("zizkadb-sdk")
+except Exception:
+    __version__ = "0.2.4"
+
+__all__ = [
+    "ZizkaDB",
+    "ZizkaDBError",
+    "AuthError",
+    "NotFoundError",
+    "RateLimitError",
+    "AgentScopeError",
+    "__version__",
+]

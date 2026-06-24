@@ -1,3 +1,3 @@
-from .callbacks import ZizkaDBCallbackHandler
+from zizkadb.integrations.langchain import ZizkaDBCallbackHandler
 
 __all__ = ["ZizkaDBCallbackHandler"]

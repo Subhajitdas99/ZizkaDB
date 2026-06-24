@@ -24,7 +24,7 @@ import platform
 import threading
 import uuid
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -36,7 +36,7 @@ try:
 
     __version__ = _pkg_version("zizkadb-mcp")
 except Exception:
-    __version__ = "0.1.3"
+    __version__ = "0.1.4"
 
 DEFAULT_DEV_API_KEY = "zizkadb_dev_local"
 _HOST = (
@@ -243,7 +243,10 @@ async def why(event_id: str, depth: int = 10) -> dict:
     Returns:
         Ordered list of events from root cause to the specified event
     """
-    return await _api("GET", f"/events/{event_id}/why?depth={depth}")
+    return await _api(
+        "GET",
+        f"/events/{quote(event_id, safe='')}/why?{urlencode({'depth': depth})}",
+    )
 
 
 @mcp.tool()
@@ -263,10 +266,10 @@ async def query_events(
     Returns:
         List of events ordered by time (most recent first)
     """
-    qs = f"?agent={agent}&limit={limit}"
+    params: dict[str, str | int] = {"agent": agent, "limit": limit}
     if event_type:
-        qs += f"&event_type={event_type}"
-    return await _api("GET", f"/events{qs}")
+        params["event_type"] = event_type
+    return await _api("GET", f"/events?{urlencode(params)}")
 
 
 @mcp.tool()
@@ -306,7 +309,7 @@ async def memory_diff(session_id: str) -> dict:
     Returns:
         summary, event_types, total_events, has_errors, new_event_types
     """
-    return await _api("GET", f"/memory/diff/{session_id}")
+    return await _api("GET", f"/memory/diff/{quote(session_id, safe='')}")
 
 
 @mcp.tool()

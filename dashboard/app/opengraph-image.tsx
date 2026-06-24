@@ -37,8 +37,8 @@ export default function OpenGraphImage() {
           Z
         </div>
         <div style={{ fontSize: 64, fontWeight: 800 }}>ZizkaDB</div>
-        <div style={{ fontSize: 28, color: '#94a3b8', marginTop: 16, maxWidth: 800, textAlign: 'center' }}>
-          Know when your agent stops behaving like itself
+        <div style={{ fontSize: 24, color: '#94a3b8', marginTop: 16, maxWidth: 900, textAlign: 'center', lineHeight: 1.4 }}>
+          Operational database for AI agents · causal lineage · semantic memory · MCP + SDKs
         </div>
       </div>
     ),

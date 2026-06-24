@@ -30,7 +30,12 @@ Paste into `~/.cursor/mcp.json` (or `.cursor/mcp.json` in your project), then re
 }
 ```
 
-Self-host: use `"ZIZKADB_HOST": "http://localhost:8000"` instead (dev key auto-injected on localhost).
+Self-host: use the [Self-hosted](#self-hosted) block below (`ZIZKADB_HOST` only — dev key auto-injected on localhost).
+
+**Prerequisite:** install [uv](https://docs.astral.sh/uv/) for `uvx`:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 ## Install
 
@@ -56,7 +61,7 @@ uvx zizkadb-mcp
 }
 ```
 
-On localhost, the dev key (`zizkadb_dev_local`) is auto-injected — no API key needed for local development.
+On localhost, the dev key (`zizkadb_dev_local`) is auto-injected — no API key needed. Must match `DEV_API_KEY` in `infra/.env` if you changed it.
 
 ## Environment variables
 

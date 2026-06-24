@@ -670,7 +670,7 @@ export function McpSection() {
   }
 }`}</Code>
       <p style={{ ...S.p, marginTop: -8, marginBottom: 24 }}>
-        Self-host: replace env with <code style={{ fontFamily: 'monospace' }}>{`"ZIZKADB_HOST": "http://localhost:8000"`}</code> only.
+        Self-host: use the full block in <strong>Self-hosted API</strong> below (only <code style={{ fontFamily: 'monospace' }}>ZIZKADB_HOST</code> — dev key auto-injected). Requires <code style={{ fontFamily: 'monospace' }}>uvx</code> — install <a href="https://docs.astral.sh/uv/" target="_blank" rel="noreferrer" style={{ color: '#111' }}>uv</a> first.
       </p>
 
       <Callout type="info">
@@ -733,13 +733,14 @@ uvx --version</Code>
 }`}</Code>
       </Step>
       <Step n={6} title="Reload MCP in Cursor">
-        <p style={S.p}>Command Palette → <strong>MCP: Reload servers</strong> (or restart Cursor). Agent mode can now log events and search memory.</p>
+        <p style={S.p}>Quit Cursor completely (<code style={{ fontFamily: 'monospace' }}>Cmd+Q</code>) and reopen, or use Command Palette → <strong>MCP: Reload servers</strong>. Open <code style={{ fontFamily: 'monospace' }}>Cmd+Shift+J</code> → <strong>Tools &amp; MCP</strong> to confirm <code style={{ fontFamily: 'monospace' }}>zizkadb</code> is connected.</p>
       </Step>
 
       <h2 style={S.h2}>Windsurf & other MCP clients</h2>
       <p style={S.p}>Same JSON block — point your client&apos;s MCP config at <code style={{ fontFamily: 'monospace' }}>uvx zizkadb-mcp</code> with <code style={{ fontFamily: 'monospace' }}>ZIZKADB_API_KEY</code> in env.</p>
 
       <h2 style={S.h2}>Self-hosted API</h2>
+      <p style={S.p}>After <code style={{ fontFamily: 'monospace' }}>bash scripts/setup-local.sh</code>, paste this (no API key needed on localhost):</p>
       <Code lang="json">{`{
   "mcpServers": {
     "zizkadb": {
@@ -792,7 +793,7 @@ uvx --version</Code>
         {[
           { q: 'Tools not showing', a: 'Restart the app after editing config. Check JSON is valid (no trailing commas).' },
           { q: 'uvx not found', a: 'Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh' },
-          { q: 'Auth errors', a: 'Verify ZIZKADB_API_KEY in env. For self-host set ZIZKADB_HOST to http://localhost:8000' },
+          { q: 'Auth errors', a: 'Cloud: verify ZIZKADB_API_KEY. Self-host: set ZIZKADB_HOST to http://localhost:8000 and ensure local API is running (curl http://localhost:8000/health). Dev key is zizkadb_dev_local by default.' },
         ].map(item => (
           <div key={item.q} style={{ padding: '14px 18px', background: '#fafafa', borderRadius: 10, border: '1px solid #ebebeb' }}>
             <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{item.q}</div>
@@ -974,7 +975,7 @@ async def run(user_input: str):
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from zizkadb import ZizkaDB
-from zizkadb_langchain import ZizkaDBCallbackHandler
+from zizkadb.integrations.langchain import ZizkaDBCallbackHandler
 
 async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
@@ -989,7 +990,7 @@ async with ZizkaDB("zizkadb_live_...") as db:
       <Code lang="python">{`pip install zizkadb-sdk zizkadb-crewai crewai
 
 from zizkadb import ZizkaDB
-from zizkadb_crewai import ZizkaDBCrewLogger
+from zizkadb.integrations.crewai import ZizkaDBCrewLogger
 
 async with ZizkaDB("zizkadb_live_...") as db:
     logger = ZizkaDBCrewLogger(db, agent="research-crew")

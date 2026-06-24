@@ -26,6 +26,22 @@ async def init_db():
     )
     logger.info("Postgres connected")
 
+    try:
+        user_count = await _pg_pool.fetchval(
+            "SELECT COUNT(*) FROM information_schema.tables "
+            "WHERE table_schema = 'public' AND table_name = 'users'"
+        )
+        if user_count:
+            n = await _pg_pool.fetchval("SELECT COUNT(*) FROM users")
+            logger.info("Postgres users table: %s rows", n)
+        else:
+            logger.warning(
+                "Postgres schema incomplete (users table missing). "
+                "Do NOT run 'docker compose down -v' on production — restore from infra/backups/."
+            )
+    except Exception as e:
+        logger.warning("Could not read user count at startup: %s", e)
+
     # Billing columns for admin subscriber view (idempotent)
     await _pg_pool.execute("""
         ALTER TABLE users ADD COLUMN IF NOT EXISTS plan VARCHAR(50);

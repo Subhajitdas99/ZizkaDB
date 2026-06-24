@@ -319,7 +319,16 @@ chain = await db.why(tool.event_id)`}</Code>
     }
   }
 }`}</Code>
-            <p style={p}>Self-host: set <code style={codeInline}>ZIZKADB_HOST</code> to <code style={codeInline}>http://localhost:8000</code> instead (dev key auto-injected).</p>
+            <p style={p}>Self-host: use this block instead (dev key auto-injected on localhost):</p>
+            <Code lang="json">{`{
+  "mcpServers": {
+    "zizkadb": {
+      "command": "uvx",
+      "args": ["zizkadb-mcp"],
+      "env": { "ZIZKADB_HOST": "http://localhost:8000" }
+    }
+  }
+}`}</Code>
             <h3 style={h3}>MCP tools</h3>
             <p style={p}>
               <code style={codeInline}>log_event</code>, <code style={codeInline}>search_memory</code>, <code style={codeInline}>get_context</code>,{' '}
