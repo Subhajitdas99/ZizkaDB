@@ -8,8 +8,9 @@ import {
 } from '@/lib/api'
 import { format, formatDistanceToNow } from 'date-fns'
 
+import { setAdminToken, clearAdminToken, getAdminToken } from '@/lib/auth'
+
 const ADMIN_EMAIL = 'founder@zizka.ai'
-const TOKEN_KEY   = 'zizkadb_admin_token'
 
 type Section = 'subscribers' | 'managed' | 'telemetry'
 
@@ -106,7 +107,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setToken(localStorage.getItem(TOKEN_KEY))
+      setToken(getAdminToken())
     }
     setBootDone(true)
   }, [])
@@ -122,9 +123,9 @@ export default function AdminPage() {
     )
   }
   if (!token) {
-    return <Login onAuthed={(t) => { localStorage.setItem(TOKEN_KEY, t); setToken(t) }} />
+    return <Login onAuthed={(t) => { setAdminToken(t); setToken(t) }} />
   }
-  return <Dashboard token={token} onLogout={() => { localStorage.removeItem(TOKEN_KEY); setToken(null) }} />
+  return <Dashboard token={token} onLogout={() => { clearAdminToken(); setToken(null) }} />
 }
 
 
