@@ -9,7 +9,7 @@ alwaysApply: false
 ## Router structure
 - Routers in `core/api/`; prefix/tags in `core/main.py`
 - Use `Depends(get_tenant)`; `assert_agent_allowed(tenant, agent)` when route accepts agent name
-- Pydantic models colocated in route files (see `events.py`, `memory.py`)
+- Pydantic models colocated in route files (see `events.py`, `memory.py`).
 
 ## Event write — always use shared service
 ```python
