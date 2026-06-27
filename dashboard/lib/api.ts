@@ -253,22 +253,11 @@ export async function requestOtp(email: string) {
   return res.json()
 }
 
-export async function verifyOtp(
-  email: string,
-  otp: string,
-  options?: { promoCode?: string; plan?: string },
-) {
-  const body: Record<string, string> = {
-    email: email.toLowerCase().trim(),
-    otp: otp.trim(),
-  }
-  if (options?.promoCode?.trim()) body.promo_code = options.promoCode.trim().toUpperCase()
-  if (options?.plan?.trim()) body.plan = options.plan.trim().toLowerCase()
-
+export async function verifyOtp(email: string, otp: string) {
   const res = await fetch(`${API}/v1/auth/verify-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otp.trim() }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
@@ -277,27 +266,4 @@ export async function verifyOtp(
   const data = await res.json()
   if (!data?.access_token) throw new Error('Sign-in succeeded but no session token was returned')
   return data
-}
-
-export type PromoValidation = {
-  valid: boolean
-  code: string
-  label: string
-  plan: string
-  trial_days: number
-  trial_months: number
-  partner?: string
-}
-
-export async function validatePromo(code: string, plan: string): Promise<PromoValidation> {
-  const res = await fetch(`${API}/v1/promo/validate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: code.trim().toUpperCase(), plan: plan.toLowerCase() }),
-  })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(formatApiError(err.detail, 'Invalid promo code'))
-  }
-  return res.json()
 }

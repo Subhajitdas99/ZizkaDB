@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 from db.connection import get_pool
-from services.promo import PromoError, PromoOffer, normalize_plan, validate_promo
 
 JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
 JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "dev-refresh-secret")
@@ -93,29 +92,9 @@ async def request_otp(email: str) -> None:
     await _send_otp_email(email, otp)
 
 
-async def verify_otp(
-    email: str,
-    otp: str,
-    promo_code: str | None = None,
-    plan: str | None = None,
-) -> dict:
+async def verify_otp(email: str, otp: str) -> dict:
     email = email.lower().strip()
     pool = get_pool()
-
-    promo_offer: PromoOffer | None = None
-    if promo_code and str(promo_code).strip():
-        try:
-            promo_offer = validate_promo(promo_code, plan)
-        except PromoError:
-            raise
-        if not promo_offer:
-            raise ValueError("Promo code requires a plan selection")
-
-    existing_user_id = await pool.fetchval(
-        "SELECT user_id FROM users WHERE email = $1::text",
-        email,
-    )
-    is_new_user = existing_user_id is None
 
     row = await pool.fetchrow(
         """
@@ -179,62 +158,11 @@ async def verify_otp(
 
     tenant_id = str(tenant_id)
 
-    await _apply_signup_billing(pool, user_id, is_new_user, promo_offer, plan)
-
-    return _issue_tokens(user_id, email, tenant_id)
-
-
-async def _apply_signup_billing(
-    pool,
-    user_id: str,
-    is_new_user: bool,
-    promo_offer: PromoOffer | None,
-    requested_plan: str | None,
-) -> None:
-    if promo_offer:
-        updated = await pool.fetchval(
-            """
-            UPDATE users
-            SET plan = $2::text,
-                subscription_status = 'trialing',
-                trial_ends_at = NOW() + make_interval(days => $3::int),
-                promo_code = $4::text
-            WHERE user_id = $1::uuid
-              AND stripe_subscription_id IS NULL
-              AND promo_code IS NULL
-            RETURNING user_id
-            """,
-            user_id,
-            promo_offer.plan,
-            promo_offer.trial_days,
-            promo_offer.code,
-        )
-        if not updated:
-            if is_new_user:
-                raise PromoError("Could not apply promo code")
-            return
-
-        await pool.execute(
-            """
-            INSERT INTO promo_redemptions (code, user_id, plan, trial_days)
-            VALUES ($1::text, $2::uuid, $3::text, $4::int)
-            ON CONFLICT (code, user_id) DO NOTHING
-            """,
-            promo_offer.code,
-            user_id,
-            promo_offer.plan,
-            promo_offer.trial_days,
-        )
-        return
-
-    if not is_new_user:
-        return
-
-    selected = normalize_plan(requested_plan) or "pro"
+    # New signups get a 30-day Pro trial (local until Stripe checkout is wired)
     await pool.execute(
         """
         UPDATE users
-        SET plan = COALESCE(plan, $2::text),
+        SET plan = COALESCE(plan, 'pro'),
             subscription_status = COALESCE(subscription_status, 'trialing'),
             trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
         WHERE user_id = $1::uuid
@@ -242,8 +170,9 @@ async def _apply_signup_billing(
           AND subscription_status IS NULL
         """,
         user_id,
-        selected,
     )
+
+    return _issue_tokens(user_id, email, tenant_id)
 
 
 def _issue_tokens(user_id: str, email: str, tenant_id: str) -> dict:

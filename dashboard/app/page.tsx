@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { ProductPreview } from '@/components/marketing/ProductPreview'
-import { StationFOfferBanner } from '@/components/marketing/StationFOffer'
 import { BRAND, BRAND_DARK, BRAND_LIGHT, brandLogoStyle } from '@/components/brand'
 import { M, container, h2, lead, primaryBtn, blueBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
 
@@ -45,7 +44,6 @@ export default function LandingPage() {
           .zdb-footer { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
           .zdb-footer-links { flex-wrap: wrap !important; gap: 16px !important; }
           .zdb-tech-row { flex-direction: column !important; align-items: stretch !important; }
-          .zdb-sf-banner { padding-left: 20px !important; padding-right: 20px !important; }
         }
       `}</style>
 
@@ -103,10 +101,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      <div className="zdb-sf-banner">
-        <StationFOfferBanner />
-      </div>
 
       {/* What / Does / Outcome — 30-second scan */}
       <section style={{

@@ -3,7 +3,6 @@ import time
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, EmailStr
 from services.auth import request_otp, verify_otp, _issue_tokens
-from services.promo import PromoError
 from services.api_keys import create_api_key_record, revoke_api_key_record
 from api.deps import get_tenant
 from fastapi import Depends
@@ -43,8 +42,6 @@ class RequestOTPBody(BaseModel):
 class VerifyOTPBody(BaseModel):
     email: EmailStr
     otp: str
-    promo_code: str | None = None
-    plan: str | None = None
 
 
 class CreateAPIKeyBody(BaseModel):
@@ -71,14 +68,7 @@ async def request_otp_route(body: RequestOTPBody):
 async def verify_otp_route(body: VerifyOTPBody, response: Response):
     email = body.email.lower().strip()
     try:
-        tokens = await verify_otp(
-            email,
-            body.otp,
-            promo_code=body.promo_code,
-            plan=body.plan,
-        )
-    except PromoError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
+        tokens = await verify_otp(email, body.otp)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
