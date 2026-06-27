@@ -18,6 +18,7 @@ from api.stats import router as stats_router
 from api.billing import router as billing_router
 from api.community import router as community_router
 from api.settings import router as settings_router
+from api.promo import router as promo_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -71,6 +72,7 @@ app.include_router(stats_router,     prefix="/v1/stats",     tags=["stats"])
 app.include_router(billing_router,   prefix="/v1/webhooks",  include_in_schema=False)
 app.include_router(community_router, prefix="/v1/community", tags=["community"])
 app.include_router(settings_router,  prefix="/v1/settings",  tags=["settings"])
+app.include_router(promo_router,     prefix="/v1/promo",     tags=["promo"])
 
 
 @app.get("/health")
