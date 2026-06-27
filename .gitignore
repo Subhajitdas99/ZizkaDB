@@ -34,5 +34,5 @@ redis_data/
 .cursor/mcp.json
 *.swp
 
-# Profiling
-*.profraw
+# Postgres backups (created by infra/backup-postgres.sh)
+infra/backups/
