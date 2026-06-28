@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
-import { BookDemoModal } from '@/components/marketing/BookDemoModal'
+import { CalendlyBookModal } from '@/components/marketing/CalendlyBookModal'
 import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
 import { ThreeWaysConnectSection } from '@/components/marketing/ThreeWaysConnectSection'
@@ -88,7 +88,7 @@ export default function LandingPage() {
             </button>
           </div>
 
-          <BookDemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
+          <CalendlyBookModal open={demoOpen} onClose={() => setDemoOpen(false)} />
 
           <p className="zdb-hero-value" style={{
             fontSize: 18, fontWeight: 600, color: '#000', margin: 0, lineHeight: 1.55, maxWidth: 520, marginInline: 'auto',
