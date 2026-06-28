@@ -76,7 +76,7 @@ export default function LandingPage() {
 
         <div style={{ ...container(1080), position: 'relative', zIndex: 1 }}>
           <div className="zdb-hero-grid" style={{
-            display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
+            display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'start',
           }}>
             <div>
               <h1 className="zdb-hero-title" style={{

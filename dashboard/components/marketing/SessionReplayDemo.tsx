@@ -39,6 +39,8 @@ const EVENT_COLORS: Record<string, string> = {
   connection_test: '#3b82f6',
 }
 
+const SCENE_HEIGHT = 278
+
 export function SessionReplayDemo() {
   const [scene, setScene] = useState<Scene>('events')
   const [auto, setAuto] = useState(true)
@@ -97,6 +99,7 @@ export function SessionReplayDemo() {
           background: D.bg,
           border: `1px solid ${D.border}`,
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+          minHeight: 520,
         }}>
           {/* API connected bar — matches ConnectionStatus */}
           <div style={{
@@ -208,10 +211,31 @@ export function SessionReplayDemo() {
               })}
             </div>
 
-            <div style={{ minHeight: 200 }}>
-              {scene === 'events' && <EventsScene />}
-              {scene === 'behavior' && <BehaviorScene />}
-              {scene === 'sessions' && <SessionsScene />}
+            <div style={{ position: 'relative', height: SCENE_HEIGHT, overflow: 'hidden' }}>
+              <div style={{
+                position: 'absolute', inset: 0,
+                opacity: scene === 'events' ? 1 : 0,
+                transition: 'opacity 0.25s ease',
+                pointerEvents: scene === 'events' ? 'auto' : 'none',
+              }}>
+                <EventsScene />
+              </div>
+              <div style={{
+                position: 'absolute', inset: 0,
+                opacity: scene === 'behavior' ? 1 : 0,
+                transition: 'opacity 0.25s ease',
+                pointerEvents: scene === 'behavior' ? 'auto' : 'none',
+              }}>
+                <BehaviorScene />
+              </div>
+              <div style={{
+                position: 'absolute', inset: 0,
+                opacity: scene === 'sessions' ? 1 : 0,
+                transition: 'opacity 0.25s ease',
+                pointerEvents: scene === 'sessions' ? 'auto' : 'none',
+              }}>
+                <SessionsScene />
+              </div>
             </div>
           </div>
         </div>
