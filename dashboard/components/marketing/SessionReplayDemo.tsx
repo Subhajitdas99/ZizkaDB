@@ -186,7 +186,7 @@ export function SessionReplayDemo() {
                     key={key}
                     style={{
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      gap: 4, padding: '6px 4px', borderRadius: 7, fontSize: 9, fontWeight: 500,
+                      gap: 4, padding: '6px 4px', borderRadius: 7, fontSize: 9,
                       background: highlighted ? '#1a1a1a' : 'transparent',
                       color: '#fff',
                       fontWeight: highlighted ? 700 : 500,
