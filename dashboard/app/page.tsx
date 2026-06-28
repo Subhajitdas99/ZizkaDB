@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
-import { SessionReplayDemo } from '@/components/marketing/SessionReplayDemo'
 import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
 import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
@@ -11,11 +10,13 @@ import { ThreeWaysConnectSection } from '@/components/marketing/ThreeWaysConnect
 import { TrustBar } from '@/components/marketing/TrustBar'
 import { BrandLogo } from '@/components/BrandLogo'
 import { BRAND, BRAND_DARK } from '@/components/brand'
-import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
+import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, violetBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
+const BOOK_DEMO_URL = 'mailto:founder@zizka.ai?subject=Book%20a%20demo'
 
 const HERO_TITLE = 'Operational Database For AI Agents'
+const HERO_VALUE = 'Fix failures in minutes, not after customer complaints.'
 const FINAL_CTA_LINE = 'Fix before production breaks'
 
 const MCP_CONFIG = `{
@@ -40,16 +41,13 @@ export default function LandingPage() {
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: M.ink, background: '#fff' }}>
       <style>{`
-        .zdb-hero-grid { align-items: center !important; }
         @media (max-width: 1024px) {
           .zdb-connect-grid { grid-template-columns: 1fr !important; }
-          .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; align-items: start !important; }
         }
         @media (max-width: 768px) {
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
           .zdb-hero-title { font-size: 32px !important; }
-          .zdb-hero-sub { font-size: 15px !important; }
-          .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .zdb-hero-value { font-size: 16px !important; }
           .zdb-connect-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
           .zdb-section { padding-top: 48px !important; padding-bottom: 48px !important; }
           .zdb-compare-grid { grid-template-columns: 1fr !important; }
@@ -67,52 +65,34 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="zdb-section" style={{
-        padding: '56px 40px 64px',
-        background: M.heroBg,
-        position: 'relative',
-        overflow: 'hidden',
+        padding: '72px 40px 56px',
+        background: '#fff',
+        borderBottom: `1px solid ${M.line}`,
       }}>
-        <div style={{ position: 'absolute', inset: 0, background: M.heroGlowOrange, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', inset: 0, background: M.heroGlowBlue, pointerEvents: 'none' }} />
-
-        <div style={{ ...container(1080), position: 'relative', zIndex: 1 }}>
-          <div className="zdb-hero-grid" style={{
-            display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
+        <div style={{ ...container(760), textAlign: 'center' }}>
+          <h1 className="zdb-hero-title" style={{
+            fontSize: 48, fontWeight: 800, lineHeight: 1.12, margin: '0 0 36px',
+            letterSpacing: -0.9, color: '#000',
           }}>
-            <div className="zdb-hero-copy">
-              <h1 className="zdb-hero-title" style={{
-                fontSize: 46, fontWeight: 800, lineHeight: 1.1, margin: '0 0 32px',
-                letterSpacing: -0.8, color: '#fff', maxWidth: 520,
-              }}>
-                {HERO_TITLE}
-              </h1>
+            {HERO_TITLE}
+          </h1>
 
-              <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
-                <Link href="/signup" style={primaryBtn}>Start free · connect your first agent</Link>
-                <a
-                  href={GITHUB_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    ...ghostBtn,
-                    border: '2px solid #fff',
-                    fontWeight: 700,
-                  }}
-                >
-                  GitHub →
-                </a>
-              </div>
-
-              <p className="zdb-hero-sub" style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
-                Self-host free · managed cloud · no credit card required
-              </p>
-            </div>
-
-            <SessionReplayDemo />
+          <div className="zdb-hero-btns" style={{
+            display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 28,
+          }}>
+            <Link href="/signup" style={primaryBtn}>Sign up for free</Link>
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={blueBtn}>Self host</a>
+            <a href={BOOK_DEMO_URL} style={violetBtn}>Book demo</a>
           </div>
 
-          <div style={{ marginTop: 40 }}>
-            <IntegrationStrip dark />
+          <p className="zdb-hero-value" style={{
+            fontSize: 18, fontWeight: 600, color: '#000', margin: 0, lineHeight: 1.55, maxWidth: 520, marginInline: 'auto',
+          }}>
+            {HERO_VALUE}
+          </p>
+
+          <div style={{ marginTop: 48 }}>
+            <IntegrationStrip />
           </div>
         </div>
       </section>

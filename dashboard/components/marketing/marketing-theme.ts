@@ -100,6 +100,21 @@ export const blueBtn = {
   boxShadow: '0 4px 20px rgba(37,99,235,0.35)',
 }
 
+export const violetBtn = {
+  display: 'inline-flex' as const,
+  alignItems: 'center' as const,
+  gap: 8,
+  padding: '14px 24px',
+  background: `linear-gradient(135deg, ${M.violet} 0%, #6d28d9 100%)`,
+  color: '#fff',
+  borderRadius: 12,
+  textDecoration: 'none',
+  fontWeight: 700,
+  fontSize: 15,
+  border: 'none',
+  boxShadow: '0 4px 20px rgba(124,58,237,0.35)',
+}
+
 export const ghostBtn = {
   display: 'inline-flex' as const,
   alignItems: 'center' as const,
