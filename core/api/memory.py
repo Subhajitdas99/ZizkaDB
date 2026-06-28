@@ -113,21 +113,23 @@ async def get_context(
         except Exception as e:
             log.warning(f"Semantic search failed for context: {e}")
 
-    # 3. Merge — deduplicate, recent first
+    # 3. Merge — deduplicate, recent first then semantic fills gaps
+    # Recent events take priority: they provide temporal grounding. Semantic
+    # results that overlap with recent are skipped to avoid duplication.
     seen_ids = set()
     merged = []
-
-    for row, score in sorted(semantic_rows, key=lambda x: x[1], reverse=True):
-        eid = str(row["event_id"])
-        if eid not in seen_ids:
-            seen_ids.add(eid)
-            merged.append({"row": row, "source": "semantic", "score": score})
 
     for row in recent_rows:
         eid = str(row["event_id"])
         if eid not in seen_ids:
             seen_ids.add(eid)
             merged.append({"row": row, "source": "recent", "score": 0.0})
+
+    for row, score in sorted(semantic_rows, key=lambda x: x[1], reverse=True):
+        eid = str(row["event_id"])
+        if eid not in seen_ids:
+            seen_ids.add(eid)
+            merged.append({"row": row, "source": "semantic", "score": score})
 
     # 4. Format as a prompt-ready string within token budget
     # Rough estimate: 1 token ≈ 4 chars
@@ -328,10 +330,13 @@ async def forget(
     event_ids = [str(r["event_id"]) for r in rows]
 
     # Delete from Postgres
-    deleted = await pool.fetchval(
-        "DELETE FROM events WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2 RETURNING COUNT(*)",
+    # Note: PostgreSQL does not support aggregate functions in RETURNING clauses.
+    # We already know the count from the SELECT above, so use that directly.
+    await pool.execute(
+        "DELETE FROM events WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2",
         event_ids, tenant_id,
     )
+    deleted = len(event_ids)
 
     # Delete from Qdrant
     try:
