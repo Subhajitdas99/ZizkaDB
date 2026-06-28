@@ -16,20 +16,28 @@ const SCENES: { id: Scene; label: string }[] = [
 ]
 
 const D = {
-  bg: '#0a0a0a',
-  surface: '#111',
-  surfaceDeep: '#0d0d0d',
-  border: '#1f1f1f',
-  borderLight: '#2a2a2a',
+  bg: '#0f172a',
+  surface: '#1e293b',
+  surfaceDeep: '#172033',
+  border: 'rgba(148,163,184,0.35)',
+  borderLight: 'rgba(148,163,184,0.22)',
   text: '#fff',
   green: '#22c55e',
-  greenBg: '#0f1f0f',
-  greenBorder: '#22c55e40',
+  greenBg: 'rgba(34,197,94,0.12)',
+  greenBorder: 'rgba(34,197,94,0.45)',
   orange: BRAND,
   red: '#ef4444',
-  blue: '#3b82f6',
-  code: '#22c55e',
+  blue: '#60a5fa',
+  code: '#4ade80',
 } as const
+
+const FRAME_SHADOW = [
+  '0 0 0 1px rgba(255,255,255,0.14)',
+  '0 0 0 1px rgba(255,255,255,0.06) inset',
+  '0 28px 72px rgba(0,0,0,0.55)',
+  '0 0 48px rgba(59,130,246,0.18)',
+  '0 0 32px rgba(249,115,22,0.14)',
+].join(', ')
 
 const EVENT_COLORS: Record<string, string> = {
   user_message: '#8b5cf6',
@@ -62,45 +70,97 @@ export function SessionReplayDemo() {
   return (
     <div style={{ width: '100%', position: 'relative' }}>
       <div style={{
-        position: 'absolute', inset: '-12px -6px -6px',
-        background: `radial-gradient(ellipse at 70% 30%, rgba(34,197,94,0.08) 0%, transparent 55%),
-                     radial-gradient(ellipse at 20% 80%, rgba(249,115,22,0.07) 0%, transparent 50%)`,
-        pointerEvents: 'none', zIndex: 0,
+        position: 'absolute', inset: '-20px -12px -8px',
+        background: `radial-gradient(ellipse at 75% 25%, rgba(59,130,246,0.2) 0%, transparent 52%),
+                     radial-gradient(ellipse at 15% 85%, rgba(249,115,22,0.16) 0%, transparent 48%)`,
+        pointerEvents: 'none', zIndex: 0, filter: 'blur(2px)',
       }} />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          marginBottom: 10, gap: 8, flexWrap: 'wrap',
+          marginBottom: 12, gap: 10, flexWrap: 'wrap',
         }}>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{
+            display: 'flex', gap: 6, padding: 4,
+            borderRadius: 100,
+            background: 'rgba(15,23,42,0.75)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+            backdropFilter: 'blur(8px)',
+          }}>
             {SCENES.map(s => (
               <button
                 key={s.id}
                 type="button"
                 onClick={() => pick(s.id)}
                 style={{
-                  fontSize: 10, fontWeight: 600, padding: '5px 11px', borderRadius: 100,
-                  border: scene === s.id ? `1px solid ${D.green}` : '1px solid rgba(255,255,255,0.12)',
-                  background: scene === s.id ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.06)',
-                  color: scene === s.id ? D.green : '#fff',
+                  fontSize: 10, fontWeight: 700, padding: '6px 12px', borderRadius: 100,
+                  border: scene === s.id ? `1px solid ${D.orange}` : '1px solid transparent',
+                  background: scene === s.id
+                    ? 'linear-gradient(135deg, rgba(249,115,22,0.28) 0%, rgba(249,115,22,0.12) 100%)'
+                    : 'transparent',
+                  color: scene === s.id ? '#fff' : 'rgba(255,255,255,0.85)',
                   cursor: 'pointer',
+                  boxShadow: scene === s.id ? '0 0 12px rgba(249,115,22,0.25)' : 'none',
                 }}
               >
                 {s.label}
               </button>
             ))}
           </div>
+          <span style={{
+            fontSize: 9, fontWeight: 800, letterSpacing: 0.6, textTransform: 'uppercase',
+            color: D.green, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '5px 10px', borderRadius: 100,
+            background: D.greenBg, border: `1px solid ${D.greenBorder}`,
+          }}>
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', background: D.green,
+              boxShadow: '0 0 8px rgba(34,197,94,0.8)',
+            }} />
+            Live preview
+          </span>
         </div>
 
         <div style={{
-          borderRadius: 14,
-          overflow: 'hidden',
-          background: D.bg,
-          border: `1px solid ${D.border}`,
-          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
-          minHeight: 520,
+          padding: 1,
+          borderRadius: 16,
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.42) 0%, rgba(249,115,22,0.55) 38%, rgba(59,130,246,0.45) 72%, rgba(255,255,255,0.28) 100%)',
+          boxShadow: FRAME_SHADOW,
         }}>
+          <div style={{
+            borderRadius: 15,
+            overflow: 'hidden',
+            background: D.bg,
+            minHeight: 520,
+          }}>
+            {/* Window chrome */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 14px',
+              background: 'linear-gradient(180deg, #1e293b 0%, #172033 100%)',
+              borderBottom: `1px solid ${D.border}`,
+            }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['#ff5f57', '#febc2e', '#28c840'].map(c => (
+                  <span key={c} style={{
+                    width: 10, height: 10, borderRadius: '50%', background: c,
+                    boxShadow: '0 0 0 1px rgba(0,0,0,0.25) inset',
+                  }} />
+                ))}
+              </div>
+              <div style={{
+                flex: 1, textAlign: 'center', fontSize: 10, fontWeight: 600,
+                color: '#fff', fontFamily: 'ui-monospace, monospace',
+                padding: '5px 12px', borderRadius: 8,
+                background: 'rgba(15,23,42,0.85)',
+                border: '1px solid rgba(255,255,255,0.12)',
+              }}>
+                dashboard.zizka.ai/agents/support-bot
+              </div>
+            </div>
+
           {/* API connected bar — matches ConnectionStatus */}
           <div style={{
             margin: '10px 10px 0',
@@ -190,10 +250,11 @@ export function SessionReplayDemo() {
                     style={{
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       gap: 4, padding: '6px 4px', borderRadius: 7, fontSize: 9,
-                      background: highlighted ? '#1a1a1a' : 'transparent',
+                      background: highlighted ? 'rgba(255,255,255,0.08)' : 'transparent',
                       color: '#fff',
                       fontWeight: highlighted ? 700 : 500,
-                      border: highlighted ? `1px solid ${D.borderLight}` : '1px solid transparent',
+                      border: highlighted ? `1px solid rgba(255,255,255,0.18)` : '1px solid transparent',
+                      boxShadow: highlighted ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
                     }}
                   >
                     <Icon size={10} />
@@ -238,9 +299,13 @@ export function SessionReplayDemo() {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#fff', marginTop: 10, marginBottom: 0 }}>
+        <p style={{
+          textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#fff',
+          marginTop: 12, marginBottom: 0, opacity: 0.92,
+        }}>
           The same dashboard you get after signup.
         </p>
       </div>
@@ -296,7 +361,9 @@ function BehaviorScene() {
   return (
     <div style={{
       padding: '14px 14px', borderRadius: 10,
-      background: '#1a0f00', border: `1px solid ${D.orange}40`,
+      background: 'linear-gradient(135deg, rgba(249,115,22,0.18) 0%, rgba(15,23,42,0.95) 100%)',
+      border: `1px solid rgba(249,115,22,0.55)`,
+      boxShadow: '0 0 24px rgba(249,115,22,0.12) inset',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
         <Activity size={12} style={{ color: D.orange }} />
@@ -320,7 +387,7 @@ function BehaviorScene() {
           { label: 'Error rate change', value: '+2.4pp', color: D.red },
         ].map(item => (
           <div key={item.label} style={{
-            padding: '8px 10px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${D.border}`,
+            padding: '8px 10px', borderRadius: 8, background: D.surfaceDeep, border: `1px solid ${D.border}`,
           }}>
             <div style={{ fontSize: 9, color: '#fff', marginBottom: 2, fontWeight: 600 }}>{item.label}</div>
             <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: item.color }}>
@@ -399,8 +466,9 @@ function DashboardEventRow({
   return (
     <div style={{
       padding: '10px 12px', borderRadius: 8,
-      background: warn ? '#1a0f00' : D.surface,
-      border: `1px solid ${warn ? `${D.orange}40` : D.border}`,
+      background: warn ? 'rgba(249,115,22,0.12)' : D.surface,
+      border: `1px solid ${warn ? 'rgba(249,115,22,0.5)' : D.border}`,
+      boxShadow: warn ? '0 0 16px rgba(249,115,22,0.08)' : 'none',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
