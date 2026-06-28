@@ -1,6 +1,7 @@
 import httpx
 import json
 import logging
+from typing import Any
 
 from db.connection import get_redis
 from services.embedding_config import (
@@ -34,6 +35,7 @@ async def generate_embedding_with_config(
         return None
 
     cache_key = f"emb:{config.provider}:{config.model}:{hash(text)}"
+
     try:
         redis = get_redis()
         cached = await redis.get(cache_key)
@@ -51,6 +53,7 @@ async def generate_embedding_with_config(
 
         if not embedding:
             return None
+
         if len(embedding) != VECTOR_SIZE:
             logger.warning(
                 "Embedding dimension %s != %s for tenant %s",
@@ -67,34 +70,84 @@ async def generate_embedding_with_config(
             pass
 
         return embedding
+
     except Exception as e:
-        logger.warning("Embedding generation failed for tenant %s: %s", config.tenant_id, e)
+        logger.warning(
+            "Embedding generation failed for tenant %s: %s",
+            config.tenant_id,
+            e,
+        )
         return None
 
 
-async def _openai_embedding(text: str, config: TenantEmbeddingConfig) -> list[float] | None:
-    payload: dict = {"input": text, "model": config.model}
-    for m in EMBEDDING_MODELS.get("openai", []):
-        if m["id"] == config.model and m.get("dimensions_param"):
-            payload["dimensions"] = m["dimensions_param"]
+async def _openai_embedding(
+    text: str,
+    config: TenantEmbeddingConfig,
+) -> list[float] | None:
+    payload: dict = {
+        "input": text,
+        "model": config.model,
+    }
+
+    for model in EMBEDDING_MODELS.get("openai", []):
+        if model["id"] == config.model and model.get("dimensions_param"):
+            payload["dimensions"] = model["dimensions_param"]
             break
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         response = await client.post(
             "https://api.openai.com/v1/embeddings",
-            headers={"Authorization": f"Bearer {config.api_key}"},
+            headers={
+                "Authorization": f"Bearer {config.api_key}",
+            },
             json=payload,
         )
+
         response.raise_for_status()
+
         return response.json()["data"][0]["embedding"]
 
 
+def _flatten_data(value: Any, prefix: str = "") -> list[str]:
+    """
+    Recursively flatten nested dictionaries and lists into
+    key:value strings suitable for semantic embeddings.
+
+    Example:
+        {"user": {"city": "Paris"}}
+            -> ["user.city:Paris"]
+
+        {"docs": ["a", "b"]}
+            -> ["docs.0:a", "docs.1:b"]
+    """
+
+    parts: list[str] = []
+
+    if isinstance(value, dict):
+        for key, item in value.items():
+            new_prefix = f"{prefix}.{key}" if prefix else key
+            parts.extend(_flatten_data(item, new_prefix))
+
+    elif isinstance(value, list):
+        for index, item in enumerate(value):
+            new_prefix = f"{prefix}.{index}" if prefix else str(index)
+            parts.extend(_flatten_data(item, new_prefix))
+
+    elif isinstance(value, (str, int, float, bool)):
+        parts.append(f"{prefix}:{value}")
+
+    return parts
+
+
 def event_to_text(event_type: str, data: dict) -> str:
-    """Convert an event to a text representation for embedding."""
+    """
+    Convert an event into a semantic text representation
+    for embedding generation.
+
+    Supports nested dictionaries and lists.
+    """
+
     parts = [f"event_type:{event_type}"]
-    for key, value in data.items():
-        if isinstance(value, str):
-            parts.append(f"{key}:{value}")
-        elif isinstance(value, (int, float, bool)):
-            parts.append(f"{key}:{value}")
+    parts.extend(_flatten_data(data))
+
     return " ".join(parts)
