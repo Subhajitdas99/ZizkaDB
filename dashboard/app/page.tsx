@@ -7,6 +7,7 @@ import { SessionReplayDemo } from '@/components/marketing/SessionReplayDemo'
 import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
 import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
+import { ThreeWaysConnectSection } from '@/components/marketing/ThreeWaysConnectSection'
 import { TrustBar } from '@/components/marketing/TrustBar'
 import { BrandLogo } from '@/components/BrandLogo'
 import { BRAND, BRAND_DARK } from '@/components/brand'
@@ -44,7 +45,7 @@ export default function LandingPage() {
           .zdb-hero-title { font-size: 32px !important; }
           .zdb-hero-sub { font-size: 15px !important; }
           .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-          .zdb-steps { grid-template-columns: 1fr !important; }
+          .zdb-connect-grid { grid-template-columns: 1fr !important; }
           .zdb-compare-grid { grid-template-columns: 1fr !important; }
           .zdb-split { grid-template-columns: 1fr !important; }
           .zdb-price-grid { grid-template-columns: 1fr !important; }
@@ -110,49 +111,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── How it works (3 steps) ── */}
-      <section id="how" className="zdb-section" style={{ padding: '88px 40px', background: M.wash }}>
-        <div style={container(900)}>
-          <p style={sectionTitle}>How it works</p>
-          <h2 style={h2}>Three steps. One operational database.</h2>
-          <p style={lead}>One API key. Log from Python, TypeScript, MCP, or REST. Self-host or managed cloud.</p>
-
-          <div className="zdb-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-            {[
-              {
-                n: '01',
-                title: 'Connect',
-                body: 'Sign up or self-host. Add one API key.',
-              },
-              {
-                n: '02',
-                title: 'Store',
-                body: 'Every message, tool call, and outcome in one store.',
-              },
-              {
-                n: '03',
-                title: 'Replay & fix',
-                body: 'Drift alerts when behavior shifts. Replay any session to root cause.',
-              },
-            ].map(step => (
-              <div key={step.n} style={{
-                padding: '28px 24px', borderRadius: 16, background: '#fff',
-                border: `1px solid ${M.line}`,
-                boxShadow: '0 4px 20px rgba(15,23,42,0.04)',
-              }}>
-                <div style={{
-                  fontSize: 28, fontWeight: 800, color: '#000', marginBottom: 16,
-                  fontVariantNumeric: 'tabular-nums',
-                }}>
-                  {step.n}
-                </div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: '#000', marginBottom: 10 }}>{step.title}</div>
-                <div style={{ fontSize: 14, color: '#000', lineHeight: 1.65, fontWeight: 500 }}>{step.body}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <ThreeWaysConnectSection />
 
       <ConversationCompare />
 
