@@ -39,7 +39,7 @@ export default async function OpenGraphImage() {
           fontSize: 22, color: '#94a3b8', marginTop: 14, maxWidth: 800,
           textAlign: 'center', lineHeight: 1.45,
         }}>
-          Operational database for AI agents. Record. Detect drift. Replay.
+          Operational Database For AI Agents. Open source.
         </div>
       </div>
     ),

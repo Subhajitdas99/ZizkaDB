@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { SessionReplayDemo } from '@/components/marketing/SessionReplayDemo'
 import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
+import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
 import { TrustBar } from '@/components/marketing/TrustBar'
 import { BrandLogo } from '@/components/BrandLogo'
@@ -13,7 +14,7 @@ import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, ghostBtn, ou
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
-const HERO_HEADLINE = 'Record. Detect drift. Replay.'
+const HERO_TITLE = 'Operational Database For AI Agents'
 const FINAL_CTA_LINE = 'Fix before production breaks'
 
 const MCP_CONFIG = `{
@@ -40,8 +41,8 @@ export default function LandingPage() {
       <style>{`
         @media (max-width: 768px) {
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
-          .zdb-hero-badge { font-size: 28px !important; }
-          .zdb-hero-h1 { font-size: 22px !important; }
+          .zdb-hero-title { font-size: 32px !important; }
+          .zdb-hero-sub { font-size: 15px !important; }
           .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .zdb-steps { grid-template-columns: 1fr !important; }
           .zdb-compare-grid { grid-template-columns: 1fr !important; }
@@ -72,27 +73,31 @@ export default function LandingPage() {
             display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
           }}>
             <div>
-              <p className="zdb-hero-badge" style={{
-                fontSize: 38, fontWeight: 800, lineHeight: 1.12, margin: '0 0 18px',
-                letterSpacing: -0.6, color: '#fff', maxWidth: 520,
+              <h1 className="zdb-hero-title" style={{
+                fontSize: 46, fontWeight: 800, lineHeight: 1.1, margin: '0 0 32px',
+                letterSpacing: -0.8, color: '#fff', maxWidth: 520,
               }}>
-                Operational database for AI agents
-              </p>
-
-              <h1 className="zdb-hero-h1" style={{
-                fontSize: 26, fontWeight: 700, lineHeight: 1.25, margin: '0 0 28px',
-                letterSpacing: -0.3, color: '#fff', maxWidth: 520,
-              }}>
-                {HERO_HEADLINE}
+                {HERO_TITLE}
               </h1>
 
-              <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+              <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24 }}>
                 <Link href="/signup" style={primaryBtn}>Start free · connect your first agent</Link>
-                <a href="#demo" style={ghostBtn}>See a session replay</a>
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    ...ghostBtn,
+                    border: '2px solid #fff',
+                    fontWeight: 700,
+                  }}
+                >
+                  GitHub →
+                </a>
               </div>
 
-              <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>
-                Self-host free · managed cloud · no credit card for trial
+              <p className="zdb-hero-sub" style={{ fontSize: 18, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.5 }}>
+                Self-host free · managed cloud · no credit card required
               </p>
             </div>
 
@@ -286,6 +291,8 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <CompetitorCompare />
+
       {/* ── Final CTA ── */}
       <section className="zdb-section" style={{
         padding: '88px 40px', background: M.heroBg, position: 'relative', overflow: 'hidden',
@@ -301,6 +308,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/signup" style={primaryBtn}>Start free trial</Link>
             <Link href="/docs" style={ghostBtn}>Read the docs</Link>
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={ghostBtn}>GitHub →</a>
           </div>
         </div>
       </section>
