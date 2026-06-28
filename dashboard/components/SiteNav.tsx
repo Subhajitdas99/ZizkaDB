@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { CSSProperties } from 'react'
-import { brandCtaStyle, brandLogoStyle } from './brand'
+import { BrandLogo } from './BrandLogo'
+import { brandCtaStyle } from './brand'
 
 export type SiteNavActive = 'docs' | 'community' | 'trust' | 'explorer' | 'home'
 
@@ -34,21 +35,7 @@ export function SiteNav({ active, suffix }: SiteNavProps) {
         zIndex: 100,
       }}
     >
-      <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-        <div style={brandLogoStyle}>
-          <span style={{ color: '#fff', fontSize: 13, fontWeight: 700 }}>Z</span>
-        </div>
-        <span style={{ fontWeight: 700, fontSize: 15, color: '#111' }}>ZizkaDB</span>
-        {suffix ? (
-          <span className="site-nav-suffix" style={{ fontSize: 12, color: '#aaa', marginLeft: 2 }}>
-            / {suffix}
-          </span>
-        ) : (
-          <span className="site-nav-suffix" style={{ fontSize: 12, color: '#aaa', marginLeft: 4 }}>
-            by Zizka AI
-          </span>
-        )}
-      </Link>
+      <BrandLogo suffix={suffix} />
 
       <div className="site-nav-links" style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
         <Link href="/docs" style={linkStyle(active === 'docs')}>Docs</Link>

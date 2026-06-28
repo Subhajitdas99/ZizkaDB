@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { clearToken } from '@/lib/auth'
-import { Database, Search, Settings, LogOut, Cpu } from 'lucide-react'
+import { BrandLogo } from '@/components/BrandLogo'
+import { Search, Settings, LogOut, Cpu } from 'lucide-react'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
 
 const nav = [
@@ -28,10 +29,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <aside className="hidden sm:flex w-56 flex-col shrink-0 border-r" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
         <div className="px-5 py-5 border-b" style={{ borderColor: '#1f1f1f' }}>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center"
-                 style={{ background: '#22c55e' }}>
-              <Database size={14} className="text-black" />
-            </div>
+            <BrandLogo variant="mark" showWordmark={false} href="/dashboard" />
             <span className="text-white font-semibold">ZizkaDB</span>
           </div>
         </div>
@@ -73,9 +71,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="flex sm:hidden items-center justify-between px-4 py-3 border-b" style={{ background: '#0d0d0d', borderColor: '#1f1f1f' }}>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: '#22c55e' }}>
-              <Database size={12} className="text-black" />
-            </div>
+            <BrandLogo variant="mark" showWordmark={false} href="/dashboard" />
             <span className="text-white font-semibold text-sm">ZizkaDB</span>
           </div>
           <button onClick={signOut} style={{ color: '#737373' }}>

@@ -34,14 +34,31 @@ export const M = {
 export const container = (max = 960) => ({ maxWidth: max, margin: '0 auto' } as const)
 
 export const h2 = {
-  fontSize: 30,
-  fontWeight: 800,
-  letterSpacing: -0.6,
+  fontSize: 32,
+  fontWeight: 700,
+  letterSpacing: -0.5,
   color: M.ink,
   margin: '0 0 12px',
   textAlign: 'center' as const,
-  lineHeight: 1.2,
+  lineHeight: 1.25,
 }
+
+export const sectionTitle = {
+  fontSize: 13,
+  fontWeight: 600,
+  letterSpacing: 0.4,
+  color: M.muted,
+  textAlign: 'center' as const,
+  margin: '0 0 8px',
+  textTransform: 'uppercase' as const,
+}
+
+export const card = {
+  background: '#fff',
+  borderRadius: 16,
+  border: `1px solid ${M.line}`,
+  boxShadow: '0 4px 24px rgba(15,23,42,0.05)',
+} as const
 
 export const lead = {
   fontSize: 17,

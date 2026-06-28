@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { requestOtp, verifyOtp } from '@/lib/api'
 import { getToken, setToken } from '@/lib/auth'
+import { BrandLogo } from '@/components/BrandLogo'
 
 const IS_DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
@@ -103,20 +104,8 @@ function LoginForm() {
     }}>
       <div style={{ width: '100%', maxWidth: 400, padding: '0 24px' }}>
 
-        {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 9, background: '#111',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>ZizkaDB</span>
-          </a>
-          <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
-            The operational database for AI agents
-          </p>
+          <BrandLogo variant="full" suffix="The operational database for AI agents" />
         </div>
 
         {/* Dev Mode Banner — shown only in self-hosted mode */}
