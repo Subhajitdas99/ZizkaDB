@@ -12,7 +12,9 @@ import { BRAND, BRAND_DARK } from '@/components/brand'
 import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
-const ZIZKA_AI_URL = 'https://zizka.ai'
+
+const HERO_ONE_LINER =
+  'Operational database for AI agents. Detect drift. Replay decisions. Fix before production breaks. Open source.'
 
 const MCP_CONFIG = `{
   "mcpServers": {
@@ -69,46 +71,39 @@ export default function LandingPage() {
             display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
           }}>
             <div>
-              <a
-                href={ZIZKA_AI_URL}
-                target="_blank"
-                rel="noreferrer"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '6px 14px', borderRadius: 100, marginBottom: 20,
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)',
-                  textDecoration: 'none', fontSize: 12, fontWeight: 600, color: '#cbd5e1',
-                }}
-              >
-                From the team behind zizka.ai
-                <span style={{ color: M.blueLight }}>→</span>
-              </a>
+              <div style={{
+                display: 'inline-block',
+                padding: '12px 22px',
+                borderRadius: 12,
+                marginBottom: 24,
+                background: 'rgba(255,255,255,0.1)',
+                border: '2px solid #fff',
+              }}>
+                <span style={{
+                  fontSize: 17,
+                  fontWeight: 800,
+                  color: '#fff',
+                  letterSpacing: 0.3,
+                  lineHeight: 1.3,
+                }}>
+                  Operational database for AI agents
+                </span>
+              </div>
 
               <h1 className="zdb-hero-h1" style={{
-                fontSize: 48, fontWeight: 700, lineHeight: 1.1, margin: '0 0 16px',
-                letterSpacing: -1.2, color: '#fff',
+                fontSize: 40, fontWeight: 700, lineHeight: 1.2, margin: '0 0 28px',
+                letterSpacing: -0.8, color: '#fff', maxWidth: 520,
               }}>
-                Know when your AI agent starts failing customers
+                Detect drift. Replay decisions. Fix before production breaks. Open source.
               </h1>
 
-              <p style={{
-                fontSize: 18, color: '#94a3b8', lineHeight: 1.65, margin: '0 0 12px', maxWidth: 480,
-              }}>
-                Built for engineering teams shipping AI agents and agentic systems to production.
-                ZizkaDB records every decision, alerts you when behavior shifts, and lets you replay any session.
-              </p>
-
-              <p style={{ fontSize: 14, color: '#64748b', margin: '0 0 28px', maxWidth: 460 }}>
-                From the team behind zizka.ai. Observability for the agents you build and deploy.
-              </p>
-
-              <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+              <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
                 <Link href="/signup" style={primaryBtn}>Start free · connect your first agent</Link>
                 <a href="#demo" style={ghostBtn}>See a session replay</a>
               </div>
 
-              <p style={{ fontSize: 12, color: '#64748b', margin: 0 }}>
-                Free trial · no credit card · self-host anytime
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#fff', margin: 0 }}>
+                Self-host free · managed cloud · no credit card for trial
               </p>
             </div>
 
@@ -152,13 +147,13 @@ export default function LandingPage() {
                 boxShadow: '0 4px 20px rgba(15,23,42,0.04)',
               }}>
                 <div style={{
-                  fontSize: 28, fontWeight: 700, color: M.line, marginBottom: 16,
+                  fontSize: 28, fontWeight: 800, color: '#000', marginBottom: 16,
                   fontVariantNumeric: 'tabular-nums',
                 }}>
                   {step.n}
                 </div>
-                <div style={{ fontSize: 17, fontWeight: 700, color: M.ink, marginBottom: 10 }}>{step.title}</div>
-                <div style={{ fontSize: 14, color: M.muted, lineHeight: 1.65 }}>{step.body}</div>
+                <div style={{ fontSize: 17, fontWeight: 700, color: '#000', marginBottom: 10 }}>{step.title}</div>
+                <div style={{ fontSize: 14, color: '#000', lineHeight: 1.65, fontWeight: 500 }}>{step.body}</div>
               </div>
             ))}
           </div>
@@ -180,10 +175,10 @@ export default function LandingPage() {
               border: `1px solid ${M.blue}33`, boxShadow: '0 8px 32px rgba(37,99,235,0.08)',
             }}>
               <div style={{ fontSize: 28, marginBottom: 16 }}>⚙️</div>
-              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: M.ink }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#000' }}>
                 Integrate in an afternoon
               </h3>
-              <p style={{ fontSize: 15, color: M.muted, lineHeight: 1.65, margin: '0 0 20px' }}>
+              <p style={{ fontSize: 15, color: '#000', lineHeight: 1.65, margin: '0 0 20px', fontWeight: 500 }}>
                 Log from Python, TypeScript, MCP, or REST. Self-host with Docker or use managed cloud.
                 One API key per agent. No heavy infra project.
               </p>
@@ -206,10 +201,10 @@ export default function LandingPage() {
               border: `1px solid ${M.line}`, boxShadow: '0 8px 32px rgba(15,23,42,0.05)',
             }}>
               <div style={{ fontSize: 28, marginBottom: 16 }}>🔍</div>
-              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: M.ink }}>
+              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#000' }}>
                 Debug production incidents
               </h3>
-              <p style={{ fontSize: 15, color: M.muted, lineHeight: 1.65, margin: '0 0 20px' }}>
+              <p style={{ fontSize: 15, color: '#000', lineHeight: 1.65, margin: '0 0 20px', fontWeight: 500 }}>
                 Prompt change broke behavior? Tool call ignored? Replay the full session, trace the decision chain,
                 and find root cause without digging through logs.
               </p>
@@ -272,15 +267,15 @@ export default function LandingPage() {
                     POPULAR
                   </div>
                 )}
-                <div style={{ fontSize: 12, fontWeight: 700, color: M.muted, marginBottom: 8 }}>{plan.name}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: '#000', marginBottom: 8 }}>{plan.name}</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 16 }}>
-                  <span style={{ fontSize: 32, fontWeight: 700 }}>{plan.price}</span>
-                  <span style={{ fontSize: 13, color: M.muted }}>{plan.sub}</span>
+                  <span style={{ fontSize: 32, fontWeight: 700, color: '#000' }}>{plan.price}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#000' }}>{plan.sub}</span>
                 </div>
                 <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {plan.features.map(f => (
-                    <li key={f} style={{ fontSize: 13.5, color: M.inkSoft, display: 'flex', gap: 8 }}>
-                      <span style={{ color: BRAND_DARK }}>✓</span> {f}
+                    <li key={f} style={{ fontSize: 13.5, color: '#000', display: 'flex', gap: 8, fontWeight: 500 }}>
+                      <span style={{ color: '#000', fontWeight: 800 }}>✓</span> {f}
                     </li>
                   ))}
                 </ul>
@@ -288,13 +283,13 @@ export default function LandingPage() {
                   display: 'block', textAlign: 'center', padding: '11px', borderRadius: 10,
                   textDecoration: 'none', fontWeight: 600, fontSize: 14,
                   background: plan.highlight ? BRAND : '#fff',
-                  color: plan.highlight ? '#fff' : M.ink,
+                  color: plan.highlight ? '#fff' : '#000',
                   border: plan.highlight ? 'none' : `1px solid ${M.line}`,
                 }}>
                   {plan.cta}
                 </Link>
                 {'note' in plan && plan.note && (
-                  <p style={{ textAlign: 'center', fontSize: 11, color: M.muted, marginTop: 8, marginBottom: 0 }}>{plan.note}</p>
+                  <p style={{ textAlign: 'center', fontSize: 11, color: '#000', marginTop: 8, marginBottom: 0, fontWeight: 600 }}>{plan.note}</p>
                 )}
               </div>
             ))}
@@ -309,10 +304,10 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', inset: 0, background: M.heroGlowBlue, pointerEvents: 'none' }} />
         <div style={{ ...container(600), textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 14px', letterSpacing: -0.6, lineHeight: 1.15 }}>
-            Stop guessing why your agent failed
+            {HERO_ONE_LINER}
           </h2>
-          <p style={{ fontSize: 17, color: '#94a3b8', margin: '0 0 28px', lineHeight: 1.65 }}>
-            Start free on db.zizka.ai. Self-host anytime. No credit card for trial.
+          <p style={{ fontSize: 17, color: '#fff', margin: '0 0 28px', lineHeight: 1.65, fontWeight: 600 }}>
+            Start free on db.zizka.ai. Self-host anytime.
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/signup" style={primaryBtn}>Start free trial</Link>
@@ -325,25 +320,23 @@ export default function LandingPage() {
       <footer className="zdb-footer" style={{
         borderTop: `1px solid ${M.line}`, padding: '32px 24px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: 13, color: M.muted, background: '#fff', flexWrap: 'wrap', gap: 16,
+        fontSize: 13, color: '#000', background: '#fff', flexWrap: 'wrap', gap: 16,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <BrandLogo variant="mark" showWordmark={false} href="/" />
-          <span style={{ fontWeight: 700, color: M.ink }}>ZizkaDB</span>
-          <span style={{ color: '#cbd5e1' }}>·</span>
-          <a href={ZIZKA_AI_URL} target="_blank" rel="noreferrer" style={{ color: M.muted, textDecoration: 'none' }}>
-            by Zizka AI
-          </a>
+          <span style={{ fontWeight: 700, color: '#000' }}>ZizkaDB</span>
+          <span style={{ color: '#000' }}>·</span>
+          <span style={{ fontWeight: 500, color: '#000' }}>Open source operational database for AI agents</span>
         </div>
         <div className="zdb-footer-links" style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {[['Docs', '/docs'], ['Pricing', '#pricing'], ['Trust', '/trust'], ['GitHub', GITHUB_URL], ['Sign in', '/login']].map(([label, href]) =>
             href.startsWith('http') ? (
-              <a key={label} href={href} target="_blank" rel="noreferrer" style={{ color: M.muted, textDecoration: 'none' }}>{label}</a>
+              <a key={label} href={href} target="_blank" rel="noreferrer" style={{ color: '#000', textDecoration: 'none', fontWeight: 500 }}>{label}</a>
             ) : (
-              <Link key={label} href={href} style={{ color: M.muted, textDecoration: 'none' }}>{label}</Link>
+              <Link key={label} href={href} style={{ color: '#000', textDecoration: 'none', fontWeight: 500 }}>{label}</Link>
             )
           )}
-          <Link href="/signup" style={{ color: BRAND_DARK, fontWeight: 600, textDecoration: 'none' }}>Start free</Link>
+          <Link href="/signup" style={{ color: '#000', fontWeight: 700, textDecoration: 'none' }}>Start free</Link>
         </div>
       </footer>
     </div>

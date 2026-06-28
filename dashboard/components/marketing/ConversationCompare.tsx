@@ -20,18 +20,18 @@ export function ConversationCompare() {
               { role: 'Your team', text: 'Can you send a screenshot? We will check the logs.' },
               { role: 'Engineering', text: 'Logs show nothing useful. Maybe a prompt issue?' },
             ]}
-            footer="Hours lost. Customer already angry. Still no root cause."
+            footer="Hours lost. Still no root cause."
           />
           <ComparePanel
             title="With ZizkaDB"
             subtitle="Same incident, 2 minutes later"
             highlight
             messages={[
-              { role: 'ZizkaDB alert', text: 'Refund answers changed after prompt v2 deploy.' },
+              { role: 'Drift alert', text: 'Refund answers changed after prompt v2 deploy.' },
               { role: 'Replay', text: 'Agent skipped policy doc, used outdated FAQ chunk.' },
               { role: 'Fix', text: 'Roll back prompt. Confirm baseline restored.' },
             ]}
-            footer="Root cause found. Customer replied to. Prompt rolled back."
+            footer="Root cause found. Prompt rolled back."
           />
         </div>
       </div>
@@ -66,12 +66,12 @@ function ComparePanel({
         borderBottom: `1px solid ${M.line}`,
       }}>
         <div style={{
-          fontSize: 11, fontWeight: 700, letterSpacing: 0.6,
-          color: highlight ? BRAND_DARK : M.muted, marginBottom: 4,
+          fontSize: 11, fontWeight: 800, letterSpacing: 0.6,
+          color: '#000', marginBottom: 4,
         }}>
           {title.toUpperCase()}
         </div>
-        <div style={{ fontSize: 16, fontWeight: 700, color: M.ink }}>{subtitle}</div>
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#000' }}>{subtitle}</div>
       </div>
       <div style={{ padding: '18px 20px', background: '#fff', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.map((m, i) => (
@@ -80,18 +80,18 @@ function ComparePanel({
             background: muted ? M.wash : highlight && i === 0 ? '#fff7ed' : M.bluePale,
             border: `1px solid ${M.line}`,
           }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: muted ? M.muted : highlight ? BRAND_DARK : M.blue, marginBottom: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: '#000', marginBottom: 4 }}>
               {m.role}
             </div>
-            <div style={{ fontSize: 13, color: M.inkSoft, lineHeight: 1.5 }}>{m.text}</div>
+            <div style={{ fontSize: 13, color: '#000', lineHeight: 1.5 }}>{m.text}</div>
           </div>
         ))}
         <div style={{
-          marginTop: 4, fontSize: 13, fontWeight: 600, lineHeight: 1.5,
-          color: muted ? M.muted : '#065f46',
+          marginTop: 4, fontSize: 13, fontWeight: 700, lineHeight: 1.5,
+          color: '#000',
           padding: '12px 14px', borderRadius: 12,
           background: muted ? M.wash : '#ecfdf5',
-          border: `1px solid ${muted ? M.line : '#a7f3d0'}`,
+          border: `1px solid ${M.line}`,
         }}>
           {footer}
         </div>

@@ -14,10 +14,10 @@ export const M = {
   tealPale: '#ccfbf1',
   violet: '#7c3aed',
   violetPale: '#ede9fe',
-  ink: '#0f172a',
-  inkSoft: '#334155',
-  muted: '#64748b',
-  faint: '#94a3b8',
+  ink: '#000000',
+  inkSoft: '#000000',
+  muted: '#000000',
+  faint: '#000000',
   line: '#e2e8f0',
   wash: '#f8fafc',
   heroBg: 'linear-gradient(145deg, #0c1222 0%, #111827 42%, #1e1b4b 100%)',
@@ -45,9 +45,9 @@ export const h2 = {
 
 export const sectionTitle = {
   fontSize: 13,
-  fontWeight: 600,
-  letterSpacing: 0.4,
-  color: M.muted,
+  fontWeight: 700,
+  letterSpacing: 0.5,
+  color: '#000',
   textAlign: 'center' as const,
   margin: '0 0 8px',
   textTransform: 'uppercase' as const,
@@ -62,7 +62,7 @@ export const card = {
 
 export const lead = {
   fontSize: 17,
-  color: M.inkSoft,
+  color: '#000',
   lineHeight: 1.65,
   textAlign: 'center' as const,
   maxWidth: 580,

@@ -46,7 +46,7 @@ export function SessionReplayDemo() {
                 fontSize: 11, fontWeight: 600, padding: '6px 12px', borderRadius: 100,
                 border: scene === s.id ? `1px solid ${M.blueLight}` : '1px solid rgba(255,255,255,0.12)',
                 background: scene === s.id ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.06)',
-                color: scene === s.id ? '#93c5fd' : '#94a3b8',
+                color: scene === s.id ? '#fff' : 'rgba(255,255,255,0.75)',
                 cursor: 'pointer',
               }}
             >
@@ -55,8 +55,8 @@ export function SessionReplayDemo() {
           ))}
         </div>
         <span style={{
-          fontSize: 10, fontWeight: 600, color: '#4ade80',
-          background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.3)',
+          fontSize: 10, fontWeight: 700, color: '#fff',
+          background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
           padding: '4px 10px', borderRadius: 100,
         }}>
           Live demo
@@ -84,13 +84,13 @@ export function SessionReplayDemo() {
               🤖
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: M.ink }}>support-bot</div>
-              <div style={{ fontSize: 11, color: M.muted }}>Production · 847 sessions today</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#000' }}>support-bot</div>
+              <div style={{ fontSize: 11, fontWeight: 600, color: '#000' }}>Production · 847 sessions today</div>
             </div>
           </div>
           {scene !== 'chat' && (
             <span style={{
-              fontSize: 11, fontWeight: 700, color: BRAND_DARK,
+              fontSize: 11, fontWeight: 700, color: '#000',
               background: '#fff7ed', border: `1px solid ${BRAND}55`,
               padding: '5px 12px', borderRadius: 100,
             }}>
@@ -106,7 +106,7 @@ export function SessionReplayDemo() {
         </div>
       </div>
 
-      <p style={{ textAlign: 'center', fontSize: 12, color: '#64748b', marginTop: 12, marginBottom: 0 }}>
+      <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#fff', marginTop: 12, marginBottom: 0 }}>
         Tap the tabs to walk through what happens when an agent goes wrong.
       </p>
     </div>
@@ -120,7 +120,7 @@ function ChatScene() {
       <Bubble who="agent" text="I checked your billing history. I don't see a duplicate charge on your account." />
       <div style={{
         padding: '12px 14px', borderRadius: 12, background: '#fef2f2',
-        border: '1px solid #fecaca', fontSize: 13, color: '#991b1b', lineHeight: 1.5,
+        border: '1px solid #fecaca', fontSize: 13, color: '#000', lineHeight: 1.5, fontWeight: 600,
       }}>
         The agent missed a duplicate flag in the billing tool. The customer opens a ticket. Your team has no visibility into why.
       </div>
@@ -136,10 +136,10 @@ function AlertScene() {
         background: 'linear-gradient(135deg, #fff7ed 0%, #eff6ff 100%)',
         border: `1px solid ${BRAND}44`,
       }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: BRAND_DARK, marginBottom: 6 }}>
-          ZizkaDB detected a shift in refund answers
+        <div style={{ fontSize: 12, fontWeight: 800, color: '#000', marginBottom: 6 }}>
+          Drift detected in refund answers
         </div>
-        <div style={{ fontSize: 14, color: M.inkSoft, lineHeight: 1.55 }}>
+        <div style={{ fontSize: 14, color: '#000', lineHeight: 1.55, fontWeight: 500 }}>
           After Tuesday&apos;s prompt update, billing responses changed tone and policy links dropped 40%.
           You are notified before complaint volume spikes.
         </div>
@@ -152,8 +152,8 @@ function AlertScene() {
           <div key={item.label} style={{
             padding: '14px', borderRadius: 12, background: M.wash, border: `1px solid ${M.line}`,
           }}>
-            <div style={{ fontSize: 11, color: M.muted, marginBottom: 4 }}>{item.label}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: M.ink }}>{item.value}</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#000', marginBottom: 4 }}>{item.label}</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: '#000' }}>{item.value}</div>
           </div>
         ))}
       </div>
@@ -164,7 +164,7 @@ function AlertScene() {
 function ReplayScene() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color: M.blue, marginBottom: 4 }}>
+      <div style={{ fontSize: 12, fontWeight: 800, color: '#000', marginBottom: 4 }}>
         Session replay · Tue 3:42 PM
       </div>
       {[
@@ -181,24 +181,24 @@ function ReplayScene() {
           <div style={{
             width: 26, height: 26, borderRadius: 8, flexShrink: 0,
             background: row.ok ? M.bluePale : '#ffedd5',
-            color: row.ok ? M.blue : BRAND_DARK,
+            color: '#000',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 12, fontWeight: 800,
           }}>
             {row.ok ? row.step : '!'}
           </div>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: row.ok ? M.muted : BRAND_DARK, marginBottom: 2 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: '#000', marginBottom: 2 }}>
               {row.label}
             </div>
-            <div style={{ fontSize: 13, color: M.ink, lineHeight: 1.45 }}>{row.text}</div>
+            <div style={{ fontSize: 13, color: '#000', lineHeight: 1.45 }}>{row.text}</div>
           </div>
         </div>
       ))}
       <div style={{
         marginTop: 4, padding: '12px 14px', borderRadius: 12,
         background: '#ecfdf5', border: '1px solid #a7f3d0',
-        fontSize: 13, color: '#065f46', fontWeight: 600,
+        fontSize: 13, color: '#000', fontWeight: 700,
       }}>
         Root cause found in 2 minutes. Roll back prompt v2. No log archaeology.
       </div>
@@ -214,10 +214,10 @@ function Bubble({ who, text }: { who: 'customer' | 'agent'; text: string }) {
         maxWidth: '85%', padding: '12px 16px', borderRadius: isCustomer ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
         background: isCustomer ? M.wash : M.bluePale,
         border: `1px solid ${isCustomer ? M.line : '#93c5fd'}`,
-        fontSize: 14, color: M.ink, lineHeight: 1.5,
+        fontSize: 14, color: '#000', lineHeight: 1.5,
       }}>
         {!isCustomer && (
-          <div style={{ fontSize: 10, fontWeight: 700, color: M.blue, marginBottom: 4 }}>support-bot</div>
+          <div style={{ fontSize: 10, fontWeight: 800, color: '#000', marginBottom: 4 }}>support-bot</div>
         )}
         {text}
       </div>

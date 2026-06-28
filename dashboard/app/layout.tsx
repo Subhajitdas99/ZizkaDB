@@ -2,11 +2,11 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 const TAGLINE =
-  'Production observability for engineering teams shipping AI agents and agentic systems. Record every decision, detect behavior drift, and replay any session. From the team behind zizka.ai.'
+  'Operational database for AI agents. Detect drift. Replay decisions. Fix before production breaks. Open source.'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ZizkaDB — Know when your AI agent starts failing customers',
+    default: 'ZizkaDB — Operational database for AI agents',
     template: '%s · ZizkaDB',
   },
   description: TAGLINE,
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'ZizkaDB — Know when your AI agent starts failing customers',
+    title: 'ZizkaDB — Operational database for AI agents',
     description: TAGLINE,
     url: 'https://db.zizka.ai',
     siteName: 'ZizkaDB',
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ZizkaDB — Know when your AI agent starts failing customers',
+    title: 'ZizkaDB — Operational database for AI agents',
     description: TAGLINE,
     images: ['/opengraph-image'],
   },

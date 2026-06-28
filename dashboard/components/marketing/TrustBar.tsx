@@ -1,10 +1,10 @@
 import { M } from './marketing-theme'
 
 const TRUST_ITEMS = [
-  { icon: '🏠', title: 'Self-host free', body: 'Your data stays on your infra. AGPL.' },
-  { icon: '🇪🇺', title: 'EU cloud option', body: 'Managed at db.zizka.ai when you want zero ops.' },
+  { icon: '📦', title: 'Open source', body: 'AGPL license. Inspect, fork, self-host free.' },
+  { icon: '🏠', title: 'Self-host free', body: 'Docker Compose on your own infrastructure.' },
   { icon: '🔒', title: 'Checksum-backed events', body: 'Tamper-evident decision history.' },
-  { icon: '🏢', title: 'Zizka AI S.L.', body: 'Same company behind zizka.ai · Málaga, Spain' },
+  { icon: '🇪🇺', title: 'Managed cloud', body: 'db.zizka.ai when you want zero ops.' },
 ]
 
 export function TrustBar() {
@@ -23,8 +23,8 @@ export function TrustBar() {
           textAlign: 'center',
         }}>
           <div style={{ fontSize: 24, marginBottom: 10 }}>{item.icon}</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: M.ink, marginBottom: 6 }}>{item.title}</div>
-          <div style={{ fontSize: 12, color: M.muted, lineHeight: 1.5 }}>{item.body}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#000', marginBottom: 6 }}>{item.title}</div>
+          <div style={{ fontSize: 12, fontWeight: 500, color: '#000', lineHeight: 1.5 }}>{item.body}</div>
         </div>
       ))}
     </div>
