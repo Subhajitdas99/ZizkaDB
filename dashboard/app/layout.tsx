@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 const TAGLINE =
-  'Know when your AI agent starts failing customers. ZizkaDB records every decision, alerts you when behavior shifts, and lets you replay any session. From the team behind zizka.ai.'
+  'Production observability for engineering teams shipping AI agents and agentic systems. Record every decision, detect behavior drift, and replay any session. From the team behind zizka.ai.'
 
 export const metadata: Metadata = {
   title: {
