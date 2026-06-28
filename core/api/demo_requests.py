@@ -8,7 +8,7 @@ import logging
 import time
 
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 from db.connection import get_pool
 
@@ -23,6 +23,7 @@ RATE_MAX = 8
 class CreateDemoRequestBody(BaseModel):
     first_name: str = Field(min_length=1, max_length=80)
     last_name: str = Field(min_length=1, max_length=80)
+    email: EmailStr
     company_name: str = Field(min_length=1, max_length=255)
     website: str = Field(min_length=1, max_length=500)
     botcheck: str | None = None  # honeypot — must be empty
@@ -55,12 +56,13 @@ async def create_demo_request(body: CreateDemoRequestBody, request: Request):
     pool = get_pool()
     row = await pool.fetchrow(
         """
-        INSERT INTO demo_requests (first_name, last_name, company_name, website, ip_address)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO demo_requests (first_name, last_name, email, company_name, website, ip_address)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING request_id, created_at
         """,
         body.first_name.strip(),
         body.last_name.strip(),
+        str(body.email).strip().lower(),
         body.company_name.strip(),
         body.website.strip(),
         ip,

@@ -138,6 +138,10 @@ async def init_db():
             ON demo_requests (created_at DESC);
     """)
 
+    await _pg_pool.execute("""
+        ALTER TABLE demo_requests ADD COLUMN IF NOT EXISTS email VARCHAR(255) NOT NULL DEFAULT '';
+    """)
+
     _redis = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
     logger.info("Redis connected")
 

@@ -105,6 +105,7 @@ interface DemoRequest {
   request_id: string
   first_name: string
   last_name: string
+  email: string
   company_name: string
   website: string
   ip_address: string | null
@@ -831,7 +832,7 @@ function DemoRequestsSection({ token }: { token: string }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && load()}
-          placeholder="Search name, company, website…"
+          placeholder="Search name, email, company, website…"
           style={{
             flex: '1 1 220px', padding: '8px 12px', background: '#0a0a0a',
             border: '1px solid #2a2a2a', borderRadius: 8, color: '#fff', fontSize: 13,
@@ -850,6 +851,7 @@ function DemoRequestsSection({ token }: { token: string }) {
                 <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
                   <Th>First name</Th>
                   <Th>Last name</Th>
+                  <Th>Email</Th>
                   <Th>Company</Th>
                   <Th>Website</Th>
                   <Th align="right">Submitted</Th>
@@ -860,6 +862,7 @@ function DemoRequestsSection({ token }: { token: string }) {
                   <tr key={r.request_id} style={{ borderBottom: '1px solid #161616' }}>
                     <Td>{r.first_name}</Td>
                     <Td>{r.last_name}</Td>
+                    <Td mono>{r.email}</Td>
                     <Td>{r.company_name}</Td>
                     <Td>
                       <a href={r.website.startsWith('http') ? r.website : `https://${r.website}`}

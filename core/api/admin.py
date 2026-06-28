@@ -513,6 +513,7 @@ async def admin_demo_requests(
                 OR last_name ILIKE ${n}
                 OR company_name ILIKE ${n}
                 OR website ILIKE ${n}
+                OR email ILIKE ${n}
             )
         """
 
@@ -521,7 +522,7 @@ async def admin_demo_requests(
 
     rows = await pool.fetch(
         f"""
-        SELECT request_id, first_name, last_name, company_name, website, ip_address, created_at
+        SELECT request_id, first_name, last_name, email, company_name, website, ip_address, created_at
         FROM demo_requests
         {where}
         ORDER BY created_at DESC
@@ -535,6 +536,7 @@ async def admin_demo_requests(
             "request_id":   str(r["request_id"]),
             "first_name":   r["first_name"],
             "last_name":    r["last_name"],
+            "email":        r["email"],
             "company_name": r["company_name"],
             "website":      r["website"],
             "ip_address":   r["ip_address"],

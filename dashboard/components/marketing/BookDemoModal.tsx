@@ -24,6 +24,7 @@ const inputStyle: CSSProperties = {
 export function BookDemoModal({ open, onClose }: Props) {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
   const [companyName, setCompanyName] = useState('')
   const [website, setWebsite] = useState('')
   const [busy, setBusy] = useState(false)
@@ -43,6 +44,7 @@ export function BookDemoModal({ open, onClose }: Props) {
     if (open) return
     setFirstName('')
     setLastName('')
+    setEmail('')
     setCompanyName('')
     setWebsite('')
     setBusy(false)
@@ -60,6 +62,7 @@ export function BookDemoModal({ open, onClose }: Props) {
       await submitDemoRequest({
         first_name: firstName.trim(),
         last_name: lastName.trim(),
+        email: email.trim(),
         company_name: companyName.trim(),
         website: website.trim(),
       })
@@ -102,7 +105,7 @@ export function BookDemoModal({ open, onClose }: Props) {
         {done ? (
           <div style={{ textAlign: 'center', padding: '12px 0 8px' }}>
             <p style={{ margin: '0 0 20px', fontSize: 15, fontWeight: 600, color: '#000', lineHeight: 1.55 }}>
-              Thanks — we received your request and will be in touch soon.
+              Your demo request has been received. You will be contacted via email in 24 hours.
             </p>
             <button type="button" onClick={onClose} style={{ ...violetBtn, border: 'none', cursor: 'pointer' }}>
               Close
@@ -130,6 +133,14 @@ export function BookDemoModal({ open, onClose }: Props) {
                   style={inputStyle} autoComplete="family-name" />
               </label>
             </div>
+
+            <label style={{ display: 'block', marginBottom: 10 }}>
+              <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#000', marginBottom: 6 }}>
+                Email
+              </span>
+              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                style={inputStyle} autoComplete="email" />
+            </label>
 
             <label style={{ display: 'block', marginBottom: 10 }}>
               <span style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#000', marginBottom: 6 }}>
