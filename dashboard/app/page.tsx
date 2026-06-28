@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
+import { BookDemoModal } from '@/components/marketing/BookDemoModal'
 import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
 import { ThreeWaysConnectSection } from '@/components/marketing/ThreeWaysConnectSection'
@@ -13,7 +14,6 @@ import { BRAND, BRAND_DARK } from '@/components/brand'
 import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, violetBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
-const BOOK_DEMO_URL = 'mailto:founder@zizka.ai?subject=Book%20a%20demo'
 
 const HERO_TITLE = 'Operational Database For AI Agents'
 const HERO_VALUE = 'Fix failures in minutes, not after customer complaints.'
@@ -31,6 +31,7 @@ const MCP_CONFIG = `{
 
 export default function LandingPage() {
   const [copied, setCopied] = useState<string | null>(null)
+  const [demoOpen, setDemoOpen] = useState(false)
 
   function copy(text: string, key: string) {
     navigator.clipboard.writeText(text)
@@ -82,8 +83,12 @@ export default function LandingPage() {
           }}>
             <Link href="/signup" style={primaryBtn}>Sign up for free</Link>
             <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={blueBtn}>Self host</a>
-            <a href={BOOK_DEMO_URL} style={violetBtn}>Book demo</a>
+            <button type="button" onClick={() => setDemoOpen(true)} style={{ ...violetBtn, cursor: 'pointer' }}>
+              Book demo
+            </button>
           </div>
+
+          <BookDemoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
 
           <p className="zdb-hero-value" style={{
             fontSize: 18, fontWeight: 600, color: '#000', margin: 0, lineHeight: 1.55, maxWidth: 520, marginInline: 'auto',

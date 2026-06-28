@@ -5,6 +5,7 @@ import {
   adminRequestOtp, adminVerifyOtp,
   adminOverview, adminTelemetrySummary, adminTelemetryRecent,
   adminManagedOverview, adminManagedSubscribers, adminManagedUsers, adminManagedUsage,
+  adminDemoRequests,
 } from '@/lib/api'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -12,7 +13,7 @@ import { setAdminToken, clearAdminToken, getAdminToken } from '@/lib/auth'
 
 const ADMIN_EMAIL = 'founder@zizka.ai'
 
-type Section = 'subscribers' | 'managed' | 'telemetry'
+type Section = 'subscribers' | 'managed' | 'telemetry' | 'demo_requests'
 
 interface Overview {
   telemetry: { total_installs?: number; active_7d?: number; active_24h?: number; total_pings?: number }
@@ -98,6 +99,16 @@ interface Subscriber {
 interface ManagedUsage {
   daily: { day: string; events: number; tenants_active: number }[]
   top_tenants_7d: { tenant_id: string; name: string; owner: string | null; events_7d: number }[]
+}
+
+interface DemoRequest {
+  request_id: string
+  first_name: string
+  last_name: string
+  company_name: string
+  website: string
+  ip_address: string | null
+  created_at: string | null
 }
 
 
@@ -315,6 +326,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
             { key: 'subscribers', label: 'Subscribers' },
             { key: 'managed',     label: 'All customers' },
             { key: 'telemetry',   label: 'SDKs & telemetry' },
+            { key: 'demo_requests', label: 'Demo requests' },
           ] as { key: Section; label: string }[]).map((t) => (
             <button key={t.key} onClick={() => setSection(t.key)}
                     style={{
@@ -339,6 +351,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         {section === 'subscribers' && <SubscribersSection token={token} />}
         {section === 'managed'     && <ManagedSection   token={token} />}
         {section === 'telemetry'   && <TelemetrySection token={token} />}
+        {section === 'demo_requests' && <DemoRequestsSection token={token} />}
       </div>
     </div>
   )
@@ -785,6 +798,86 @@ function ManagedSection({ token }: { token: string }) {
           </table>
         </Card>
       )}
+    </div>
+  )
+}
+
+
+// ── Demo requests ────────────────────────────────────────────────────────────
+
+function DemoRequestsSection({ token }: { token: string }) {
+  const [rows, setRows] = useState<DemoRequest[] | null>(null)
+  const [search, setSearch] = useState('')
+
+  const load = () => {
+    adminDemoRequests(token, { search, limit: 200 }).then(setRows).catch(() => setRows([]))
+  }
+
+  useEffect(() => {
+    load()
+    const interval = setInterval(load, 10_000)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <Stat label="Total requests" value={fmt(rows?.length)} sub="from Book demo form" accent="#7c3aed" />
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && load()}
+          placeholder="Search name, company, website…"
+          style={{
+            flex: '1 1 220px', padding: '8px 12px', background: '#0a0a0a',
+            border: '1px solid #2a2a2a', borderRadius: 8, color: '#fff', fontSize: 13,
+          }}
+        />
+        <button type="button" onClick={load} style={btnSmall()}>Refresh</button>
+      </div>
+
+      <Card title="Demo requests" subtitle="Submissions from the homepage Book demo form. Newest first.">
+        {!rows ? <SkeletonBlock /> : rows.length === 0 ? (
+          <Empty>No demo requests yet.</Empty>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 760 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
+                  <Th>First name</Th>
+                  <Th>Last name</Th>
+                  <Th>Company</Th>
+                  <Th>Website</Th>
+                  <Th align="right">Submitted</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.request_id} style={{ borderBottom: '1px solid #161616' }}>
+                    <Td>{r.first_name}</Td>
+                    <Td>{r.last_name}</Td>
+                    <Td>{r.company_name}</Td>
+                    <Td>
+                      <a href={r.website.startsWith('http') ? r.website : `https://${r.website}`}
+                         target="_blank" rel="noreferrer"
+                         style={{ color: '#a78bfa', textDecoration: 'none' }}>
+                        {r.website}
+                      </a>
+                    </Td>
+                    <Td align="right" subtle>
+                      {r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : '—'}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </div>
   )
 }
