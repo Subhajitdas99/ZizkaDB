@@ -81,7 +81,7 @@ export default function LandingPage() {
           <div className="zdb-hero-btns" style={{
             display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 28,
           }}>
-            <Link href="/signup" style={primaryBtn}>Sign up for free</Link>
+            <Link href="/signup" style={primaryBtn}>Free Trial</Link>
             <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={blueBtn}>Self host</a>
             <button type="button" onClick={() => setDemoOpen(true)} style={{ ...violetBtn, cursor: 'pointer' }}>
               Book demo
