@@ -11,6 +11,8 @@ from langchain_core.outputs import LLMResult
 from zizkadb import ZizkaDB
 from zizkadb.models import LogResult
 
+_RUN_PARENT_MAX = 2_000  # prevent unbounded growth across long sessions
+
 
 class ZizkaDBCallbackHandler(AsyncCallbackHandler):
     """
@@ -32,6 +34,8 @@ class ZizkaDBCallbackHandler(AsyncCallbackHandler):
         self.session_id = session_id
         self.last_event_id: str | None = None
         self._run_parents: dict[UUID, str] = {}
+
+    # ── LLM ───────────────────────────────────────────────────────────────
 
     async def on_chat_model_start(
         self,
@@ -77,6 +81,79 @@ class ZizkaDBCallbackHandler(AsyncCallbackHandler):
         )
         self.last_event_id = result.event_id
 
+    async def on_llm_error(
+        self,
+        error: BaseException,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        result = await self._log(
+            event="llm_error",
+            data={"error": str(error), "type": type(error).__name__},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+
+    # ── Chain ─────────────────────────────────────────────────────────────
+
+    async def on_chain_start(
+        self,
+        serialized: dict[str, Any],
+        inputs: dict[str, Any],
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        chain_name = serialized.get("name") or serialized.get("id", ["chain"])[-1]
+        result = await self._log(
+            event="chain_start",
+            data={"chain": chain_name, "input_keys": list(inputs.keys())},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self._run_parents[run_id] = result.event_id
+        self.last_event_id = result.event_id
+
+    async def on_chain_end(
+        self,
+        outputs: dict[str, Any],
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        result = await self._log(
+            event="chain_end",
+            data={"output_keys": list(outputs.keys())},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+        self._run_parents.pop(run_id, None)
+
+    async def on_chain_error(
+        self,
+        error: BaseException,
+        *,
+        run_id: UUID,
+        parent_run_id: UUID | None = None,
+        **kwargs: Any,
+    ) -> None:
+        result = await self._log(
+            event="chain_error",
+            data={"error": str(error), "type": type(error).__name__},
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+        )
+        self.last_event_id = result.event_id
+        self._run_parents.pop(run_id, None)
+
+    # ── Tool ──────────────────────────────────────────────────────────────
+
     async def on_tool_start(
         self,
         serialized: dict[str, Any],
@@ -111,8 +188,9 @@ class ZizkaDBCallbackHandler(AsyncCallbackHandler):
             parent_run_id=parent_run_id,
         )
         self.last_event_id = result.event_id
+        self._run_parents.pop(run_id, None)
 
-    async def on_chain_error(
+    async def on_tool_error(
         self,
         error: BaseException,
         *,
@@ -120,13 +198,17 @@ class ZizkaDBCallbackHandler(AsyncCallbackHandler):
         parent_run_id: UUID | None = None,
         **kwargs: Any,
     ) -> None:
+        """Log tool failures — previously untracked, breaking causal lineage on errors."""
         result = await self._log(
-            event="chain_error",
+            event="tool_error",
             data={"error": str(error), "type": type(error).__name__},
             run_id=run_id,
             parent_run_id=parent_run_id,
         )
         self.last_event_id = result.event_id
+        self._run_parents.pop(run_id, None)
+
+    # ── Internal ──────────────────────────────────────────────────────────
 
     async def _log(
         self,
@@ -147,4 +229,8 @@ class ZizkaDBCallbackHandler(AsyncCallbackHandler):
             session_id=self.session_id,
         )
         self._run_parents[run_id] = result.event_id
+        # Evict oldest entries if the dict grows too large
+        if len(self._run_parents) > _RUN_PARENT_MAX:
+            oldest = next(iter(self._run_parents))
+            del self._run_parents[oldest]
         return result
