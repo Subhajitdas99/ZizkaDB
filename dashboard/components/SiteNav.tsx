@@ -13,7 +13,7 @@ type SiteNavProps = {
 
 const linkStyle = (on: boolean): CSSProperties => ({
   fontSize: 14,
-  color: on ? '#111' : '#555',
+  color: on ? '#000' : '#000',
   fontWeight: on ? 600 : 400,
   textDecoration: 'none',
 })
@@ -42,7 +42,7 @@ export function SiteNav({ active, suffix }: SiteNavProps) {
         <Link href="/community" style={linkStyle(active === 'community')}>Community</Link>
         <a href="/swagger" style={linkStyle(active === 'explorer')}>API Explorer</a>
         <Link href="/login" style={{
-          fontSize: 14, fontWeight: 500, color: '#111', textDecoration: 'none',
+          fontSize: 14, fontWeight: 500, color: '#000', textDecoration: 'none',
           padding: '7px 16px', border: '1px solid #ddd', borderRadius: 8,
         }}>
           Sign in

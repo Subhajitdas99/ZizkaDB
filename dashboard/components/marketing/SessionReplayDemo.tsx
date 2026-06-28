@@ -21,16 +21,14 @@ const D = {
   surfaceDeep: '#0d0d0d',
   border: '#1f1f1f',
   borderLight: '#2a2a2a',
-  text: '#e5e5e5',
-  muted: '#737373',
-  faint: '#525252',
-  dim: '#404040',
+  text: '#fff',
   green: '#22c55e',
   greenBg: '#0f1f0f',
   greenBorder: '#22c55e40',
   orange: BRAND,
   red: '#ef4444',
-  json: '#404040',
+  blue: '#3b82f6',
+  code: '#22c55e',
 } as const
 
 const EVENT_COLORS: Record<string, string> = {
@@ -38,7 +36,7 @@ const EVENT_COLORS: Record<string, string> = {
   tool_call: '#3b82f6',
   agent_response: '#22c55e',
   error: '#ef4444',
-  connection_test: '#525252',
+  connection_test: '#3b82f6',
 }
 
 export function SessionReplayDemo() {
@@ -83,7 +81,7 @@ export function SessionReplayDemo() {
                   fontSize: 10, fontWeight: 600, padding: '5px 11px', borderRadius: 100,
                   border: scene === s.id ? `1px solid ${D.green}` : '1px solid rgba(255,255,255,0.12)',
                   background: scene === s.id ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.06)',
-                  color: scene === s.id ? D.green : 'rgba(255,255,255,0.7)',
+                  color: scene === s.id ? D.green : '#fff',
                   cursor: 'pointer',
                 }}
               >
@@ -111,16 +109,16 @@ export function SessionReplayDemo() {
             alignItems: 'center',
             gap: 8,
             fontSize: 10,
-            color: '#a3a3a3',
+            color: '#fff',
           }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: D.green, flexShrink: 0 }} />
             API connected
-            <code style={{ fontFamily: 'ui-monospace, monospace', color: D.muted }}>https://db.zizka.ai</code>
+            <code style={{ fontFamily: 'ui-monospace, monospace', color: D.green }}>https://db.zizka.ai</code>
           </div>
 
           <div style={{ padding: '12px 12px 14px' }}>
             {/* Header — matches agent page Shell */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10, color: D.muted, fontSize: 11 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10, color: '#fff', fontSize: 11 }}>
               <ChevronLeft size={12} />
               <span>Agents</span>
             </div>
@@ -129,7 +127,7 @@ export function SessionReplayDemo() {
               <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', fontFamily: 'ui-monospace, monospace' }}>
                 support-bot
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: D.faint }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: D.green, fontWeight: 600 }}>
                 <span style={{
                   width: 6, height: 6, borderRadius: '50%', background: D.green,
                   boxShadow: '0 0 6px rgba(34,197,94,0.6)',
@@ -152,8 +150,8 @@ export function SessionReplayDemo() {
                   background: D.surface, border: `1px solid ${D.border}`,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-                    <Icon size={10} style={{ color: D.muted }} />
-                    <span style={{ fontSize: 9, color: D.muted }}>{label}</span>
+                    <Icon size={10} style={{ color: '#fff' }} />
+                    <span style={{ fontSize: 9, color: '#fff', fontWeight: 600 }}>{label}</span>
                   </div>
                   <div style={{
                     fontSize: 14, fontWeight: 600, fontFamily: 'ui-monospace, monospace',
@@ -190,7 +188,8 @@ export function SessionReplayDemo() {
                       flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       gap: 4, padding: '6px 4px', borderRadius: 7, fontSize: 9, fontWeight: 500,
                       background: highlighted ? '#1a1a1a' : 'transparent',
-                      color: highlighted ? D.text : D.faint,
+                      color: '#fff',
+                      fontWeight: highlighted ? 700 : 500,
                       border: highlighted ? `1px solid ${D.borderLight}` : '1px solid transparent',
                     }}
                   >
@@ -240,13 +239,13 @@ function EventsScene() {
           flex: 1, display: 'flex', alignItems: 'center', gap: 6,
           padding: '0 10px', borderRadius: 8, background: D.surface, border: `1px solid ${D.border}`,
         }}>
-          <Search size={11} style={{ color: D.faint }} />
-          <span style={{ fontSize: 10, color: D.faint, padding: '7px 0' }}>Semantic search across events…</span>
+          <Search size={11} style={{ color: '#fff' }} />
+          <span style={{ fontSize: 10, color: '#fff', padding: '7px 0', fontWeight: 500 }}>Semantic search across events…</span>
         </div>
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4, padding: '0 10px',
           borderRadius: 8, background: D.surface, border: `1px solid ${D.border}`,
-          color: D.muted, fontSize: 10,
+          color: '#fff', fontSize: 10, fontWeight: 600,
         }}>
           <RefreshCw size={10} />
           Refresh
@@ -283,9 +282,9 @@ function BehaviorScene() {
       </div>
       <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
         Drift score: <span style={{ fontFamily: 'ui-monospace, monospace' }}>0.31</span>
-        <span style={{ fontSize: 11, fontWeight: 400, color: '#a3a3a3', marginLeft: 6 }}>(31 / 100)</span>
+        <span style={{ fontSize: 11, fontWeight: 600, color: D.orange, marginLeft: 6 }}>(31 / 100)</span>
       </div>
-      <div style={{ fontSize: 11, color: '#d4d4d4', lineHeight: 1.55, marginBottom: 10 }}>
+      <div style={{ fontSize: 11, color: '#fff', lineHeight: 1.55, marginBottom: 10, fontWeight: 500 }}>
         Billing responses changed after prompt v2. Policy links dropped 40%.
       </div>
       <div style={{ height: 5, borderRadius: 100, background: '#0a0a0a', overflow: 'hidden' }}>
@@ -293,14 +292,14 @@ function BehaviorScene() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 10 }}>
         {[
-          { label: 'Sessions affected', value: '23 today' },
-          { label: 'Error rate change', value: '+2.4pp' },
+          { label: 'Sessions affected', value: '23 today', color: D.orange },
+          { label: 'Error rate change', value: '+2.4pp', color: D.red },
         ].map(item => (
           <div key={item.label} style={{
             padding: '8px 10px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${D.border}`,
           }}>
-            <div style={{ fontSize: 9, color: D.muted, marginBottom: 2 }}>{item.label}</div>
-            <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: D.text }}>
+            <div style={{ fontSize: 9, color: '#fff', marginBottom: 2, fontWeight: 600 }}>{item.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: item.color }}>
               {item.value}
             </div>
           </div>
@@ -320,7 +319,7 @@ function SessionsScene() {
 
   return (
     <div>
-      <div style={{ fontSize: 10, fontWeight: 500, color: D.muted, marginBottom: 10 }}>
+      <div style={{ fontSize: 10, fontWeight: 600, color: '#fff', marginBottom: 10 }}>
         Session sess_8821… · {chain.length} events in causal chain
       </div>
       {chain.map((e, i) => (
@@ -335,12 +334,12 @@ function SessionsScene() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 11, fontFamily: 'ui-monospace, monospace', color: D.text }}>{e.label}</span>
               {e.root && <Badge label="root" color={D.green} bg="#1a2a1a" />}
-              {e.selected && <Badge label="selected" color="#f87171" bg="#2a1a1a" />}
+              {e.selected && <Badge label="selected" color={D.red} bg="#2a1a1a" />}
               {e.bad && !e.selected && <Badge label="ignored" color={D.red} bg="rgba(239,68,68,0.12)" />}
             </div>
             <div style={{
               fontSize: 10, fontFamily: 'ui-monospace, monospace', marginTop: 3,
-              color: e.bad ? '#f87171' : D.json, lineHeight: 1.4,
+              color: e.bad ? D.red : D.code, lineHeight: 1.4,
             }}>
               {e.data}
             </div>
@@ -350,7 +349,7 @@ function SessionsScene() {
       <div style={{
         marginTop: 4, padding: '8px 10px', borderRadius: 8,
         background: D.greenBg, border: `1px solid ${D.greenBorder}`,
-        fontSize: 10, color: '#86efac', fontWeight: 500,
+        fontSize: 10, color: D.green, fontWeight: 700,
       }}>
         Root cause found. Roll back prompt v2.
       </div>
@@ -390,15 +389,15 @@ function DashboardEventRow({
             </div>
             <div style={{
               fontSize: 10, fontFamily: 'ui-monospace, monospace', marginTop: 3,
-              color: D.json, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              color: D.code, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {data}
             </div>
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: D.dim }}>#{seq}</span>
-          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: D.faint }}>{time}</span>
+          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: D.blue, fontWeight: 600 }}>#{seq}</span>
+          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: '#fff', fontWeight: 600 }}>{time}</span>
         </div>
       </div>
     </div>
@@ -411,7 +410,7 @@ function FilterPill({ label, active, color }: { label: string; active?: boolean;
     <span style={{
       fontSize: 9, padding: '3px 8px', borderRadius: 100,
       background: active ? `${c}20` : D.surface,
-      color: active ? c : D.faint,
+      color: active ? c : '#fff',
       border: `1px solid ${active ? `${c}40` : D.border}`,
     }}>
       {label}
@@ -434,7 +433,7 @@ function EventDot({ type }: { type: string }) {
   return (
     <div style={{
       width: 7, height: 7, borderRadius: '50%', flexShrink: 0, marginTop: 3,
-      background: EVENT_COLORS[type] ?? D.faint,
+      background: EVENT_COLORS[type] ?? D.blue,
     }} />
   )
 }

@@ -13,7 +13,8 @@ import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, ghostBtn, ou
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
-const HERO_ONE_LINER = 'Fix before production breaks'
+const HERO_HEADLINE = 'Record. Detect drift. Replay.'
+const FINAL_CTA_LINE = 'Fix before production breaks'
 
 const MCP_CONFIG = `{
   "mcpServers": {
@@ -39,7 +40,8 @@ export default function LandingPage() {
       <style>{`
         @media (max-width: 768px) {
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
-          .zdb-hero-h1 { font-size: 34px !important; }
+          .zdb-hero-badge { font-size: 28px !important; }
+          .zdb-hero-h1 { font-size: 22px !important; }
           .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
           .zdb-steps { grid-template-columns: 1fr !important; }
           .zdb-compare-grid { grid-template-columns: 1fr !important; }
@@ -70,30 +72,18 @@ export default function LandingPage() {
             display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
           }}>
             <div>
-              <div style={{
-                display: 'inline-block',
-                padding: '12px 22px',
-                borderRadius: 12,
-                marginBottom: 24,
-                background: 'rgba(255,255,255,0.1)',
-                border: '2px solid #fff',
+              <p className="zdb-hero-badge" style={{
+                fontSize: 38, fontWeight: 800, lineHeight: 1.12, margin: '0 0 18px',
+                letterSpacing: -0.6, color: '#fff', maxWidth: 520,
               }}>
-                <span style={{
-                  fontSize: 17,
-                  fontWeight: 800,
-                  color: '#fff',
-                  letterSpacing: 0.3,
-                  lineHeight: 1.3,
-                }}>
-                  Operational database for AI agents
-                </span>
-              </div>
+                Operational database for AI agents
+              </p>
 
               <h1 className="zdb-hero-h1" style={{
-                fontSize: 48, fontWeight: 700, lineHeight: 1.15, margin: '0 0 28px',
-                letterSpacing: -0.8, color: '#fff', maxWidth: 520,
+                fontSize: 26, fontWeight: 700, lineHeight: 1.25, margin: '0 0 28px',
+                letterSpacing: -0.3, color: '#fff', maxWidth: 520,
               }}>
-                {HERO_ONE_LINER}
+                {HERO_HEADLINE}
               </h1>
 
               <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -119,25 +109,25 @@ export default function LandingPage() {
       <section id="how" className="zdb-section" style={{ padding: '88px 40px', background: M.wash }}>
         <div style={container(900)}>
           <p style={sectionTitle}>How it works</p>
-          <h2 style={h2}>Three steps. No infrastructure project.</h2>
-          <p style={lead}>Connect from your stack in an afternoon. Debug production incidents in minutes, not days.</p>
+          <h2 style={h2}>Three steps. One operational database.</h2>
+          <p style={lead}>One API key. Log from Python, TypeScript, MCP, or REST. Self-host or managed cloud.</p>
 
           <div className="zdb-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {[
               {
                 n: '01',
-                title: 'Connect your agent',
-                body: 'Sign up at db.zizka.ai or self-host. Add one API key. Log from Python, TypeScript, MCP, or REST.',
+                title: 'Connect',
+                body: 'Sign up or self-host. Add one API key.',
               },
               {
                 n: '02',
-                title: 'It records everything',
-                body: 'Every message, tool call, and response is stored automatically in production.',
+                title: 'Store',
+                body: 'Every message, tool call, and outcome in one store.',
               },
               {
                 n: '03',
-                title: 'You catch problems early',
-                body: 'Get alerted when behavior shifts. Replay any bad session and trace it to the root cause.',
+                title: 'Replay & fix',
+                body: 'Drift alerts when behavior shifts. Replay any session to root cause.',
               },
             ].map(step => (
               <div key={step.n} style={{
@@ -303,7 +293,7 @@ export default function LandingPage() {
         <div style={{ position: 'absolute', inset: 0, background: M.heroGlowBlue, pointerEvents: 'none' }} />
         <div style={{ ...container(600), textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <h2 style={{ fontSize: 36, fontWeight: 700, color: '#fff', margin: '0 0 14px', letterSpacing: -0.6, lineHeight: 1.15 }}>
-            {HERO_ONE_LINER}
+            {FINAL_CTA_LINE}
           </h2>
           <p style={{ fontSize: 17, color: '#fff', margin: '0 0 28px', lineHeight: 1.65, fontWeight: 600 }}>
             Start free on db.zizka.ai. Self-host anytime.
