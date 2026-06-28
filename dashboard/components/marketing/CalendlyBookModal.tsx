@@ -130,7 +130,7 @@ export function CalendlyBookModal({ open, onClose }: Props) {
           <>
             <div style={{ padding: '18px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <h2 id="book-demo-title" style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#000' }}>
-                Book a 30-minute demo
+                Book a 15-minute demo
               </h2>
               <button
                 type="button"
