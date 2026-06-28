@@ -40,9 +40,10 @@ export default function LandingPage() {
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: M.ink, background: '#fff' }}>
       <style>{`
+        .zdb-hero-grid { align-items: center !important; }
         @media (max-width: 1024px) {
           .zdb-connect-grid { grid-template-columns: 1fr !important; }
-          .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+          .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; align-items: start !important; }
         }
         @media (max-width: 768px) {
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
@@ -76,9 +77,9 @@ export default function LandingPage() {
 
         <div style={{ ...container(1080), position: 'relative', zIndex: 1 }}>
           <div className="zdb-hero-grid" style={{
-            display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'start',
+            display: 'grid', gridTemplateColumns: '1fr 1.05fr', gap: 48, alignItems: 'center',
           }}>
-            <div>
+            <div className="zdb-hero-copy">
               <h1 className="zdb-hero-title" style={{
                 fontSize: 46, fontWeight: 800, lineHeight: 1.1, margin: '0 0 32px',
                 letterSpacing: -0.8, color: '#fff', maxWidth: 520,
