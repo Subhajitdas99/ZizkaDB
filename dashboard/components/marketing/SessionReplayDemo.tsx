@@ -1,24 +1,53 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { BRAND, BRAND_DARK } from '@/components/brand'
-import { M } from './marketing-theme'
+import { BRAND } from '@/components/brand'
+import {
+  Activity, AlertCircle, BarChart2, ChevronLeft, Clock, GitBranch,
+  Layers, RefreshCw, Rewind, Search,
+} from 'lucide-react'
 
-type Scene = 'chat' | 'alert' | 'replay'
+type Scene = 'events' | 'behavior' | 'sessions'
 
 const SCENES: { id: Scene; label: string }[] = [
-  { id: 'chat', label: 'Customer chat' },
-  { id: 'alert', label: 'Alert fires' },
-  { id: 'replay', label: 'Replay & fix' },
+  { id: 'events', label: 'Events' },
+  { id: 'behavior', label: 'Drift alert' },
+  { id: 'sessions', label: 'Session replay' },
 ]
 
+const D = {
+  bg: '#0a0a0a',
+  surface: '#111',
+  surfaceDeep: '#0d0d0d',
+  border: '#1f1f1f',
+  borderLight: '#2a2a2a',
+  text: '#e5e5e5',
+  muted: '#737373',
+  faint: '#525252',
+  dim: '#404040',
+  green: '#22c55e',
+  greenBg: '#0f1f0f',
+  greenBorder: '#22c55e40',
+  orange: BRAND,
+  red: '#ef4444',
+  json: '#404040',
+} as const
+
+const EVENT_COLORS: Record<string, string> = {
+  user_message: '#8b5cf6',
+  tool_call: '#3b82f6',
+  agent_response: '#22c55e',
+  error: '#ef4444',
+  connection_test: '#525252',
+}
+
 export function SessionReplayDemo() {
-  const [scene, setScene] = useState<Scene>('chat')
+  const [scene, setScene] = useState<Scene>('events')
   const [auto, setAuto] = useState(true)
 
   useEffect(() => {
     if (!auto) return
-    const order: Scene[] = ['chat', 'alert', 'replay']
+    const order: Scene[] = ['events', 'behavior', 'sessions']
     const t = setInterval(() => {
       setScene(prev => order[(order.indexOf(prev) + 1) % order.length])
     }, 4500)
@@ -31,129 +60,249 @@ export function SessionReplayDemo() {
   }
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: '100%', position: 'relative' }}>
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        marginBottom: 12, gap: 8, flexWrap: 'wrap',
-      }}>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {SCENES.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={() => pick(s.id)}
-              style={{
-                fontSize: 11, fontWeight: 600, padding: '6px 12px', borderRadius: 100,
-                border: scene === s.id ? `1px solid ${M.blueLight}` : '1px solid rgba(255,255,255,0.12)',
-                background: scene === s.id ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.06)',
-                color: scene === s.id ? '#fff' : 'rgba(255,255,255,0.75)',
-                cursor: 'pointer',
-              }}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-        <span style={{
-          fontSize: 10, fontWeight: 700, color: '#fff',
-          background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)',
-          padding: '4px 10px', borderRadius: 100,
-        }}>
-          Live demo
-        </span>
-      </div>
+        position: 'absolute', inset: '-12px -6px -6px',
+        background: `radial-gradient(ellipse at 70% 30%, rgba(34,197,94,0.08) 0%, transparent 55%),
+                     radial-gradient(ellipse at 20% 80%, rgba(249,115,22,0.07) 0%, transparent 50%)`,
+        pointerEvents: 'none', zIndex: 0,
+      }} />
 
-      <div style={{
-        borderRadius: 20,
-        overflow: 'hidden',
-        background: '#fff',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08)',
-      }}>
-        {/* App chrome */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
         <div style={{
-          padding: '14px 18px', borderBottom: `1px solid ${M.line}`,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          background: M.wash,
+          marginBottom: 10, gap: 8, flexWrap: 'wrap',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: 10, background: M.bluePale,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14,
-            }}>
-              🤖
+          <div style={{ display: 'flex', gap: 6 }}>
+            {SCENES.map(s => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => pick(s.id)}
+                style={{
+                  fontSize: 10, fontWeight: 600, padding: '5px 11px', borderRadius: 100,
+                  border: scene === s.id ? `1px solid ${D.green}` : '1px solid rgba(255,255,255,0.12)',
+                  background: scene === s.id ? 'rgba(34,197,94,0.12)' : 'rgba(255,255,255,0.06)',
+                  color: scene === s.id ? D.green : 'rgba(255,255,255,0.7)',
+                  cursor: 'pointer',
+                }}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{
+          borderRadius: 14,
+          overflow: 'hidden',
+          background: D.bg,
+          border: `1px solid ${D.border}`,
+          boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
+        }}>
+          {/* API connected bar — matches ConnectionStatus */}
+          <div style={{
+            margin: '10px 10px 0',
+            padding: '8px 12px',
+            borderRadius: 10,
+            background: D.surface,
+            border: `1px solid ${D.border}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            fontSize: 10,
+            color: '#a3a3a3',
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: D.green, flexShrink: 0 }} />
+            API connected
+            <code style={{ fontFamily: 'ui-monospace, monospace', color: D.muted }}>https://db.zizka.ai</code>
+          </div>
+
+          <div style={{ padding: '12px 12px 14px' }}>
+            {/* Header — matches agent page Shell */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 10, color: D.muted, fontSize: 11 }}>
+              <ChevronLeft size={12} />
+              <span>Agents</span>
             </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#000' }}>support-bot</div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#000' }}>Production · 847 sessions today</div>
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 8 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#fff', fontFamily: 'ui-monospace, monospace' }}>
+                support-bot
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, color: D.faint }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: D.green,
+                  boxShadow: '0 0 6px rgba(34,197,94,0.6)',
+                }} />
+                Live · less than a minute ago
+              </div>
+            </div>
+
+            {/* Stats row — matches StatsRow */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 12 }}>
+              {[
+                { label: 'Total events', value: '847', icon: BarChart2 },
+                { label: 'Event types', value: '12', icon: GitBranch },
+                { label: 'Sessions', value: '42', icon: Layers },
+                { label: 'Last event', value: '2m ago', icon: Clock },
+                { label: 'Errors', value: '3', icon: AlertCircle, color: D.red },
+              ].map(({ label, value, icon: Icon, color }) => (
+                <div key={label} style={{
+                  padding: '8px 8px', borderRadius: 10,
+                  background: D.surface, border: `1px solid ${D.border}`,
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                    <Icon size={10} style={{ color: D.muted }} />
+                    <span style={{ fontSize: 9, color: D.muted }}>{label}</span>
+                  </div>
+                  <div style={{
+                    fontSize: 14, fontWeight: 600, fontFamily: 'ui-monospace, monospace',
+                    color: color ?? D.text,
+                  }}>
+                    {value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tab bar — matches agent page tabs */}
+            <div style={{
+              display: 'flex', gap: 3, padding: 3, marginBottom: 12,
+              background: D.surfaceDeep, border: `1px solid ${D.border}`, borderRadius: 10,
+            }}>
+              {[
+                { key: 'Behavior', icon: Activity, badge: 'NEW' as const },
+                { key: 'Events', icon: BarChart2 },
+                { key: 'Sessions', icon: Layers },
+                { key: 'Time Travel', icon: Rewind },
+              ].map(({ key, icon: Icon, badge }) => {
+                const isBehavior = key === 'Behavior'
+                const isEvents = key === 'Events'
+                const isSessions = key === 'Sessions'
+                const highlighted =
+                  (scene === 'behavior' && isBehavior) ||
+                  (scene === 'events' && isEvents) ||
+                  (scene === 'sessions' && isSessions)
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      gap: 4, padding: '6px 4px', borderRadius: 7, fontSize: 9, fontWeight: 500,
+                      background: highlighted ? '#1a1a1a' : 'transparent',
+                      color: highlighted ? D.text : D.faint,
+                      border: highlighted ? `1px solid ${D.borderLight}` : '1px solid transparent',
+                    }}
+                  >
+                    <Icon size={10} />
+                    <span>{key}</span>
+                    {badge && (
+                      <span style={{
+                        fontSize: 7, fontWeight: 800, padding: '1px 4px', borderRadius: 3,
+                        background: D.orange, color: '#fff', letterSpacing: 0.4,
+                      }}>
+                        {badge}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ minHeight: 200 }}>
+              {scene === 'events' && <EventsScene />}
+              {scene === 'behavior' && <BehaviorScene />}
+              {scene === 'sessions' && <SessionsScene />}
             </div>
           </div>
-          {scene !== 'chat' && (
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: '#000',
-              background: '#fff7ed', border: `1px solid ${BRAND}55`,
-              padding: '5px 12px', borderRadius: 100,
-            }}>
-              Behavior change detected
-            </span>
-          )}
         </div>
 
-        <div style={{ padding: '20px 18px', minHeight: 320, background: '#fff' }}>
-          {scene === 'chat' && <ChatScene />}
-          {scene === 'alert' && <AlertScene />}
-          {scene === 'replay' && <ReplayScene />}
-        </div>
-      </div>
-
-      <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: '#fff', marginTop: 12, marginBottom: 0 }}>
-        Tap the tabs to walk through what happens when an agent goes wrong.
-      </p>
-    </div>
-  )
-}
-
-function ChatScene() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <Bubble who="customer" text="Why was I charged twice this month?" />
-      <Bubble who="agent" text="I checked your billing history. I don't see a duplicate charge on your account." />
-      <div style={{
-        padding: '12px 14px', borderRadius: 12, background: '#fef2f2',
-        border: '1px solid #fecaca', fontSize: 13, color: '#000', lineHeight: 1.5, fontWeight: 600,
-      }}>
-        The agent missed a duplicate flag in the billing tool. The customer opens a ticket. Your team has no visibility into why.
+        <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#fff', marginTop: 10, marginBottom: 0 }}>
+          The same dashboard you get after signup.
+        </p>
       </div>
     </div>
   )
 }
 
-function AlertScene() {
+function EventsScene() {
+  const events = [
+    { type: 'user_message', data: '{"text":"Why was I charged twice this month?"}', time: '15:42:01', seq: 1 },
+    { type: 'tool_call', data: '{"fn":"get_billing","user":8821}', time: '15:42:02', seq: 2, causal: true },
+    { type: 'tool_call', data: '{"duplicate_charge":true}', time: '15:42:02', seq: 3, causal: true },
+    { type: 'agent_response', data: '{"text":"I don\'t see a duplicate charge."}', time: '15:42:03', seq: 4, warn: true },
+  ]
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{
-        padding: '16px 18px', borderRadius: 14,
-        background: 'linear-gradient(135deg, #fff7ed 0%, #eff6ff 100%)',
-        border: `1px solid ${BRAND}44`,
-      }}>
-        <div style={{ fontSize: 12, fontWeight: 800, color: '#000', marginBottom: 6 }}>
-          Drift detected in refund answers
+    <div>
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+        <div style={{
+          flex: 1, display: 'flex', alignItems: 'center', gap: 6,
+          padding: '0 10px', borderRadius: 8, background: D.surface, border: `1px solid ${D.border}`,
+        }}>
+          <Search size={11} style={{ color: D.faint }} />
+          <span style={{ fontSize: 10, color: D.faint, padding: '7px 0' }}>Semantic search across events…</span>
         </div>
-        <div style={{ fontSize: 14, color: '#000', lineHeight: 1.55, fontWeight: 500 }}>
-          After Tuesday&apos;s prompt update, billing responses changed tone and policy links dropped 40%.
-          You are notified before complaint volume spikes.
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 4, padding: '0 10px',
+          borderRadius: 8, background: D.surface, border: `1px solid ${D.border}`,
+          color: D.muted, fontSize: 10,
+        }}>
+          <RefreshCw size={10} />
+          Refresh
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+
+      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
+        <FilterPill label="All" active />
+        <FilterPill label="user_message (1)" color={EVENT_COLORS.user_message} />
+        <FilterPill label="tool_call (2)" color={EVENT_COLORS.tool_call} />
+        <FilterPill label="agent_response (1)" color={EVENT_COLORS.agent_response} />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {events.map(ev => (
+          <DashboardEventRow key={ev.seq} {...ev} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function BehaviorScene() {
+  return (
+    <div style={{
+      padding: '14px 14px', borderRadius: 10,
+      background: '#1a0f00', border: `1px solid ${D.orange}40`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+        <Activity size={12} style={{ color: D.orange }} />
+        <span style={{ fontSize: 9, fontWeight: 800, color: D.orange, letterSpacing: 0.6 }}>
+          NOTICEABLE DRIFT
+        </span>
+      </div>
+      <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
+        Drift score: <span style={{ fontFamily: 'ui-monospace, monospace' }}>0.31</span>
+        <span style={{ fontSize: 11, fontWeight: 400, color: '#a3a3a3', marginLeft: 6 }}>(31 / 100)</span>
+      </div>
+      <div style={{ fontSize: 11, color: '#d4d4d4', lineHeight: 1.55, marginBottom: 10 }}>
+        Billing responses changed after prompt v2. Policy links dropped 40%.
+      </div>
+      <div style={{ height: 5, borderRadius: 100, background: '#0a0a0a', overflow: 'hidden' }}>
+        <div style={{ width: '31%', height: '100%', borderRadius: 100, background: D.orange }} />
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginTop: 10 }}>
         {[
           { label: 'Sessions affected', value: '23 today' },
-          { label: 'Drift score', value: '0.31 · review' },
+          { label: 'Error rate change', value: '+2.4pp' },
         ].map(item => (
           <div key={item.label} style={{
-            padding: '14px', borderRadius: 12, background: M.wash, border: `1px solid ${M.line}`,
+            padding: '8px 10px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${D.border}`,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#000', marginBottom: 4 }}>{item.label}</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: '#000' }}>{item.value}</div>
+            <div style={{ fontSize: 9, color: D.muted, marginBottom: 2 }}>{item.label}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: D.text }}>
+              {item.value}
+            </div>
           </div>
         ))}
       </div>
@@ -161,66 +310,131 @@ function AlertScene() {
   )
 }
 
-function ReplayScene() {
+function SessionsScene() {
+  const chain = [
+    { type: 'user_message', label: 'user_message', data: '{"text":"Why was I charged twice?"}', root: true },
+    { type: 'tool_call', label: 'tool_call', data: '{"fn":"get_billing","user":8821}' },
+    { type: 'tool_call', label: 'tool_call', data: '{"duplicate_charge":true}', bad: true },
+    { type: 'agent_response', label: 'agent_response', data: '{"text":"No duplicate found"}', bad: true, selected: true },
+  ]
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ fontSize: 12, fontWeight: 800, color: '#000', marginBottom: 4 }}>
-        Session replay · Tue 3:42 PM
+    <div>
+      <div style={{ fontSize: 10, fontWeight: 500, color: D.muted, marginBottom: 10 }}>
+        Session sess_8821… · {chain.length} events in causal chain
       </div>
-      {[
-        { step: '1', label: 'Customer asked', text: '"Why was I charged twice?"', ok: true },
-        { step: '2', label: 'Agent called', text: 'get_billing(user=8821)', ok: true },
-        { step: '3', label: 'Tool returned', text: 'duplicate_charge: true (ignored by model)', ok: false },
-        { step: '4', label: 'Agent replied', text: '"No duplicate found"', ok: false },
-      ].map(row => (
-        <div key={row.step} style={{
-          display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 12,
-          background: row.ok ? M.wash : '#fff7ed',
-          border: `1px solid ${row.ok ? M.line : `${BRAND}44`}`,
-        }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: 8, flexShrink: 0,
-            background: row.ok ? M.bluePale : '#ffedd5',
-            color: '#000',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 12, fontWeight: 800,
-          }}>
-            {row.ok ? row.step : '!'}
+      {chain.map((e, i) => (
+        <div key={i} style={{ display: 'flex', gap: 10, marginBottom: i < chain.length - 1 ? 0 : 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <EventDot type={e.type} />
+            {i < chain.length - 1 && (
+              <div style={{ width: 1, flex: 1, minHeight: 12, background: D.borderLight, margin: '3px 0' }} />
+            )}
           </div>
-          <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#000', marginBottom: 2 }}>
-              {row.label}
+          <div style={{ paddingBottom: 10, flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 11, fontFamily: 'ui-monospace, monospace', color: D.text }}>{e.label}</span>
+              {e.root && <Badge label="root" color={D.green} bg="#1a2a1a" />}
+              {e.selected && <Badge label="selected" color="#f87171" bg="#2a1a1a" />}
+              {e.bad && !e.selected && <Badge label="ignored" color={D.red} bg="rgba(239,68,68,0.12)" />}
             </div>
-            <div style={{ fontSize: 13, color: '#000', lineHeight: 1.45 }}>{row.text}</div>
+            <div style={{
+              fontSize: 10, fontFamily: 'ui-monospace, monospace', marginTop: 3,
+              color: e.bad ? '#f87171' : D.json, lineHeight: 1.4,
+            }}>
+              {e.data}
+            </div>
           </div>
         </div>
       ))}
       <div style={{
-        marginTop: 4, padding: '12px 14px', borderRadius: 12,
-        background: '#ecfdf5', border: '1px solid #a7f3d0',
-        fontSize: 13, color: '#000', fontWeight: 700,
+        marginTop: 4, padding: '8px 10px', borderRadius: 8,
+        background: D.greenBg, border: `1px solid ${D.greenBorder}`,
+        fontSize: 10, color: '#86efac', fontWeight: 500,
       }}>
-        Root cause found in 2 minutes. Roll back prompt v2. No log archaeology.
+        Root cause found. Roll back prompt v2.
       </div>
     </div>
   )
 }
 
-function Bubble({ who, text }: { who: 'customer' | 'agent'; text: string }) {
-  const isCustomer = who === 'customer'
+function DashboardEventRow({
+  type,
+  data,
+  time,
+  seq,
+  causal,
+  warn,
+}: {
+  type: string
+  data: string
+  time: string
+  seq: number
+  causal?: boolean
+  warn?: boolean
+}) {
   return (
-    <div style={{ display: 'flex', justifyContent: isCustomer ? 'flex-start' : 'flex-end' }}>
-      <div style={{
-        maxWidth: '85%', padding: '12px 16px', borderRadius: isCustomer ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
-        background: isCustomer ? M.wash : M.bluePale,
-        border: `1px solid ${isCustomer ? M.line : '#93c5fd'}`,
-        fontSize: 14, color: '#000', lineHeight: 1.5,
-      }}>
-        {!isCustomer && (
-          <div style={{ fontSize: 10, fontWeight: 800, color: '#000', marginBottom: 4 }}>support-bot</div>
-        )}
-        {text}
+    <div style={{
+      padding: '10px 12px', borderRadius: 8,
+      background: warn ? '#1a0f00' : D.surface,
+      border: `1px solid ${warn ? `${D.orange}40` : D.border}`,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <EventDot type={type} />
+          <div style={{ minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 12, fontFamily: 'ui-monospace, monospace', color: D.text }}>{type}</span>
+              {causal && <Badge label="causal" color={D.green} bg="#1a2a1a" />}
+              {warn && <AlertCircle size={11} style={{ color: D.orange }} />}
+            </div>
+            <div style={{
+              fontSize: 10, fontFamily: 'ui-monospace, monospace', marginTop: 3,
+              color: D.json, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {data}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: D.dim }}>#{seq}</span>
+          <span style={{ fontSize: 9, fontFamily: 'ui-monospace, monospace', color: D.faint }}>{time}</span>
+        </div>
       </div>
     </div>
+  )
+}
+
+function FilterPill({ label, active, color }: { label: string; active?: boolean; color?: string }) {
+  const c = color ?? D.green
+  return (
+    <span style={{
+      fontSize: 9, padding: '3px 8px', borderRadius: 100,
+      background: active ? `${c}20` : D.surface,
+      color: active ? c : D.faint,
+      border: `1px solid ${active ? `${c}40` : D.border}`,
+    }}>
+      {label}
+    </span>
+  )
+}
+
+function Badge({ label, color, bg }: { label: string; color: string; bg: string }) {
+  return (
+    <span style={{
+      fontSize: 8, fontWeight: 700, padding: '1px 5px', borderRadius: 4,
+      background: bg, color,
+    }}>
+      {label}
+    </span>
+  )
+}
+
+function EventDot({ type }: { type: string }) {
+  return (
+    <div style={{
+      width: 7, height: 7, borderRadius: '50%', flexShrink: 0, marginTop: 3,
+      background: EVENT_COLORS[type] ?? D.faint,
+    }} />
   )
 }

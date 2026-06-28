@@ -13,8 +13,7 @@ import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, ghostBtn, ou
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
-const HERO_ONE_LINER =
-  'Operational database for AI agents. Detect drift. Replay decisions. Fix before production breaks. Open source.'
+const HERO_ONE_LINER = 'Fix before production breaks'
 
 const MCP_CONFIG = `{
   "mcpServers": {
@@ -91,10 +90,10 @@ export default function LandingPage() {
               </div>
 
               <h1 className="zdb-hero-h1" style={{
-                fontSize: 40, fontWeight: 700, lineHeight: 1.2, margin: '0 0 28px',
+                fontSize: 48, fontWeight: 700, lineHeight: 1.15, margin: '0 0 28px',
                 letterSpacing: -0.8, color: '#fff', maxWidth: 520,
               }}>
-                Detect drift. Replay decisions. Fix before production breaks. Open source.
+                {HERO_ONE_LINER}
               </h1>
 
               <div className="zdb-hero-btns" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>

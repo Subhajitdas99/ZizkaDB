@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
-const TAGLINE =
-  'Operational database for AI agents. Detect drift. Replay decisions. Fix before production breaks. Open source.'
+const TAGLINE = 'Fix before production breaks'
 
 export const metadata: Metadata = {
   title: {
