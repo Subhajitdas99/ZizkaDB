@@ -63,12 +63,12 @@ function ConnectStep({ n, title, children, accent }: { n: number; title: string;
 }
 
 function ConnectCard({
-  label,
+  title,
   accent,
   intro,
   children,
 }: {
-  label: string
+  title: string
   accent: string
   intro: string
   children: ReactNode
@@ -77,17 +77,29 @@ function ConnectCard({
     <div style={{
       background: '#fff',
       border: `1px solid ${M.line}`,
-      borderTop: `3px solid ${accent}`,
       borderRadius: 14,
       padding: '16px 16px 18px',
+      overflow: 'hidden',
     }}>
       <div style={{
-        fontSize: 10, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',
-        color: accent, marginBottom: 6,
+        textAlign: 'center',
+        margin: '0 0 14px',
+        padding: '14px 16px',
+        borderRadius: 10,
+        background: `linear-gradient(135deg, ${accent} 0%, ${accent}dd 100%)`,
+        boxShadow: `0 6px 20px ${accent}33`,
       }}>
-        {label}
+        <div style={{
+          fontSize: 20,
+          fontWeight: 800,
+          color: '#fff',
+          letterSpacing: -0.4,
+          lineHeight: 1.2,
+        }}>
+          {title}
+        </div>
       </div>
-      <p style={{ fontSize: 12, color: '#000', margin: '0 0 2px', lineHeight: 1.5, fontWeight: 500 }}>
+      <p style={{ fontSize: 12, color: '#000', margin: '0 0 2px', lineHeight: 1.5, fontWeight: 500, textAlign: 'center' }}>
         {intro}
       </p>
       {children}
@@ -115,7 +127,7 @@ export function ThreeWaysConnectSection() {
           }}
         >
           <ConnectCard
-            label="1 · Managed cloud"
+            title="Managed cloud"
             accent={M.violet}
             intro="We run the stack at db.zizka.ai. Sign up, create an agent, copy your API key."
           >
@@ -134,7 +146,7 @@ await db.log(agent="my-bot", event="started", data={})`}</CodeBlock>
           </ConnectCard>
 
           <ConnectCard
-            label="2 · MCP"
+            title="MCP"
             accent={M.blue}
             intro="Plug into Claude Desktop, Cursor, or OpenAI MCP. No app refactor."
           >
@@ -149,7 +161,7 @@ await db.log(agent="my-bot", event="started", data={})`}</CodeBlock>
           </ConnectCard>
 
           <ConnectCard
-            label="3 · Self-hosted"
+            title="Self-hosted"
             accent={M.teal}
             intro="Run on your laptop or VPS — AGPL, free forever. Point SDKs at your API URL."
           >
