@@ -223,14 +223,6 @@ export async function adminManagedUsage(token: string) {
   return apiFetch('/v1/admin/managed/usage', token)
 }
 
-export async function adminDemoRequests(token: string, params: { search?: string; limit?: number } = {}) {
-  const qs = new URLSearchParams()
-  if (params.search?.trim()) qs.set('search', params.search.trim())
-  if (params.limit) qs.set('limit', String(params.limit))
-  const q = qs.toString()
-  return apiFetch(`/v1/admin/demo-requests${q ? `?${q}` : ''}`, token)
-}
-
 export async function getApiKeys(token: string) {
   return apiFetch('/v1/auth/api-keys', token)
 }
