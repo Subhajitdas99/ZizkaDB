@@ -1,6 +1,6 @@
 ---
 name: zizkadb-release
-description: Bumps versions, runs pre-push verification, and publishes ZizkaDB SDK, MCP, LangChain, and CrewAI packages. Use when releasing, publishing to PyPI or npm, bumping version, or running verify-release.
+description: Bumps versions, runs pre-push verification, and publishes ZizkaDB SDK and MCP packages. Use when releasing, publishing to PyPI or npm, bumping version, or running verify-release.
 ---
 
 # ZizkaDB Release
@@ -11,8 +11,6 @@ description: Bumps versions, runs pre-push verification, and publishes ZizkaDB S
 | Python SDK | `sdk/python/pyproject.toml` |
 | TypeScript SDK | `sdk/typescript/package.json` |
 | MCP | `mcp/pyproject.toml` |
-| LangChain | `integrations/langchain/pyproject.toml` |
-| CrewAI | `integrations/crewai/pyproject.toml` |
 | API (display) | `core/main.py` `version=` |
 
 Keep SDK versions aligned when possible.
