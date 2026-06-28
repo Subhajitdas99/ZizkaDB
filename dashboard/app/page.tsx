@@ -40,12 +40,17 @@ export default function LandingPage() {
   return (
     <div style={{ fontFamily: 'Inter, system-ui, sans-serif', color: M.ink, background: '#fff' }}>
       <style>{`
+        @media (max-width: 1024px) {
+          .zdb-connect-grid { grid-template-columns: 1fr !important; }
+          .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+        }
         @media (max-width: 768px) {
           .zdb-section { padding-left: 20px !important; padding-right: 20px !important; }
           .zdb-hero-title { font-size: 32px !important; }
           .zdb-hero-sub { font-size: 15px !important; }
           .zdb-hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
-          .zdb-connect-grid { grid-template-columns: 1fr !important; }
+          .zdb-connect-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+          .zdb-section { padding-top: 48px !important; padding-bottom: 48px !important; }
           .zdb-compare-grid { grid-template-columns: 1fr !important; }
           .zdb-split { grid-template-columns: 1fr !important; }
           .zdb-price-grid { grid-template-columns: 1fr !important; }
@@ -61,7 +66,7 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <section className="zdb-section" style={{
-        padding: '56px 40px 72px',
+        padding: '56px 40px 64px',
         background: M.heroBg,
         position: 'relative',
         overflow: 'hidden',
@@ -105,7 +110,7 @@ export default function LandingPage() {
             <SessionReplayDemo />
           </div>
 
-          <div style={{ marginTop: 56 }}>
+          <div style={{ marginTop: 40 }}>
             <IntegrationStrip dark />
           </div>
         </div>

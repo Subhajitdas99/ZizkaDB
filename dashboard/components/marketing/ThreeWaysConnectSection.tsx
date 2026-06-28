@@ -17,21 +17,25 @@ const MCP_CONFIG = `{
 function CodeBlock({ children, lang }: { children: string; lang?: string }) {
   return (
     <pre style={{
-      margin: '12px 0 0',
-      padding: '14px 16px',
-      borderRadius: 10,
-      background: '#000',
-      border: '2px solid #000',
-      fontSize: 11.5,
-      lineHeight: 1.65,
+      margin: '10px 0 0',
+      padding: '10px 12px',
+      borderRadius: 8,
+      background: M.wash,
+      border: `1px solid ${M.line}`,
+      fontSize: 10,
+      lineHeight: 1.55,
       overflowX: 'auto',
-      color: '#fff',
-      fontFamily: 'JetBrains Mono, Menlo, monospace',
+      overflowY: 'auto',
+      maxHeight: 112,
+      color: '#000',
+      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
     }}>
       {lang && (
         <span style={{
-          display: 'block', fontSize: 10, color: M.blueLight, marginBottom: 8,
-          textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'Inter, sans-serif', fontWeight: 800,
+          display: 'block', fontSize: 9, color: M.blue, marginBottom: 6,
+          textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'Inter, sans-serif', fontWeight: 800,
         }}>
           {lang}
         </span>
@@ -43,136 +47,130 @@ function CodeBlock({ children, lang }: { children: string; lang?: string }) {
 
 function ConnectStep({ n, title, children, accent }: { n: number; title: string; children: ReactNode; accent: string }) {
   return (
-    <div style={{ display: 'flex', gap: 12, marginTop: 14 }}>
+    <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
       <div style={{
-        width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
-        background: '#fff', border: `2px solid ${accent}`,
+        width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+        background: '#fff', border: `1.5px solid ${accent}`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 11, fontWeight: 800, color: accent,
+        fontSize: 10, fontWeight: 800, color: accent,
       }}>{n}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#000', marginBottom: 4 }}>{title}</div>
-        <div style={{ fontSize: 12.5, color: '#000', lineHeight: 1.6, fontWeight: 500 }}>{children}</div>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#000', marginBottom: 2 }}>{title}</div>
+        <div style={{ fontSize: 11.5, color: '#000', lineHeight: 1.5, fontWeight: 500 }}>{children}</div>
       </div>
+    </div>
+  )
+}
+
+function ConnectCard({
+  label,
+  accent,
+  intro,
+  children,
+}: {
+  label: string
+  accent: string
+  intro: string
+  children: ReactNode
+}) {
+  return (
+    <div style={{
+      background: '#fff',
+      border: `1px solid ${M.line}`,
+      borderTop: `3px solid ${accent}`,
+      borderRadius: 14,
+      padding: '16px 16px 18px',
+    }}>
+      <div style={{
+        fontSize: 10, fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',
+        color: accent, marginBottom: 6,
+      }}>
+        {label}
+      </div>
+      <p style={{ fontSize: 12, color: '#000', margin: '0 0 2px', lineHeight: 1.5, fontWeight: 500 }}>
+        {intro}
+      </p>
+      {children}
     </div>
   )
 }
 
 export function ThreeWaysConnectSection() {
   return (
-    <section id="how" className="zdb-section" style={{ padding: '88px 40px', background: M.wash }}>
-      <div style={container(1060)}>
+    <section id="how" className="zdb-section" style={{ padding: '56px 40px 64px', background: '#fff' }}>
+      <div style={container(960)}>
         <p style={sectionTitle}>How it works</p>
-        <h2 style={h2}>Three ways to connect</h2>
-        <p style={lead}>
-          Managed cloud, MCP in Claude / Cursor / OpenAI, or self-hosted on your infrastructure — same SDKs and API.
+        <h2 style={{ ...h2, fontSize: 28, marginBottom: 8 }}>Three ways to connect</h2>
+        <p style={{ ...lead, fontSize: 15, marginBottom: 28, maxWidth: 520 }}>
+          Managed cloud, MCP in Claude / Cursor / OpenAI, or self-hosted — same SDKs and API.
         </p>
 
-        <div className="zdb-connect-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 18 }}>
-          {/* 1 — Managed cloud */}
-          <div style={{
-            background: '#fff', border: `2px solid ${M.violet}`,
-            borderRadius: 18, padding: '24px 22px', display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: M.violet, marginBottom: 8,
-            }}>
-              1 · Managed cloud
-            </div>
-            <p style={{ fontSize: 13, color: '#000', margin: '0 0 4px', lineHeight: 1.55, fontWeight: 500 }}>
-              We run Postgres, vectors, and the dashboard at{' '}
-              <strong style={{ color: '#000' }}>db.zizka.ai</strong>. Sign up, create an agent, copy your API key.
-            </p>
+        <div
+          className="zdb-connect-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 14,
+            alignItems: 'start',
+          }}
+        >
+          <ConnectCard
+            label="1 · Managed cloud"
+            accent={M.violet}
+            intro="We run the stack at db.zizka.ai. Sign up, create an agent, copy your API key."
+          >
             <ConnectStep n={1} title="Create account" accent={M.violet}>
-              <Link href="/signup" style={{ color: M.violet, fontWeight: 700 }}>db.zizka.ai/signup</Link>
-              {' '}— email OTP, no card required.
+              <Link href="/signup" style={{ color: M.violet, fontWeight: 700 }}>Sign up</Link>
+              {' '}— email OTP, no card.
             </ConnectStep>
-            <ConnectStep n={2} title="Create agent & API key" accent={M.violet}>
-              Open{' '}
-              <Link href="/dashboard" style={{ color: M.violet, fontWeight: 700 }}>Dashboard → Create agent</Link>
-              {' '}and copy your key (<code style={{ fontFamily: 'monospace', fontSize: 11, color: '#000' }}>zizkadb_live_…</code>).
-            </ConnectStep>
-            <ConnectStep n={3} title="Log from your code" accent={M.violet}>
-              Same agent name in every log call. Python SDK example below.
+            <ConnectStep n={2} title="Create agent & key" accent={M.violet}>
+              <Link href="/dashboard" style={{ color: M.violet, fontWeight: 700 }}>Dashboard</Link>
+              {' '}→ create agent → copy <code style={{ fontFamily: 'monospace', fontSize: 10 }}>zizkadb_live_…</code>
             </ConnectStep>
             <CodeBlock lang="python">{`pip install zizkadb-sdk
-
 from zizkadb import ZizkaDB
 db = ZizkaDB("zizkadb_live_xxxx")
 await db.log(agent="my-bot", event="started", data={})`}</CodeBlock>
-          </div>
+          </ConnectCard>
 
-          {/* 2 — MCP */}
-          <div style={{
-            background: '#fff', border: `2px solid ${M.blue}`,
-            borderRadius: 18, padding: '24px 22px', display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: M.blue, marginBottom: 8,
-            }}>
-              2 · MCP
-            </div>
-            <p style={{ fontSize: 13, color: '#000', margin: '0 0 4px', lineHeight: 1.55, fontWeight: 500 }}>
-              Plug ZizkaDB into <strong style={{ color: '#000' }}>Claude Desktop</strong>,{' '}
-              <strong style={{ color: '#000' }}>Cursor</strong>, or <strong style={{ color: '#000' }}>OpenAI</strong> MCP clients. No app refactor.
-            </p>
-            <ConnectStep n={1} title="Install the MCP server" accent={M.blue}>
-              Requires <code style={{ fontFamily: 'monospace', fontSize: 11, color: '#000' }}>uvx</code>{' '}
-              (<a href="https://docs.astral.sh/uv/" target="_blank" rel="noreferrer" style={{ color: M.blue, fontWeight: 700 }}>uv</a>) or{' '}
-              <code style={{ fontFamily: 'monospace', fontSize: 11, color: '#000' }}>pip install zizkadb-mcp</code>.
+          <ConnectCard
+            label="2 · MCP"
+            accent={M.blue}
+            intro="Plug into Claude Desktop, Cursor, or OpenAI MCP. No app refactor."
+          >
+            <ConnectStep n={1} title="Install" accent={M.blue}>
+              <code style={{ fontFamily: 'monospace', fontSize: 10 }}>pip install zizkadb-mcp</code> or{' '}
+              <code style={{ fontFamily: 'monospace', fontSize: 10 }}>uvx zizkadb-mcp</code>
             </ConnectStep>
-            <ConnectStep n={2} title="Add config & reload" accent={M.blue}>
-              Paste into <code style={{ fontFamily: 'monospace', fontSize: 11, color: '#000' }}>~/.cursor/mcp.json</code> (Cursor), Claude Desktop config, or your OpenAI MCP settings. Reload MCP servers.
+            <ConnectStep n={2} title="Paste & reload" accent={M.blue}>
+              Add to Cursor <code style={{ fontFamily: 'monospace', fontSize: 10 }}>mcp.json</code> or Claude Desktop config.
             </ConnectStep>
             <CodeBlock lang="json">{MCP_CONFIG}</CodeBlock>
-            <p style={{ fontSize: 11, color: '#000', margin: '12px 0 0', lineHeight: 1.5, fontWeight: 600 }}>
-              Claude: <code style={{ fontFamily: 'monospace', fontSize: 10 }}>~/Library/Application Support/Claude/claude_desktop_config.json</code>
-            </p>
-          </div>
+          </ConnectCard>
 
-          {/* 3 — Self-hosted */}
-          <div style={{
-            background: '#fff', border: `2px solid ${M.teal}`,
-            borderRadius: 18, padding: '24px 22px', display: 'flex', flexDirection: 'column',
-          }}>
-            <div style={{
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-              color: M.teal, marginBottom: 8,
-            }}>
-              3 · Self-hosted
-            </div>
-            <p style={{ fontSize: 13, color: '#000', margin: '0 0 4px', lineHeight: 1.55, fontWeight: 500 }}>
-              Run the full stack on your laptop or VPS — AGPL, free forever. Same SDKs and MCP; point at your own API URL.
-            </p>
+          <ConnectCard
+            label="3 · Self-hosted"
+            accent={M.teal}
+            intro="Run on your laptop or VPS — AGPL, free forever. Point SDKs at your API URL."
+          >
             <ConnectStep n={1} title="Clone & start" accent={M.teal}>
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ color: M.teal, fontWeight: 700 }}>github.com/Zizka-ai/ZizkaDB</a>
-              {' '}→ <code style={{ fontFamily: 'monospace', fontSize: 11, color: '#000' }}>bash scripts/setup-local.sh</code>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ color: M.teal, fontWeight: 700 }}>GitHub</a>
+              {' '}→ <code style={{ fontFamily: 'monospace', fontSize: 10 }}>bash scripts/setup-local.sh</code>
             </ConnectStep>
-            <ConnectStep n={2} title="Install SDK" accent={M.teal}>
-              Python or TypeScript — same API as managed cloud, different host.
+            <ConnectStep n={2} title="SDK" accent={M.teal}>
+              <code style={{ fontFamily: 'monospace', fontSize: 10 }}>pip install zizkadb-sdk</code>
+              {' · '}
+              <code style={{ fontFamily: 'monospace', fontSize: 10 }}>npm i zizkadb-sdk</code>
             </ConnectStep>
-            <CodeBlock lang="python">{`pip install zizkadb-sdk
-
-from zizkadb import ZizkaDB
+            <CodeBlock lang="python">{`from zizkadb import ZizkaDB
 db = ZizkaDB(host="http://localhost:8000")
 await db.log(agent="my-bot", event="started", data={})`}</CodeBlock>
-            <CodeBlock lang="typescript">{`npm install zizkadb-sdk
-
-import { ZizkaDB } from 'zizkadb-sdk'
-const db = new ZizkaDB({ host: 'http://localhost:8000' })
-await db.log({ agent: 'my-bot', event: 'started', data: {} })`}</CodeBlock>
-            <p style={{ fontSize: 12, margin: '14px 0 0', fontWeight: 600 }}>
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ color: M.teal, fontWeight: 700 }}>
-                View on GitHub →
-              </a>
+            <p style={{ fontSize: 11, margin: '10px 0 0', fontWeight: 700 }}>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={{ color: M.teal }}>GitHub →</a>
               {' · '}
-              <Link href="/docs" style={{ color: '#000', fontWeight: 700 }}>
-                Full docs
-              </Link>
+              <Link href="/docs" style={{ color: '#000' }}>Docs</Link>
             </p>
-          </div>
+          </ConnectCard>
         </div>
       </div>
     </section>
