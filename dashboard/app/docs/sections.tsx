@@ -89,6 +89,31 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
   return (
     <div>
       <h1 style={S.h1}>Documentation</h1>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+        {[
+          { label: 'Python SDK', pkg: 'zizkadb-sdk' },
+          { label: 'MCP', pkg: 'zizkadb-mcp' },
+          { label: 'LangChain', pkg: 'zizkadb-langchain' },
+          { label: 'CrewAI', pkg: 'zizkadb-crewai' },
+        ].map(({ label, pkg }) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <a key={pkg} href={`https://pypi.org/project/${pkg}/`} target="_blank" rel="noreferrer">
+            <img
+              src={`https://img.shields.io/pypi/v/${pkg}?label=${encodeURIComponent(label)}`}
+              alt={`${label} on PyPI`}
+              style={{ display: 'block', height: 20 }}
+            />
+          </a>
+        ))}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <a href="https://www.npmjs.com/package/zizkadb-sdk" target="_blank" rel="noreferrer">
+          <img
+            src="https://img.shields.io/npm/v/zizkadb-sdk?label=TypeScript%20SDK"
+            alt="TypeScript SDK on npm"
+            style={{ display: 'block', height: 20 }}
+          />
+        </a>
+      </div>
       <p style={S.lead}>
         Complete guides for every way to integrate ZizkaDB — managed cloud or self-hosted.
         Pick the path that matches your stack.
@@ -156,12 +181,14 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
       <h3 style={{ ...S.h3, marginTop: 40 }}>Path B — Self-host (open source)</h3>
       <p style={S.p}>Run Docker on your laptop or VPS. Full guide in <button type="button" onClick={() => onNavigate('selfhost')} style={{ background: 'none', border: 'none', color: '#1e40af', fontWeight: 500, cursor: 'pointer', padding: 0, fontSize: 'inherit' }}>Self-host →</button>.</p>
       <Step n={1} title="Start API + dashboard">
-        <Code lang="bash">{`docker compose -f infra/docker-compose.yml up -d
-cd dashboard && NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev`}</Code>
+        <Code lang="bash">{`git clone https://github.com/Zizka-ai/ZizkaDB
+cd ZizkaDB
+bash scripts/setup-local.sh`}</Code>
+        <p style={S.p}>Starts API + dashboard on port <strong>3001</strong> (PM2). API at <code style={{ fontFamily: 'monospace' }}>http://localhost:8000</code>.</p>
       </Step>
       <Step n={2} title="Open dashboard (no email)">
         <p style={S.p}>
-          Go to <code style={{ fontFamily: 'monospace' }}>http://localhost:3000/login</code> → click{' '}
+          Go to <code style={{ fontFamily: 'monospace' }}>http://localhost:3001/login</code> → click{' '}
           <strong>Open my dashboard →</strong>. This is your local workspace.
         </p>
       </Step>
@@ -965,8 +992,7 @@ async def run(user_input: str):
 
       <h2 style={S.h2}>LangChain</h2>
       <p style={S.p}>
-        Install <code style={{ fontFamily: 'monospace' }}>zizkadb-langchain</code> (monorepo:{' '}
-        <code style={{ fontFamily: 'monospace' }}>pip install -e integrations/langchain</code>).
+        Install <code style={{ fontFamily: 'monospace' }}>zizkadb-langchain</code> from PyPI.
         Pass <code style={{ fontFamily: 'monospace' }}>ZizkaDBCallbackHandler</code> in{' '}
         <code style={{ fontFamily: 'monospace' }}>config={'{'}&quot;callbacks&quot;: [handler]{'}'}</code>.
       </p>
@@ -975,7 +1001,7 @@ async def run(user_input: str):
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
 from zizkadb import ZizkaDB
-from zizkadb.integrations.langchain import ZizkaDBCallbackHandler
+from zizkadb_langchain import ZizkaDBCallbackHandler
 
 async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
@@ -990,7 +1016,7 @@ async with ZizkaDB("zizkadb_live_...") as db:
       <Code lang="python">{`pip install zizkadb-sdk zizkadb-crewai crewai
 
 from zizkadb import ZizkaDB
-from zizkadb.integrations.crewai import ZizkaDBCrewLogger
+from zizkadb_crewai import ZizkaDBCrewLogger
 
 async with ZizkaDB("zizkadb_live_...") as db:
     logger = ZizkaDBCrewLogger(db, agent="research-crew")
