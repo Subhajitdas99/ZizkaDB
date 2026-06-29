@@ -334,4 +334,4 @@ You do not need permission to open a PR. You **do** need alignment for large des
 
 Contributors are credited in release notes and, with permission, on the project site. Thank you for helping build operational infrastructure for AI agents.
 
-**Questions?** [Community board](https://db.zizka.ai/community) · [GitHub Discussions/Issues](https://github.com/Zizka-ai/ZizkaDB/issues) · hello@zizka.ai
+**Questions?** [Community board](https://db.zizka.ai/community) · [GitHub Discussions/Issues](https://github.com/Zizka-ai/ZizkaDB/issues) · founder@zizka.ai

@@ -9,7 +9,7 @@ description = "MCP server for ZizkaDB — give any AI agent persistent memory an
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "Zizka AI", email = "hello@zizka.ai" }]
+authors = [{ name = "Zizka AI", email = "founder@zizka.ai" }]
 keywords = ["mcp", "ai", "agents", "memory", "observability", "zizkadb", "claude", "cursor"]
 classifiers = [
     "Development Status :: 3 - Alpha",

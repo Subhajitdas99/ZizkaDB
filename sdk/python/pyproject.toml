@@ -9,7 +9,7 @@ description = "ZizkaDB tells you when your agent stops behaving like itself. Cau
 readme = "README.md"
 license = { text = "AGPL-3.0" }
 requires-python = ">=3.10"
-authors = [{ name = "Zizka AI", email = "hello@zizka.ai" }]
+authors = [{ name = "Zizka AI", email = "founder@zizka.ai" }]
 keywords = ["ai", "agents", "database", "memory", "llm", "observability"]
 classifiers = [
     "Development Status :: 3 - Alpha",
