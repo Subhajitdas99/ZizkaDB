@@ -75,8 +75,8 @@ export default function SettingsPage() {
   return (
     <div className="p-8 max-w-2xl mx-auto">
       <h1 className="text-white font-semibold text-xl mb-1">Settings</h1>
-      <p className="text-sm mb-4" style={{ color: '#737373' }}>Embeddings and account-wide overview.</p>
-      <p className="text-xs mb-8 rounded-lg px-3 py-2" style={{ color: '#a3a3a3', background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
+      <p className="text-sm mb-4" style={{ color: '#e5e5e5' }}>Embeddings and account-wide overview.</p>
+      <p className="text-xs mb-8 rounded-lg px-3 py-2" style={{ color: '#e5e5e5', background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
         API keys belong to an agent.{' '}
         <Link href="/dashboard" className="underline" style={{ color: '#22c55e' }}>
           Create an agent
@@ -87,7 +87,7 @@ export default function SettingsPage() {
       {/* Embeddings */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Embeddings</h2>
-        <p className="text-xs mb-4" style={{ color: '#737373' }}>
+        <p className="text-xs mb-4" style={{ color: '#e5e5e5' }}>
           Choose the model used for semantic search and context injection (like Pinecone&apos;s embedding choice).
           All models use 1536 dimensions. New events use this model; existing vectors are not re-indexed automatically.
         </p>
@@ -118,7 +118,7 @@ export default function SettingsPage() {
               }
             }}
           >
-            <label className="block text-xs mb-1" style={{ color: '#737373' }}>Model</label>
+            <label className="block text-xs mb-1" style={{ color: '#e5e5e5' }}>Model</label>
             <select
               value={embModel}
               onChange={(e) => setEmbModel(e.target.value)}
@@ -141,7 +141,7 @@ export default function SettingsPage() {
 
             {!usePlatformKey && (
               <>
-                <label className="block text-xs mb-1" style={{ color: '#737373' }}>Your OpenAI API key</label>
+                <label className="block text-xs mb-1" style={{ color: '#e5e5e5' }}>Your OpenAI API key</label>
                 <input
                   type="password"
                   value={customApiKey}
@@ -175,7 +175,7 @@ export default function SettingsPage() {
       {/* Connection test */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Test event logging</h2>
-        <p className="text-xs mb-4" style={{ color: '#737373' }}>
+        <p className="text-xs mb-4" style={{ color: '#e5e5e5' }}>
           Logs to agent <span className="font-mono">dashboard-connection-test</span> (not your app agent).
           To test a specific agent, open that agent and click <strong>Test agent</strong>.
         </p>
@@ -212,7 +212,7 @@ export default function SettingsPage() {
       {/* Tenant-wide key (multi-agent apps) */}
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Tenant-wide API key</h2>
-        <p className="text-xs mb-3" style={{ color: '#737373' }}>
+        <p className="text-xs mb-3" style={{ color: '#e5e5e5' }}>
           For apps that log to <strong>many agent names</strong> with one key (e.g. one key →{' '}
           <span className="font-mono">conv-user1</span>, <span className="font-mono">conv-user2</span>).
           Most users should create per-agent keys on the{' '}
@@ -229,7 +229,7 @@ export default function SettingsPage() {
                 {tenantNewKey}
               </code>
               <button type="button" onClick={() => { navigator.clipboard.writeText(tenantNewKey); setCopied(true); setTimeout(() => setCopied(false), 2000) }} className="p-1.5 rounded" style={{ background: '#1a1a1a' }}>
-                {copied ? <Check size={14} style={{ color: '#22c55e' }} /> : <Copy size={14} style={{ color: '#737373' }} />}
+                {copied ? <Check size={14} style={{ color: '#22c55e' }} /> : <Copy size={14} style={{ color: '#e5e5e5' }} />}
               </button>
             </div>
           </div>
@@ -276,14 +276,14 @@ export default function SettingsPage() {
       {/* Key list (overview) */}
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #1f1f1f' }}>
         <div className="px-5 py-3 border-b" style={{ background: '#111', borderColor: '#1f1f1f' }}>
-          <span className="text-xs font-medium" style={{ color: '#737373' }}>ALL API KEYS (OVERVIEW)</span>
+          <span className="text-xs font-medium" style={{ color: '#e5e5e5' }}>ALL API KEYS (OVERVIEW)</span>
         </div>
         {loading ? (
           <div className="p-5 space-y-2">
             {[1,2].map(i => <div key={i} className="h-10 rounded animate-pulse" style={{ background: '#1a1a1a' }} />)}
           </div>
         ) : keys.length === 0 ? (
-          <div className="p-8 text-center text-sm" style={{ color: '#737373', background: '#111' }}>
+          <div className="p-8 text-center text-sm" style={{ color: '#e5e5e5', background: '#111' }}>
             No API keys yet. Create an agent on the dashboard to get one.
           </div>
         ) : (
@@ -295,21 +295,21 @@ export default function SettingsPage() {
                 style={{ borderTop: i > 0 ? '1px solid #1a1a1a' : 'none' }}
               >
                 <div className="flex items-center gap-3">
-                  <Key size={14} style={{ color: '#525252' }} />
+                  <Key size={14} style={{ color: '#e5e5e5' }} />
                   <div>
                     <div className="text-sm text-white">{key.name ?? 'Unnamed'}</div>
-                    <div className="text-xs font-mono mt-0.5" style={{ color: '#525252' }}>
+                    <div className="text-xs font-mono mt-0.5" style={{ color: '#e5e5e5' }}>
                       {key.prefix}...
                       {key.agent_id ? (
-                        <span className="ml-2" style={{ color: '#737373' }}>· agent: {key.agent_id}</span>
+                        <span className="ml-2" style={{ color: '#e5e5e5' }}>· agent: {key.agent_id}</span>
                       ) : (
-                        <span className="ml-2" style={{ color: '#737373' }}>· tenant-wide (legacy)</span>
+                        <span className="ml-2" style={{ color: '#e5e5e5' }}>· tenant-wide (legacy)</span>
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="text-xs" style={{ color: '#525252' }}>
+                  <div className="text-xs" style={{ color: '#e5e5e5' }}>
                     {key.last_used
                       ? `Last used ${new Date(key.last_used).toLocaleDateString()}`
                       : 'Never used'}

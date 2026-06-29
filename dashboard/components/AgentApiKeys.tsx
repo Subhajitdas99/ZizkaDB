@@ -92,7 +92,7 @@ export function AgentApiKeys({
       >
         <div>
           <h2 className="text-sm font-medium text-white">API keys</h2>
-          <p className="text-xs mt-0.5" style={{ color: '#737373' }}>
+          <p className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>
             Keys for this agent only. Set as <span className="font-mono">ZIZKADB_API_KEY</span> or{' '}
             <span className="font-mono">AGENTDB_API_KEY</span> in your app.
           </p>
@@ -161,7 +161,7 @@ export function AgentApiKeys({
               {copied ? (
                 <Check size={14} style={{ color: '#22c55e' }} />
               ) : (
-                <Copy size={14} style={{ color: '#737373' }} />
+                <Copy size={14} style={{ color: '#e5e5e5' }} />
               )}
             </button>
           </div>
@@ -169,7 +169,7 @@ export function AgentApiKeys({
             type="button"
             onClick={() => setNewKey(null)}
             className="text-xs mt-2"
-            style={{ color: '#525252' }}
+            style={{ color: '#e5e5e5' }}
           >
             Dismiss
           </button>
@@ -184,7 +184,7 @@ export function AgentApiKeys({
             ))}
           </div>
         ) : keys.length === 0 ? (
-          <div className="p-6 text-center text-sm" style={{ color: '#737373' }}>
+          <div className="p-6 text-center text-sm" style={{ color: '#e5e5e5' }}>
             No keys yet. Create one to connect your app to this agent.
           </div>
         ) : (
@@ -195,16 +195,16 @@ export function AgentApiKeys({
               style={{ borderTop: i > 0 ? '1px solid #1a1a1a' : 'none' }}
             >
               <div className="flex items-center gap-3 min-w-0">
-                <Key size={14} style={{ color: '#525252' }} className="shrink-0" />
+                <Key size={14} style={{ color: '#e5e5e5' }} className="shrink-0" />
                 <div className="min-w-0">
                   <div className="text-sm text-white truncate">{key.name ?? 'Unnamed'}</div>
-                  <div className="text-xs font-mono mt-0.5" style={{ color: '#525252' }}>
+                  <div className="text-xs font-mono mt-0.5" style={{ color: '#e5e5e5' }}>
                     {key.prefix}...
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0">
-                <span className="text-xs" style={{ color: '#525252' }}>
+                <span className="text-xs" style={{ color: '#e5e5e5' }}>
                   {key.last_used
                     ? `Used ${new Date(key.last_used).toLocaleDateString()}`
                     : 'Never used'}

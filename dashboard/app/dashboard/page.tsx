@@ -118,7 +118,7 @@ export default function DashboardPage() {
       <PageShell>
         <div className="rounded-xl p-8 text-center" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
           <p className="text-white font-medium mb-2">Could not load dashboard</p>
-          <p className="text-sm mb-4" style={{ color: '#737373' }}>{error}</p>
+          <p className="text-sm mb-4" style={{ color: '#e5e5e5' }}>{error}</p>
           <button
             type="button"
             onClick={() => router.replace('/login')}
@@ -137,12 +137,12 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-white font-semibold text-xl">Agents</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#737373' }}>
+          <p className="text-sm mt-0.5" style={{ color: '#e5e5e5' }}>
             {agents.length} agent{agents.length !== 1 ? 's' : ''} tracked · updates every 10s
           </p>
         </div>
         {lastSync && (
-          <div className="flex items-center gap-2 text-xs" style={{ color: '#525252' }}>
+          <div className="flex items-center gap-2 text-xs" style={{ color: '#e5e5e5' }}>
             <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
             Live · synced {formatDistanceToNow(lastSync, { addSuffix: true })}
           </div>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
 
       <div className="rounded-xl p-5 mb-6" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
         <h2 className="text-sm font-medium text-white mb-1">Create agent</h2>
-        <p className="text-xs mb-3" style={{ color: '#737373' }}>
+        <p className="text-xs mb-3" style={{ color: '#e5e5e5' }}>
           Creates an agent and its first API key (shown once). Use the key as{' '}
           <span className="font-mono">ZIZKADB_API_KEY</span> or{' '}
           <span className="font-mono">AGENTDB_API_KEY</span> in your app.
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                 {copied ? (
                   <Check size={14} style={{ color: '#22c55e' }} />
                 ) : (
-                  <Copy size={14} style={{ color: '#737373' }} />
+                  <Copy size={14} style={{ color: '#e5e5e5' }} />
                 )}
               </button>
             </div>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
               type="button"
               onClick={() => { setNewAgentKey(null); setNewAgentName(null) }}
               className="text-xs mt-2"
-              style={{ color: '#525252' }}
+              style={{ color: '#e5e5e5' }}
             >
               I&apos;ve saved my key — dismiss
             </button>
@@ -274,7 +274,7 @@ function AgentCard({
                   <span className="w-1.5 h-1.5 rounded-full inline-block shrink-0"
                         style={{ background: '#22c55e' }} />
                 )}
-                <span className="text-xs" style={{ color: '#737373' }}>
+                <span className="text-xs" style={{ color: '#e5e5e5' }}>
                   Active {lastSeen}
                 </span>
               </div>
@@ -286,15 +286,15 @@ function AgentCard({
               <div className="text-white font-semibold font-mono">
                 {agent.event_count.toLocaleString()}
               </div>
-            <div className="text-xs" style={{ color: '#737373' }}>events</div>
+            <div className="text-xs" style={{ color: '#e5e5e5' }}>events</div>
           </div>
           <div>
             <div className="text-white font-semibold font-mono">
               {(agent.api_key_count ?? 0).toLocaleString()}
             </div>
-            <div className="text-xs" style={{ color: '#737373' }}>keys</div>
+            <div className="text-xs" style={{ color: '#e5e5e5' }}>keys</div>
           </div>
-          <span style={{ color: '#525252' }}>→</span>
+          <span style={{ color: '#e5e5e5' }}>→</span>
           </div>
         </div>
       </button>

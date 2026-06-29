@@ -30,17 +30,17 @@ export function ConnectionStatus() {
   }, [])
 
   const dot =
-    health === 'ok' ? '#22c55e' : health === 'error' ? '#ef4444' : '#737373'
+    health === 'ok' ? '#22c55e' : health === 'error' ? '#ef4444' : '#e5e5e5'
 
   return (
     <div
       className="mx-8 mt-6 mb-0 rounded-xl px-4 py-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs"
       style={{ background: '#111', border: '1px solid #1f1f1f' }}
     >
-      <span className="flex items-center gap-2" style={{ color: '#a3a3a3' }}>
+      <span className="flex items-center gap-2" style={{ color: '#e5e5e5' }}>
         <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: dot }} />
         API {health === 'ok' ? 'connected' : health === 'error' ? 'unreachable' : 'checking…'}
-        <code style={{ fontFamily: 'monospace', color: '#737373' }}>{apiLabel}</code>
+        <code style={{ fontFamily: 'monospace', color: '#e5e5e5' }}>{apiLabel}</code>
       </span>
       {IS_DEV && (
         <span style={{ color: '#22c55e' }}>Self-hosted · local dev tenant</span>
@@ -97,7 +97,7 @@ asyncio.run(main())"`
   return (
     <div className="rounded-xl p-8" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
       <h3 className="text-white font-medium mb-1">Getting started</h3>
-      <p className="text-sm mb-6" style={{ color: '#737373' }}>
+      <p className="text-sm mb-6" style={{ color: '#e5e5e5' }}>
         Three steps to see your first agent in the dashboard.
       </p>
       <ol className="space-y-4 mb-6 text-left">
@@ -111,7 +111,7 @@ asyncio.run(main())"`
             </span>
             <div>
               <div className="text-sm font-medium text-white">{step.title}</div>
-              <div className="text-xs mt-0.5" style={{ color: '#737373' }}>{step.desc}</div>
+              <div className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>{step.desc}</div>
             </div>
           </li>
         ))}
@@ -122,9 +122,9 @@ asyncio.run(main())"`
       >
         {snippet}
       </pre>
-      <p className="text-xs mt-4" style={{ color: '#525252' }}>
+      <p className="text-xs mt-4" style={{ color: '#e5e5e5' }}>
         Dashboard empty but SDK works? Your SDK and login must share the same tenant — see{' '}
-        <a href="/docs" style={{ color: '#737373' }}>Self-host docs</a>.
+        <a href="/docs" style={{ color: '#e5e5e5' }}>Self-host docs</a>.
       </p>
     </div>
   )

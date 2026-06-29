@@ -43,7 +43,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 href={href}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition"
                 style={{
-                  color: active ? '#fff' : '#737373',
+                  color: active ? '#fff' : '#e5e5e5',
                   background: active ? '#1a1a1a' : 'transparent',
                 }}
               >
@@ -58,9 +58,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           <button
             onClick={signOut}
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm w-full transition"
-            style={{ color: '#737373' }}
+            style={{ color: '#e5e5e5' }}
             onMouseEnter={e => (e.currentTarget.style.color = '#e5e5e5')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#737373')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#e5e5e5')}
           >
             <LogOut size={15} />
             Sign out
@@ -74,7 +74,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <BrandLogo variant="mark" showWordmark={false} href="/dashboard" />
             <span className="text-white font-semibold text-sm">ZizkaDB</span>
           </div>
-          <button onClick={signOut} style={{ color: '#737373' }}>
+          <button onClick={signOut} style={{ color: '#e5e5e5' }}>
             <LogOut size={16} />
           </button>
         </div>
@@ -92,7 +92,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className="flex-1 flex flex-col items-center gap-1 py-3 text-xs"
-                style={{ color: active ? '#22c55e' : '#737373' }}
+                style={{ color: active ? '#22c55e' : '#e5e5e5' }}
               >
                 <Icon size={18} />
                 {label}

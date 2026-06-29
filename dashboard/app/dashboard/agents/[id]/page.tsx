@@ -364,7 +364,7 @@ export default function AgentPage() {
             className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition"
             style={{
               background: tab === key ? '#1a1a1a' : 'transparent',
-              color:      tab === key ? '#e5e5e5' : '#525252',
+              color:      tab === key ? '#e5e5e5' : '#e5e5e5',
               border:     tab === key ? '1px solid #2a2a2a' : '1px solid transparent',
             }}
           >
@@ -399,7 +399,7 @@ export default function AgentPage() {
             <div className="flex gap-2 mb-4">
               <div className="flex-1 flex items-center gap-2 rounded-lg px-3"
                    style={{ background: '#111', border: '1px solid #1f1f1f' }}>
-                <Search size={13} style={{ color: '#525252' }} />
+                <Search size={13} style={{ color: '#e5e5e5' }} />
                 <input
                   className="flex-1 bg-transparent py-2.5 text-sm outline-none"
                   style={{ color: '#e5e5e5' }}
@@ -417,7 +417,7 @@ export default function AgentPage() {
               </div>
               <button onClick={refresh}
                       className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition"
-                      style={{ background: '#111', color: '#737373', border: '1px solid #1f1f1f' }}>
+                      style={{ background: '#111', color: '#e5e5e5', border: '1px solid #1f1f1f' }}>
                 <RefreshCw size={12} className={refreshing ? 'animate-spin' : ''} />
                 Refresh
               </button>
@@ -440,10 +440,10 @@ export default function AgentPage() {
             )}
 
             {searchResults && (
-              <div className="flex items-center justify-between mb-3 text-xs" style={{ color: '#737373' }}>
+              <div className="flex items-center justify-between mb-3 text-xs" style={{ color: '#e5e5e5' }}>
                 <span>{searchResults.length} semantic results for "{searchQ}"</span>
                 <button onClick={() => { setSearchResults(null); setSearchQ('') }}
-                        style={{ color: '#525252' }}>Clear</button>
+                        style={{ color: '#e5e5e5' }}>Clear</button>
               </div>
             )}
 
@@ -459,13 +459,13 @@ export default function AgentPage() {
             {!searchResults && hasMore && (
               <button onClick={loadMore}
                       className="w-full mt-4 py-2.5 rounded-lg text-sm transition"
-                      style={{ background: '#111', color: '#737373', border: '1px solid #1f1f1f' }}>
+                      style={{ background: '#111', color: '#e5e5e5', border: '1px solid #1f1f1f' }}>
                 Load more
               </button>
             )}
 
             {displayEvents.length === 0 && (
-              <div className="text-center py-12 text-sm" style={{ color: '#525252' }}>
+              <div className="text-center py-12 text-sm" style={{ color: '#e5e5e5' }}>
                 No events found.
               </div>
             )}
@@ -489,7 +489,7 @@ export default function AgentPage() {
 
                 {panelTab === 'why' && (
                   whyLoading ? (
-                    <div className="text-sm animate-pulse py-4 text-center" style={{ color: '#737373' }}>
+                    <div className="text-sm animate-pulse py-4 text-center" style={{ color: '#e5e5e5' }}>
                       Tracing causal chain…
                     </div>
                   ) : whyChain ? (
@@ -507,13 +507,13 @@ export default function AgentPage() {
         <div className="flex gap-4">
           {/* Session list */}
           <div className="w-72 shrink-0">
-            <h2 className="text-xs font-medium mb-3" style={{ color: '#737373' }}>
+            <h2 className="text-xs font-medium mb-3" style={{ color: '#e5e5e5' }}>
               {sessions.length} session{sessions.length !== 1 ? 's' : ''}
             </h2>
             {sessLoading ? (
               <Skeleton rows={5} />
             ) : sessions.length === 0 ? (
-              <div className="text-sm py-8 text-center" style={{ color: '#525252' }}>
+              <div className="text-sm py-8 text-center" style={{ color: '#e5e5e5' }}>
                 No sessions recorded yet.<br />
                 <span className="text-xs">Pass a <code className="text-green-400">session_id</code> when logging events.</span>
               </div>
@@ -527,14 +527,14 @@ export default function AgentPage() {
                             background: selSession?.session_id === s.session_id ? '#0f1f0f' : '#111',
                             border: `1px solid ${selSession?.session_id === s.session_id ? '#22c55e40' : '#1f1f1f'}`,
                           }}>
-                    <div className="text-xs font-mono mb-1 truncate" style={{ color: '#a3a3a3' }}>
+                    <div className="text-xs font-mono mb-1 truncate" style={{ color: '#e5e5e5' }}>
                       {s.session_id.slice(0, 20)}…
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs" style={{ color: '#525252' }}>
+                      <span className="text-xs" style={{ color: '#e5e5e5' }}>
                         {s.event_count} events · {s.event_types} types
                       </span>
-                      <span className="text-xs" style={{ color: '#525252' }}>
+                      <span className="text-xs" style={{ color: '#e5e5e5' }}>
                         {s.duration_seconds > 0
                           ? formatDuration(intervalToDuration({ start: 0, end: s.duration_seconds * 1000 }), { format: ['hours', 'minutes', 'seconds'] }).replace(' seconds', 's').replace(' minutes', 'm').replace(' hours', 'h') || '<1s'
                           : '<1s'}
@@ -548,12 +548,12 @@ export default function AgentPage() {
                         </span>
                       ))}
                       {s.types.length > 4 && (
-                        <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1a1a1a', color: '#525252' }}>
+                        <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1a1a1a', color: '#e5e5e5' }}>
                           +{s.types.length - 4}
                         </span>
                       )}
                     </div>
-                    <div className="text-xs mt-1.5" style={{ color: '#404040' }}>
+                    <div className="text-xs mt-1.5" style={{ color: '#e5e5e5' }}>
                       {format(new Date(s.started_at), 'MMM d, HH:mm:ss')}
                     </div>
                   </button>
@@ -565,7 +565,7 @@ export default function AgentPage() {
           {/* Session detail */}
           <div className="flex-1 min-w-0">
             {!selSession ? (
-              <div className="flex flex-col items-center justify-center h-64" style={{ color: '#525252' }}>
+              <div className="flex flex-col items-center justify-center h-64" style={{ color: '#e5e5e5' }}>
                 <Layers size={32} className="mb-3 opacity-30" />
                 <p className="text-sm">Select a session to inspect its events</p>
               </div>
@@ -576,7 +576,7 @@ export default function AgentPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-sm font-medium text-white font-mono">{selSession.session_id}</h2>
-                    <p className="text-xs mt-0.5" style={{ color: '#525252' }}>
+                    <p className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>
                       {format(new Date(selSession.started_at), 'MMM d yyyy, HH:mm:ss')}
                       {' → '}
                       {format(new Date(selSession.ended_at), 'HH:mm:ss')}
@@ -586,7 +586,7 @@ export default function AgentPage() {
                     <div className="text-xs px-3 py-1.5 rounded-lg" style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}>
                       {(sessDiff as { new_event_types?: string[] }).new_event_types?.length
                         ? <span style={{ color: '#22c55e' }}>{(sessDiff as { new_event_types: string[] }).new_event_types.length} new event type{(sessDiff as { new_event_types: string[] }).new_event_types.length !== 1 ? 's' : ''}</span>
-                        : <span style={{ color: '#525252' }}>No new event types</span>}
+                        : <span style={{ color: '#e5e5e5' }}>No new event types</span>}
                     </div>
                   )}
                 </div>
@@ -613,7 +613,7 @@ export default function AgentPage() {
       {/* ══════════════════ TIME TRAVEL TAB ══════════════════ */}
       {tab === 'timetravel' && (
         <div className="max-w-2xl">
-          <div className="mb-6 p-4 rounded-xl text-sm" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f', color: '#737373' }}>
+          <div className="mb-6 p-4 rounded-xl text-sm" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f', color: '#e5e5e5' }}>
             <div className="flex items-center gap-2 mb-1">
               <Rewind size={14} style={{ color: '#22c55e' }} />
               <span className="text-white font-medium">Time Travel</span>
@@ -653,13 +653,13 @@ export default function AgentPage() {
               {/* Summary */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
-                  <div className="text-xs mb-1" style={{ color: '#737373' }}>Events at this time</div>
+                  <div className="text-xs mb-1" style={{ color: '#e5e5e5' }}>Events at this time</div>
                   <div className="text-2xl font-bold font-mono text-white">
                     {(ttResult as { event_count: number }).event_count}
                   </div>
                 </div>
                 <div className="rounded-xl p-4" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
-                  <div className="text-xs mb-1" style={{ color: '#737373' }}>Reconstructed at</div>
+                  <div className="text-xs mb-1" style={{ color: '#e5e5e5' }}>Reconstructed at</div>
                   <div className="text-sm font-mono text-white">
                     {format(new Date(ttTimestamp), 'MMM d yyyy, HH:mm:ss')}
                   </div>
@@ -671,7 +671,7 @@ export default function AgentPage() {
                 <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#1f1f1f' }}>
                   <Zap size={13} style={{ color: '#22c55e' }} />
                   <span className="text-sm font-medium text-white">Reconstructed state</span>
-                  <span className="text-xs ml-auto" style={{ color: '#525252' }}>
+                  <span className="text-xs ml-auto" style={{ color: '#e5e5e5' }}>
                     Based on all STATE_SET events up to this point
                   </span>
                 </div>
@@ -685,7 +685,7 @@ export default function AgentPage() {
           {/* Quick picks */}
           {stats?.last_event && !ttResult && (
             <div>
-              <div className="text-xs mb-2" style={{ color: '#525252' }}>Quick picks</div>
+              <div className="text-xs mb-2" style={{ color: '#e5e5e5' }}>Quick picks</div>
               <div className="flex gap-2 flex-wrap">
                 {[
                   { label: '1 hour ago',  ms: 60 * 60 * 1000 },
@@ -698,7 +698,7 @@ export default function AgentPage() {
                   return (
                     <button key={label} onClick={() => setTtTimestamp(val)}
                             className="text-xs px-3 py-1.5 rounded-lg transition"
-                            style={{ background: '#111', color: '#737373', border: '1px solid #1f1f1f' }}>
+                            style={{ background: '#111', color: '#e5e5e5', border: '1px solid #1f1f1f' }}>
                       {label}
                     </button>
                   )
@@ -723,12 +723,12 @@ function StatsRow({ stats }: { stats: Stats }) {
         { label: 'Event types',   value: stats.unique_event_types,                     icon: GitBranch,   color: '#e5e5e5' },
         { label: 'Sessions',      value: stats.sessions,                               icon: Layers,      color: '#e5e5e5' },
         { label: 'Last event',    value: stats.last_event ? formatDistanceToNow(new Date(stats.last_event), { addSuffix: true }) : '—', icon: Clock, color: '#e5e5e5' },
-        { label: 'Errors',        value: errorCount,                                   icon: AlertCircle, color: errorCount > 0 ? '#ef4444' : '#525252' },
+        { label: 'Errors',        value: errorCount,                                   icon: AlertCircle, color: errorCount > 0 ? '#ef4444' : '#e5e5e5' },
       ].map(({ label, value, icon: Icon, color }) => (
         <div key={label} className="rounded-xl p-4" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
           <div className="flex items-center gap-1.5 mb-1">
-            <Icon size={12} style={{ color: '#737373' }} />
-            <span className="text-xs" style={{ color: '#737373' }}>{label}</span>
+            <Icon size={12} style={{ color: '#e5e5e5' }} />
+            <span className="text-xs" style={{ color: '#e5e5e5' }}>{label}</span>
           </div>
           <div className="font-semibold font-mono text-lg" style={{ color }}>{value}</div>
         </div>
@@ -752,11 +752,11 @@ function EventList({ events, selected, expanded, onSelect, onToggleExpand }: {
           {sessionId && (
             <div className="flex items-center gap-2 mb-2">
               <span className="text-xs font-mono px-2 py-0.5 rounded shrink-0"
-                    style={{ background: '#1a1a1a', color: '#404040', border: '1px solid #2a2a2a' }}>
+                    style={{ background: '#1a1a1a', color: '#e5e5e5', border: '1px solid #2a2a2a' }}>
                 session {sessionId.slice(0, 14)}…
               </span>
               <div className="flex-1 h-px" style={{ background: '#1a1a1a' }} />
-              <span className="text-xs shrink-0" style={{ color: '#404040' }}>{evs.length} events</span>
+              <span className="text-xs shrink-0" style={{ color: '#e5e5e5' }}>{evs.length} events</span>
             </div>
           )}
           <div className="space-y-1">
@@ -789,14 +789,14 @@ function EventList({ events, selected, expanded, onSelect, onToggleExpand }: {
                               <AlertCircle size={12} style={{ color: '#ef4444' }} />
                             )}
                           </div>
-                          <div className="text-xs font-mono mt-0.5 truncate" style={{ color: '#404040' }}>
+                          <div className="text-xs font-mono mt-0.5 truncate" style={{ color: '#e5e5e5' }}>
                             {JSON.stringify(ev.data).slice(0, 90)}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3 shrink-0 ml-2">
-                        <span className="text-xs font-mono" style={{ color: '#404040' }}>#{ev.sequence_no}</span>
-                        <span className="text-xs font-mono" style={{ color: '#525252' }}>{format(new Date(ev.timestamp), 'HH:mm:ss')}</span>
+                        <span className="text-xs font-mono" style={{ color: '#e5e5e5' }}>#{ev.sequence_no}</span>
+                        <span className="text-xs font-mono" style={{ color: '#e5e5e5' }}>{format(new Date(ev.timestamp), 'HH:mm:ss')}</span>
                       </div>
                     </div>
                   </button>
@@ -806,7 +806,7 @@ function EventList({ events, selected, expanded, onSelect, onToggleExpand }: {
                       <button
                         onClick={() => onToggleExpand(ev.event_id)}
                         className="w-full flex items-center gap-2 px-4 py-2 text-xs"
-                        style={{ color: '#525252' }}
+                        style={{ color: '#e5e5e5' }}
                       >
                         {isExpanded ? <ChevronDown size={11} /> : <ChevronRight size={11} />}
                         Full payload
@@ -816,7 +816,7 @@ function EventList({ events, selected, expanded, onSelect, onToggleExpand }: {
                           {JSON.stringify(ev.data, null, 2)}
                         </pre>
                       )}
-                      <div className="px-4 pb-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: '#404040' }}>
+                      <div className="px-4 pb-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: '#e5e5e5' }}>
                         <span>id: <span className="font-mono">{ev.event_id.slice(0, 18)}…</span></span>
                         {ev.session_id && <span>session: <span className="font-mono">{ev.session_id.slice(0, 12)}…</span></span>}
                         <span>{format(new Date(ev.timestamp), 'yyyy-MM-dd HH:mm:ss.SSS')}</span>
@@ -860,7 +860,7 @@ function WhyPanel({ chain }: { chain: WhyChain }) {
     <div>
       <div className="flex items-center gap-2 mb-4">
         <GitBranch size={13} style={{ color: '#22c55e' }} />
-        <span className="text-xs font-medium" style={{ color: '#a3a3a3' }}>
+        <span className="text-xs font-medium" style={{ color: '#e5e5e5' }}>
           {chain.chain_length} event{chain.chain_length !== 1 ? 's' : ''} in causal chain
         </span>
       </div>
@@ -880,11 +880,11 @@ function WhyPanel({ chain }: { chain: WhyChain }) {
                 {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#1a2a1a', color: '#22c55e' }}>root</span>}
                 {i === chain.chain.length - 1 && <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: '#2a1a1a', color: '#f87171' }}>selected</span>}
               </div>
-              <div className="text-xs font-mono truncate mt-0.5" style={{ color: '#525252' }}>
+              <div className="text-xs font-mono truncate mt-0.5" style={{ color: '#e5e5e5' }}>
                 {JSON.stringify(e.data).slice(0, 55)}
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-xs" style={{ color: '#404040' }}>{format(new Date(e.timestamp), 'HH:mm:ss.SSS')}</span>
+                <span className="text-xs" style={{ color: '#e5e5e5' }}>{format(new Date(e.timestamp), 'HH:mm:ss.SSS')}</span>
                 {i < chain.chain.length - 1 && <ArrowRight size={10} style={{ color: '#2a2a2a' }} />}
               </div>
             </div>
@@ -908,9 +908,9 @@ function BehaviorTab({ baseline, loading, agentId, onRetry }: {
   if (baseline.status === 'insufficient_data') {
     return (
       <div className="rounded-xl p-8 text-center" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
-        <Activity size={32} style={{ color: '#525252', margin: '0 auto 12px' }} />
+        <Activity size={32} style={{ color: '#e5e5e5', margin: '0 auto 12px' }} />
         <h3 className="text-base font-medium mb-2" style={{ color: '#e5e5e5' }}>No baseline yet</h3>
-        <p className="text-sm" style={{ color: '#737373' }}>
+        <p className="text-sm" style={{ color: '#e5e5e5' }}>
           {baseline.message}
         </p>
       </div>
@@ -953,7 +953,7 @@ function BehaviorTab({ baseline, loading, agentId, onRetry }: {
           <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#1f1f1f' }}>
             <TrendingUp size={13} style={{ color: '#22c55e' }} />
             <span className="text-sm font-medium text-white">Biggest behavioral changes</span>
-            <span className="text-xs ml-auto" style={{ color: '#525252' }}>
+            <span className="text-xs ml-auto" style={{ color: '#e5e5e5' }}>
               recent {recent_window} vs prior {sessions - recent_window} sessions
             </span>
           </div>
@@ -1009,13 +1009,13 @@ function DriftHeadline({ drift, agentId, sessions, recentWindow, onRetry }: {
           </div>
           <h2 className="text-lg font-semibold" style={{ color: '#fff' }}>
             Drift score: <span className="font-mono">{drift.score.toFixed(3)}</span>
-            <span className="text-sm font-normal ml-2" style={{ color: '#a3a3a3' }}>({scorePct} / 100)</span>
+            <span className="text-sm font-normal ml-2" style={{ color: '#e5e5e5' }}>({scorePct} / 100)</span>
           </h2>
           <p className="text-sm mt-1" style={{ color: '#d4d4d4' }}>{m.desc}</p>
         </div>
         <button onClick={onRetry}
                 className="text-xs px-3 py-1.5 rounded-lg transition shrink-0"
-                style={{ background: '#0a0a0a', color: '#a3a3a3', border: '1px solid #2a2a2a' }}>
+                style={{ background: '#0a0a0a', color: '#e5e5e5', border: '1px solid #2a2a2a' }}>
           <RefreshCw size={11} className="inline mr-1" />
           Recompute
         </button>
@@ -1056,9 +1056,9 @@ function SubStat({ label, value, sub, tone = 'neutral' }: {
   const c = tone === 'good' ? '#22c55e' : tone === 'bad' ? '#ef4444' : '#e5e5e5'
   return (
     <div className="rounded-lg p-3" style={{ background: '#0a0a0a', border: '1px solid #1f1f1f' }}>
-      <div className="text-xs mb-1" style={{ color: '#737373' }}>{label}</div>
+      <div className="text-xs mb-1" style={{ color: '#e5e5e5' }}>{label}</div>
       <div className="text-base font-semibold font-mono" style={{ color: c }}>{value}</div>
-      <div className="text-xs mt-0.5" style={{ color: '#525252' }}>{sub}</div>
+      <div className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>{sub}</div>
     </div>
   )
 }
@@ -1066,7 +1066,7 @@ function SubStat({ label, value, sub, tone = 'neutral' }: {
 function ChangeRow({ change }: { change: BaselineChange }) {
   const isUp   = change.delta_pp > 0
   const Icon   = isUp ? TrendingUp : TrendingDown
-  const color  = Math.abs(change.delta_pp) > 10 ? '#f97316' : '#a3a3a3'
+  const color  = Math.abs(change.delta_pp) > 10 ? '#f97316' : '#e5e5e5'
 
   const [scope, ...rest] = change.metric.split('.')
   const detail = rest.join('.')
@@ -1077,10 +1077,10 @@ function ChangeRow({ change }: { change: BaselineChange }) {
       <Icon size={13} style={{ color }} />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-xs uppercase tracking-wider" style={{ color: '#525252' }}>{scopeLabel}</span>
+          <span className="text-xs uppercase tracking-wider" style={{ color: '#e5e5e5' }}>{scopeLabel}</span>
           <span className="text-sm font-mono truncate" style={{ color: '#e5e5e5' }}>{detail}</span>
         </div>
-        <div className="text-xs font-mono mt-0.5" style={{ color: '#525252' }}>
+        <div className="text-xs font-mono mt-0.5" style={{ color: '#e5e5e5' }}>
           {change.baseline.toFixed(2)}% → {change.recent.toFixed(2)}%
         </div>
       </div>
@@ -1107,7 +1107,7 @@ function WindowCard({ title, subtitle, window: w, highlight = false }: {
     }}>
       <div className="px-4 py-3 border-b" style={{ borderColor: highlight ? '#22c55e20' : '#1f1f1f' }}>
         <div className="text-sm font-semibold" style={{ color: '#fff' }}>{title}</div>
-        <div className="text-xs mt-0.5" style={{ color: '#737373' }}>{subtitle}</div>
+        <div className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>{subtitle}</div>
       </div>
       <div className="p-4 space-y-4">
         {/* Quick numbers */}
@@ -1119,9 +1119,9 @@ function WindowCard({ title, subtitle, window: w, highlight = false }: {
 
         {/* Event distribution */}
         <div>
-          <div className="text-xs font-medium mb-2" style={{ color: '#a3a3a3' }}>Event distribution</div>
+          <div className="text-xs font-medium mb-2" style={{ color: '#e5e5e5' }}>Event distribution</div>
           {topEvents.length === 0 ? (
-            <div className="text-xs" style={{ color: '#525252' }}>No events</div>
+            <div className="text-xs" style={{ color: '#e5e5e5' }}>No events</div>
           ) : (
             <div className="space-y-1.5">
               {topEvents.map(([type, pct]) => (
@@ -1134,7 +1134,7 @@ function WindowCard({ title, subtitle, window: w, highlight = false }: {
         {/* Top transitions */}
         {topTransitions.length > 0 && (
           <div>
-            <div className="text-xs font-medium mb-2" style={{ color: '#a3a3a3' }}>Common decision sequences (parent → child)</div>
+            <div className="text-xs font-medium mb-2" style={{ color: '#e5e5e5' }}>Common decision sequences (parent → child)</div>
             <div className="space-y-1.5">
               {topTransitions.map(([key, pct]) => (
                 <DistRow key={key} label={key} pct={pct} color="#3b82f6" />
@@ -1152,7 +1152,7 @@ function DistRow({ label, pct, color }: { label: string; pct: number; color: str
     <div>
       <div className="flex items-center justify-between mb-0.5">
         <span className="text-xs font-mono truncate pr-2" style={{ color: '#d4d4d4' }}>{label}</span>
-        <span className="text-xs font-mono shrink-0" style={{ color: '#737373' }}>{pct.toFixed(1)}%</span>
+        <span className="text-xs font-mono shrink-0" style={{ color: '#e5e5e5' }}>{pct.toFixed(1)}%</span>
       </div>
       <div className="h-1 rounded overflow-hidden" style={{ background: '#0a0a0a' }}>
         <div className="h-full rounded transition-all"
@@ -1166,7 +1166,7 @@ function Mini({ label, value, tone = 'neutral' }: { label: string; value: string
   const c = tone === 'bad' ? '#ef4444' : '#e5e5e5'
   return (
     <div className="rounded p-2.5" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
-      <div className="text-xs mb-0.5" style={{ color: '#737373' }}>{label}</div>
+      <div className="text-xs mb-0.5" style={{ color: '#e5e5e5' }}>{label}</div>
       <div className="text-sm font-semibold font-mono" style={{ color: c }}>{value}</div>
     </div>
   )
@@ -1205,7 +1205,7 @@ function eventColor(type: string): string {
     post_generated:   '#34d399',
     image_generated:  '#fb923c',
   }
-  return map[type] ?? '#525252'
+  return map[type] ?? '#e5e5e5'
 }
 
 function EventDot({ type, size = 'md' }: { type: string; size?: 'sm' | 'md' }) {
@@ -1220,7 +1220,7 @@ function FilterPill({ label, active, onClick, color }: { label: string; active: 
       className="text-xs px-2.5 py-1 rounded-full transition"
       style={{
         background: active ? `${color ?? '#22c55e'}20` : '#111',
-        color:      active ? (color ?? '#22c55e') : '#525252',
+        color:      active ? (color ?? '#22c55e') : '#e5e5e5',
         border:     `1px solid ${active ? (color ?? '#22c55e') + '40' : '#1f1f1f'}`,
       }}
     >
@@ -1232,7 +1232,7 @@ function FilterPill({ label, active, onClick, color }: { label: string; active: 
 function PanelTabBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex-1 py-2 text-xs font-medium transition"
-            style={{ background: active ? '#1a1a1a' : 'transparent', color: active ? '#e5e5e5' : '#525252' }}>
+            style={{ background: active ? '#1a1a1a' : 'transparent', color: active ? '#e5e5e5' : '#e5e5e5' }}>
       {label}
     </button>
   )
@@ -1241,8 +1241,8 @@ function PanelTabBtn({ label, active, onClick }: { label: string; active: boolea
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start gap-2 text-xs">
-      <span className="font-mono shrink-0" style={{ color: '#525252', minWidth: 80 }}>{label}</span>
-      <span className="font-mono break-all" style={{ color: '#404040' }}>{value}</span>
+      <span className="font-mono shrink-0" style={{ color: '#e5e5e5', minWidth: 80 }}>{label}</span>
+      <span className="font-mono break-all" style={{ color: '#e5e5e5' }}>{value}</span>
     </div>
   )
 }
@@ -1266,9 +1266,9 @@ function Shell({
       <button
         onClick={() => router.push('/dashboard')}
         className="flex items-center gap-1.5 text-sm mb-6 transition"
-        style={{ color: '#737373' }}
+        style={{ color: '#e5e5e5' }}
         onMouseEnter={e => (e.currentTarget.style.color = '#e5e5e5')}
-        onMouseLeave={e => (e.currentTarget.style.color = '#737373')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#e5e5e5')}
       >
         <ChevronLeft size={15} /> Agents
       </button>
@@ -1276,7 +1276,7 @@ function Shell({
         <h1 className="text-white font-semibold text-xl font-mono">{agentId}</h1>
         <div className="flex items-center gap-3 shrink-0">
           {lastSync && (
-            <div className="flex items-center gap-2 text-xs" style={{ color: '#525252' }}>
+            <div className="flex items-center gap-2 text-xs" style={{ color: '#e5e5e5' }}>
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22c55e' }} />
               Live · {formatDistanceToNow(lastSync, { addSuffix: true })}
             </div>

@@ -41,7 +41,7 @@ export default function SearchPage() {
     <div className="p-8 max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="text-white font-semibold text-xl mb-1">Semantic Search</h1>
-        <p className="text-sm" style={{ color: '#737373' }}>
+        <p className="text-sm" style={{ color: '#e5e5e5' }}>
           Search your agent history using natural language.
         </p>
       </div>
@@ -49,7 +49,7 @@ export default function SearchPage() {
       {/* Search bar */}
       <form onSubmit={handleSearch} className="relative mb-6">
         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2"
-                style={{ color: '#525252' }} />
+                style={{ color: '#e5e5e5' }} />
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -72,7 +72,7 @@ export default function SearchPage() {
 
       {/* Results */}
       {searched && !loading && results.length === 0 && (
-        <div className="text-center py-12" style={{ color: '#737373' }}>
+        <div className="text-center py-12" style={{ color: '#e5e5e5' }}>
           No results for "{query}"
         </div>
       )}
@@ -88,20 +88,20 @@ export default function SearchPage() {
                         style={{ background: '#1a1a1a', color: '#22c55e' }}>
                     {event.event}
                   </span>
-                  <span className="text-xs font-mono" style={{ color: '#525252' }}>
+                  <span className="text-xs font-mono" style={{ color: '#e5e5e5' }}>
                     {event.agent}
                   </span>
                 </div>
-                <div className="text-sm font-mono" style={{ color: '#a3a3a3' }}>
+                <div className="text-sm font-mono" style={{ color: '#e5e5e5' }}>
                   {JSON.stringify(event.data).slice(0, 120)}
                 </div>
               </div>
               <div className="text-right shrink-0">
-                <div className="text-xs font-mono" style={{ color: '#525252' }}>
+                <div className="text-xs font-mono" style={{ color: '#e5e5e5' }}>
                   {format(new Date(event.timestamp), 'MMM d, HH:mm')}
                 </div>
                 {event.score !== undefined && (
-                  <div className="text-xs mt-0.5" style={{ color: '#737373' }}>
+                  <div className="text-xs mt-0.5" style={{ color: '#e5e5e5' }}>
                     {(event.score * 100).toFixed(0)}% match
                   </div>
                 )}
@@ -114,7 +114,7 @@ export default function SearchPage() {
       {/* Example queries */}
       {!searched && (
         <div className="mt-8">
-          <p className="text-xs mb-3" style={{ color: '#525252' }}>Try searching for:</p>
+          <p className="text-xs mb-3" style={{ color: '#e5e5e5' }}>Try searching for:</p>
           <div className="flex flex-wrap gap-2">
             {[
               'tool call errors in the last session',
@@ -126,9 +126,9 @@ export default function SearchPage() {
                 key={q}
                 onClick={() => setQuery(q)}
                 className="text-xs px-3 py-1.5 rounded-lg transition"
-                style={{ background: '#111', border: '1px solid #1f1f1f', color: '#737373' }}
+                style={{ background: '#111', border: '1px solid #1f1f1f', color: '#e5e5e5' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#e5e5e5')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#737373')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#e5e5e5')}
               >
                 {q}
               </button>
