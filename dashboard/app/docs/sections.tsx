@@ -93,6 +93,8 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
         {[
           { label: 'Python SDK', pkg: 'zizkadb-sdk' },
           { label: 'MCP', pkg: 'zizkadb-mcp' },
+          { label: 'LangChain', pkg: 'zizkadb-langchain' },
+          { label: 'CrewAI', pkg: 'zizkadb-crewai' },
         ].map(({ label, pkg }) => (
           // eslint-disable-next-line @next/next/no-img-element
           <a key={pkg} href={`https://pypi.org/project/${pkg}/`} target="_blank" rel="noreferrer">
@@ -133,8 +135,8 @@ export function OverviewSection({ onNavigate }: { onNavigate: (s: string) => voi
       <h2 style={{ ...S.h2, marginTop: 24 }}>Choose your integration</h2>
       <div style={{ display: 'grid', gap: 12, marginBottom: 40 }}>
         {[
-          { id: 'frameworks', title: 'Framework starters', desc: 'zizkadb init — basic, OpenAI, MCP templates', time: '~2 min' },
-          { id: 'python', title: 'Python SDK', desc: 'FastAPI, notebooks, batch jobs. pip install zizkadb-sdk', time: '~5 min' },
+          { id: 'frameworks', title: 'Framework starters', desc: 'zizkadb init — LangChain, CrewAI, OpenAI, MCP templates', time: '~2 min' },
+          { id: 'python', title: 'Python SDK', desc: 'FastAPI, LangChain, notebooks, batch jobs. pip install zizkadb-sdk', time: '~5 min' },
           { id: 'typescript', title: 'TypeScript SDK', desc: 'Node, Bun, Deno, edge workers. npm install zizkadb-sdk', time: '~5 min' },
           { id: 'mcp', title: 'MCP server', desc: 'Claude Desktop, Cursor, Windsurf — no app code changes', time: '~2 min' },
           { id: 'rest', title: 'REST API', desc: 'Any language via HTTP. curl, Go, Rust, Java, Ruby', time: '~3 min' },
@@ -932,7 +934,7 @@ bash infra/deploy-selfhost.sh
   )
 }
 
-// ── Frameworks (OpenAI, MCP) ───────────────────────────────────────────────────
+// ── Frameworks (LangChain, CrewAI, OpenAI) ───────────────────────────────────
 
 export function FrameworksSection() {
   return (
@@ -946,9 +948,11 @@ export function FrameworksSection() {
       <Callout type="tip">
         <strong>Fastest start:</strong>{' '}
         <code style={{ fontFamily: 'monospace' }}>pip install zizkadb-sdk</code> then{' '}
-        <code style={{ fontFamily: 'monospace' }}>zizkadb init my-agent --template basic</code>.
+        <code style={{ fontFamily: 'monospace' }}>zizkadb init my-agent --template langchain</code>.
         Templates: <code style={{ fontFamily: 'monospace' }}>basic</code>,{' '}
         <code style={{ fontFamily: 'monospace' }}>openai</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>langchain</code>,{' '}
+        <code style={{ fontFamily: 'monospace' }}>crewai</code>,{' '}
         <code style={{ fontFamily: 'monospace' }}>mcp-cursor</code>.
       </Callout>
 
@@ -986,11 +990,46 @@ async def run(user_input: str):
             parent_id=turn.event_id,
         )`}</Code>
 
+      <h2 style={S.h2}>LangChain</h2>
+      <p style={S.p}>
+        Install <code style={{ fontFamily: 'monospace' }}>zizkadb-langchain</code> from PyPI.
+        Pass <code style={{ fontFamily: 'monospace' }}>ZizkaDBCallbackHandler</code> in{' '}
+        <code style={{ fontFamily: 'monospace' }}>config={'{'}&quot;callbacks&quot;: [handler]{'}'}</code>.
+      </p>
+      <Code lang="python">{`pip install zizkadb-sdk zizkadb-langchain langchain-openai
+
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+from zizkadb import ZizkaDB
+from zizkadb_langchain import ZizkaDBCallbackHandler
+
+async with ZizkaDB("zizkadb_live_...") as db:
+    handler = ZizkaDBCallbackHandler(db, agent="my-bot")
+    llm = ChatOpenAI(model="gpt-4o-mini")
+    await llm.ainvoke([HumanMessage(content="Hello")], config={"callbacks": [handler]})
+    (await db.why(handler.last_event_id)).print()`}</Code>
+
+      <h2 style={S.h2}>CrewAI</h2>
+      <p style={S.p}>
+        Install <code style={{ fontFamily: 'monospace' }}>zizkadb-crewai</code> from PyPI.
+        <code style={{ fontFamily: 'monospace' }}>ZizkaDBCrewLogger</code> logs kickoff, tasks, and final output with lineage.
+      </p>
+      <Code lang="python">{`pip install zizkadb-sdk zizkadb-crewai crewai
+
+from zizkadb import ZizkaDB
+from zizkadb_crewai import ZizkaDBCrewLogger
+
+async with ZizkaDB("zizkadb_live_...") as db:
+    logger = ZizkaDBCrewLogger(db, agent="research-crew")
+    kickoff = await logger.log_kickoff(goal="Research topic X")
+    output = crew.kickoff()
+    await logger.log_output(str(output), parent_id=kickoff.event_id)`}</Code>
+
       <h2 style={S.h2}>Examples in the repo</h2>
       <p style={S.p}>
         Runnable trees under <code style={{ fontFamily: 'monospace' }}>examples/</code> on{' '}
         <a href="https://github.com/Zizka-ai/ZizkaDB" style={{ color: '#1e40af' }}>GitHub</a>:
-        minimal-python, openai-agent, mcp-cursor.
+        minimal-python, openai-agent, langchain-agent, crewai-agent, mcp-cursor.
       </p>
     </div>
   )
