@@ -104,6 +104,15 @@ pytest
 
 ### Dashboard (optional)
 
+Prefer the one-command stack (port **3001**):
+
+```bash
+bash scripts/setup-local.sh
+# http://localhost:3001/login → Open my dashboard →
+```
+
+Or run the dashboard alone for UI work:
+
 ```bash
 cd dashboard
 npm install
