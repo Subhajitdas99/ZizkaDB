@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getToken } from '@/lib/auth'
-import { confirmCheckout } from '@/lib/api'
+import { confirmCheckout, getBillingStatus, type BillingStatus } from '@/lib/api'
 import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SignupSuccessPage() {
@@ -46,19 +46,56 @@ function SignupSuccessInner() {
     }
 
     let cancelled = false
+    const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+    function isPendingStripeConfirmation(status: BillingStatus) {
+      if (status.has_access) return false
+      if (!status.requires_checkout) return false
+      return (
+        status.subscription_status === null
+        || status.subscription_status === 'pending_checkout'
+        || status.subscription_status === 'incomplete'
+        || status.subscription_status === 'incomplete_expired'
+      )
+    }
 
     async function confirm() {
-      try {
-        const status = await confirmCheckout(token!, sessionId!)
-        if (cancelled) return
-        if (status.has_access) {
-          router.replace('/dashboard')
-        } else {
-          setError('Payment was not completed. Please try again.')
-        }
-      } catch (e) {
-        if (!cancelled) {
+      const maxAttempts = 10
+
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+          const status = await confirmCheckout(token!, sessionId!)
+          if (cancelled) return
+          if (status.has_access) {
+            router.replace('/dashboard')
+            return
+          }
+
+          const liveStatus = await getBillingStatus(token!)
+          if (cancelled) return
+          if (liveStatus.has_access) {
+            router.replace('/dashboard')
+            return
+          }
+
+          if (isPendingStripeConfirmation(liveStatus) && attempt < maxAttempts) {
+            await wait(1500)
+            continue
+          }
+
+          setError(
+            'Stripe confirmation is taking longer than expected. '
+            + 'Please wait a few seconds and try again.',
+          )
+          return
+        } catch (e) {
+          if (cancelled) return
+          if (attempt < maxAttempts) {
+            await wait(1500)
+            continue
+          }
           setError(e instanceof Error ? e.message : 'Could not confirm payment')
+          return
         }
       }
     }
@@ -75,6 +112,22 @@ function SignupSuccessInner() {
       }}>
         <div style={{ maxWidth: 420, textAlign: 'center' }}>
           <p style={{ color: '#ef4444', marginBottom: 16 }}>{error}</p>
+          <button
+            type="button"
+            onClick={() => router.refresh()}
+            style={{
+              color: '#111',
+              fontWeight: 600,
+              display: 'block',
+              margin: '0 auto 10px',
+              border: 'none',
+              background: 'transparent',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+          >
+            Check confirmation again
+          </button>
           <a href="/signup/plan" style={{ color: '#111', fontWeight: 600 }}>Return to plan selection →</a>
         </div>
       </div>
