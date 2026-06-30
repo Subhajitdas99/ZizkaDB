@@ -49,7 +49,6 @@ async def init_db():
         ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255);
-        ALTER TABLE users ADD COLUMN IF NOT EXISTS retention_trial_used BOOLEAN NOT NULL DEFAULT FALSE;
     """)
     await _pg_pool.execute("""
         UPDATE users
@@ -58,6 +57,22 @@ async def init_db():
             trial_ends_at = COALESCE(trial_ends_at, created_at + INTERVAL '30 days')
         WHERE plan IS NULL OR subscription_status IS NULL
     """)
+
+    # Restore dashboard access for users blocked by Stripe checkout rollout (no data deleted)
+    restored = await _pg_pool.execute(
+        """
+        UPDATE users
+        SET subscription_status = 'trialing',
+            plan = COALESCE(plan, 'pro'),
+            trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
+        WHERE stripe_subscription_id IS NULL
+          AND subscription_status IN (
+            'pending_checkout', 'past_due', 'unpaid', 'incomplete', 'incomplete_expired'
+          )
+        """
+    )
+    if restored and restored != "UPDATE 0":
+        logger.info("Restored local trial access after Stripe rollback: %s", restored)
 
     await _pg_pool.execute("""
         CREATE TABLE IF NOT EXISTS community_posts (

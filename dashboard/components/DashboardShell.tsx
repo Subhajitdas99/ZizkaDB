@@ -6,7 +6,6 @@ import { clearToken } from '@/lib/auth'
 import { BrandLogo } from '@/components/BrandLogo'
 import { Search, Settings, LogOut, Cpu } from 'lucide-react'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
-import { TenantPlanBanner } from '@/components/TenantPlanBanner'
 
 const nav = [
   { href: '/dashboard',         label: 'Agents',   icon: Cpu },
@@ -81,7 +80,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <main className="flex-1 overflow-auto pb-16 sm:pb-0">
-          <TenantPlanBanner />
           <ConnectionStatus />
           {children}
         </main>

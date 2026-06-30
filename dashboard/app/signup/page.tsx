@@ -1,46 +1,19 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { requestOtp, verifyOtp, postAuthRedirect } from '@/lib/api'
+import { requestOtp, verifyOtp } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SignupPage() {
-  return (
-    <Suspense fallback={<SignupFallback />}>
-      <SignupForm />
-    </Suspense>
-  )
-}
-
-function SignupFallback() {
-  return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif', color: '#888',
-    }}>
-      Loading…
-    </div>
-  )
-}
-
-function SignupForm() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [step, setStep] = useState<'email' | 'otp'>('email')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    const plan = searchParams.get('plan')
-    if (plan === 'pro' || plan === 'team') {
-      sessionStorage.setItem('signup_plan', plan)
-    }
-  }, [searchParams])
 
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault()
@@ -63,7 +36,7 @@ function SignupForm() {
     try {
       const data = await verifyOtp(email, otp)
       setToken(data.access_token)
-      router.replace(postAuthRedirect(data))
+      router.replace('/dashboard')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Invalid or expired code.')
     } finally {
@@ -130,9 +103,7 @@ function SignupForm() {
                   {loading ? 'Sending...' : 'Send verification code →'}
                 </button>
                 <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center', margin: 0 }}>
-                  {process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-                    ? 'Self-hosted — no billing required.'
-                    : '30-day free trial · card required after email verification'}
+                  Free to start. No credit card required.
                 </p>
               </form>
             </>

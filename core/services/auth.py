@@ -11,31 +11,8 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 from db.connection import get_pool
 
-def _required_secret(env_var: str, dev_fallback: str) -> str:
-    """
-    Resolve a signing secret from the environment.
-
-    In development this falls back to a fixed insecure string so local
-    self-host works without any env setup. In production (ENV !=
-    "development"), the fallback string is visible in this public
-    repository — using it to sign JWTs would let anyone forge a valid
-    auth token. Refuse to start rather than silently sign tokens with a
-    known secret.
-    """
-    secret = os.getenv(env_var)
-    if secret:
-        return secret
-    if os.getenv("ENV", "development") != "development":
-        raise RuntimeError(
-            f"{env_var} must be set in production. Refusing to sign tokens "
-            f"with the hardcoded development fallback, since that value is "
-            f"visible in the public source code."
-        )
-    return dev_fallback
-
-
-JWT_SECRET = _required_secret("JWT_SECRET", "dev-secret")
-JWT_REFRESH_SECRET = _required_secret("JWT_REFRESH_SECRET", "dev-refresh-secret")
+JWT_SECRET = os.getenv("JWT_SECRET", "dev-secret")
+JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "dev-refresh-secret")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
@@ -181,24 +158,19 @@ async def verify_otp(email: str, otp: str) -> dict:
 
     tenant_id = str(tenant_id)
 
-    from services.billing import billing_enforced, mark_pending_checkout
-
-    if billing_enforced():
-        await mark_pending_checkout(user_id)
-    else:
-        # Self-host / local: 30-day Pro trial without Stripe
-        await pool.execute(
-            """
-            UPDATE users
-            SET plan = COALESCE(plan, 'pro'),
-                subscription_status = COALESCE(subscription_status, 'trialing'),
-                trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
-            WHERE user_id = $1::uuid
-              AND plan IS NULL
-              AND subscription_status IS NULL
-            """,
-            user_id,
-        )
+    # New signups get a 30-day Pro trial (local until Stripe checkout is wired)
+    await pool.execute(
+        """
+        UPDATE users
+        SET plan = COALESCE(plan, 'pro'),
+            subscription_status = COALESCE(subscription_status, 'trialing'),
+            trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
+        WHERE user_id = $1::uuid
+          AND plan IS NULL
+          AND subscription_status IS NULL
+        """,
+        user_id,
+    )
 
     return _issue_tokens(user_id, email, tenant_id)
 
