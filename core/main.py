@@ -21,6 +21,7 @@ from api.community import router as community_router
 from api.demo_requests import router as demo_requests_router
 from api.settings import router as settings_router
 from api.account import router as account_router
+from services.billing import migrate_legacy_users_to_billing
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ async def lifespan(app: FastAPI):
     # Seed dev tenant for local self-host (ENV=development) or when DEV_API_KEY is set.
     if os.getenv("ENV", "development") == "development" or os.getenv("DEV_API_KEY"):
         await _ensure_dev_tenant(get_pool())
+    await migrate_legacy_users_to_billing()
     logger.info("ZizkaDB started")
     yield
     await close_db()

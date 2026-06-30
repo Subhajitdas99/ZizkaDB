@@ -13,8 +13,9 @@ log = logging.getLogger(__name__)
 
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
-STRIPE_PRO_PRICE_ID = os.getenv("STRIPE_PRO_PRICE_ID", "")
-STRIPE_TEAM_PRICE_ID = os.getenv("STRIPE_TEAM_PRICE_ID", "")
+# Accept ZizkaDB names or legacy zizka.ai-style names on the same Stripe account
+STRIPE_PRO_PRICE_ID = os.getenv("STRIPE_PRO_PRICE_ID") or os.getenv("STRIPE_PRICE_PRO", "")
+STRIPE_TEAM_PRICE_ID = os.getenv("STRIPE_TEAM_PRICE_ID") or os.getenv("STRIPE_PRICE_TEAM", "")
 STRIPE_TRIAL_DAYS = int(os.getenv("STRIPE_TRIAL_DAYS", "30"))
 DASHBOARD_URL = os.getenv("DASHBOARD_URL", "https://db.zizka.ai").rstrip("/")
 _IS_PRODUCTION = os.getenv("ENV", "development") == "production"
@@ -187,7 +188,7 @@ async def update_user_billing(
 
 
 async def mark_pending_checkout(user_id: str) -> None:
-    """New managed-cloud signups must add a card before dashboard access."""
+    """Managed-cloud users without Stripe must complete checkout before dashboard access."""
     if not billing_enforced():
         return
     pool = get_pool()
@@ -197,11 +198,27 @@ async def mark_pending_checkout(user_id: str) -> None:
         SET subscription_status = 'pending_checkout'
         WHERE user_id = $1::uuid
           AND stripe_subscription_id IS NULL
-          AND subscription_status IS DISTINCT FROM 'active'
-          AND subscription_status IS DISTINCT FROM 'trialing'
+          AND COALESCE(subscription_status, '') NOT IN ('active', 'canceled')
         """,
         user_id,
     )
+
+
+async def migrate_legacy_users_to_billing() -> None:
+    """One-time style sweep: existing managed-cloud users without Stripe must add a card."""
+    if not billing_enforced():
+        return
+    pool = get_pool()
+    result = await pool.execute(
+        """
+        UPDATE users
+        SET subscription_status = 'pending_checkout'
+        WHERE stripe_subscription_id IS NULL
+          AND COALESCE(subscription_status, '') NOT IN ('pending_checkout', 'canceled')
+        """
+    )
+    if result and result != "UPDATE 0":
+        log.info("Legacy users marked pending_checkout: %s", result)
 
 
 def _stripe():
