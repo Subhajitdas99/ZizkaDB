@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { SiteNav } from '@/components/SiteNav'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import {
   getCommunityPost,
@@ -23,15 +23,15 @@ export default function CommunityPostPage() {
   const [website, setWebsite] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true)
     getCommunityPost(id)
       .then(setPost)
       .catch((e) => setErr(e instanceof Error ? e.message : 'Not found'))
       .finally(() => setLoading(false))
-  }
+  }, [id])
 
-  useEffect(() => { load() }, [id])
+  useEffect(() => { load() }, [load])
 
   async function submitReply(e: React.FormEvent) {
     e.preventDefault()

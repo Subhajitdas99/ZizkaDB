@@ -441,9 +441,7 @@ export default function AgentPage() {
 
             {searchResults && (
               <div className="flex items-center justify-between mb-3 text-xs" style={{ color: '#e5e5e5' }}>
-                <span>{searchResults.length} semantic results for "{searchQ}"</span>
-                <button onClick={() => { setSearchResults(null); setSearchQ('') }}
-                        style={{ color: '#e5e5e5' }}>Clear</button>
+             <span>{searchResults.length} semantic results for &quot;{searchQ}&quot;</span>
               </div>
             )}
 
