@@ -1,0 +1,24 @@
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["core", "sdk/python", "mcp", "integrations"]
+extend-exclude = [
+    "examples",
+    "wiki",
+    "sdk/python/zizkadb/templates",
+]
+
+# Lint only — does not reformat or reorder imports. Keeps existing code style.
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = [
+    "E501",   # line length (no rewrap)
+    "E402",   # imports not at top (tests)
+    "E401",   # multiple imports on one line
+    "F401",   # unused imports (fix incrementally)
+    "F541",   # f-string without placeholders
+    "F841",   # unused variables (fix incrementally)
+]
+
+[tool.ruff.format]
+exclude = ["*"]
