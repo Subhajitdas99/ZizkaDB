@@ -126,4 +126,7 @@ async def confirm_checkout(body: ConfirmCheckoutBody, tenant: dict = Depends(get
         raise HTTPException(status_code=403, detail="Invalid checkout session")
     except Exception as e:
         log.error("confirm checkout failed: %s", e)
-        raise HTTPException(status_code=400, detail="Could not confirm payment. Try again.")
+        # Don't hard-fail the user flow on transient Stripe/API races.
+        # Return current billing status so the client can continue polling.
+        row = await fetch_user_billing(user_id=tenant["user_id"])
+        return billing_status_payload(row)

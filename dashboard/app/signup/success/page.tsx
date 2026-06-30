@@ -90,6 +90,20 @@ function SignupSuccessInner() {
           return
         } catch (e) {
           if (cancelled) return
+          try {
+            const liveStatus = await getBillingStatus(token!)
+            if (cancelled) return
+            if (liveStatus.has_access) {
+              router.replace('/dashboard')
+              return
+            }
+            if (isPendingStripeConfirmation(liveStatus) && attempt < maxAttempts) {
+              await wait(1500)
+              continue
+            }
+          } catch {
+            // Ignore secondary status errors and keep retry logic below.
+          }
           if (attempt < maxAttempts) {
             await wait(1500)
             continue
