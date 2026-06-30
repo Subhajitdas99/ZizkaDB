@@ -128,7 +128,7 @@ function SignupSuccessInner() {
           <p style={{ color: '#ef4444', marginBottom: 16 }}>{error}</p>
           <button
             type="button"
-            onClick={() => router.refresh()}
+            onClick={() => window.location.reload()}
             style={{
               color: '#111',
               fontWeight: 600,

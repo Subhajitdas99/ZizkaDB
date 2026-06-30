@@ -287,14 +287,13 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
 
     sub = session.subscription
     sub_id = sub.id if hasattr(sub, "id") else session.subscription
-    status = getattr(sub, "status", None) if sub else "trialing"
-    payment_status = getattr(session, "payment_status", None)
-    # Stripe can briefly report subscription as incomplete during post-checkout sync.
-    # If checkout is complete and payment is already confirmed, grant trial access now.
-    if status in (None, "incomplete", "incomplete_expired") and payment_status in (
-        "paid",
-        "no_payment_required",
-    ):
+    status = getattr(sub, "status", None) if sub else None
+    # A completed Checkout Session means the customer finished payment/card setup
+    # and Stripe accepted it. Card-on-file trials (and 3DS / bank-approved cards)
+    # can briefly report the subscription as "incomplete" while Stripe settles.
+    # Grant trial access on a completed session and let webhooks downgrade later
+    # (e.g. to past_due) if a real charge fails. This avoids bouncing paying users.
+    if status not in ("active", "trialing"):
         status = "trialing"
     trial_end = None
     if sub and getattr(sub, "trial_end", None):
