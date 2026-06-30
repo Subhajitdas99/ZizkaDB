@@ -288,6 +288,14 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
     sub = session.subscription
     sub_id = sub.id if hasattr(sub, "id") else session.subscription
     status = getattr(sub, "status", None) if sub else "trialing"
+    payment_status = getattr(session, "payment_status", None)
+    # Stripe can briefly report subscription as incomplete during post-checkout sync.
+    # If checkout is complete and payment is already confirmed, grant trial access now.
+    if status in (None, "incomplete", "incomplete_expired") and payment_status in (
+        "paid",
+        "no_payment_required",
+    ):
+        status = "trialing"
     trial_end = None
     if sub and getattr(sub, "trial_end", None):
         trial_end = datetime.fromtimestamp(sub.trial_end, tz=timezone.utc)
