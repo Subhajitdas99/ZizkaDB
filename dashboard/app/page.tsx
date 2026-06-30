@@ -186,14 +186,14 @@ export default function LandingPage() {
               {
                 name: 'Pro', price: '€39', sub: '/ month',
                 features: ['100M events', '90-day retention', '3 projects', 'Email support'],
-                cta: 'Start free trial', href: '/signup', highlight: true,
-                note: 'No credit card needed',
+                cta: 'Start free trial', href: '/signup?plan=pro', highlight: true,
+                note: '30-day free trial · card required',
               },
               {
                 name: 'Team', price: '€99', sub: '/ month',
                 features: ['Up to 1B events/mo', '1-year retention', '10 seats', 'Priority support'],
-                cta: 'Start free trial', href: '/signup', highlight: false,
-                note: 'No credit card needed',
+                cta: 'Start free trial', href: '/signup?plan=team', highlight: false,
+                note: '30-day free trial · card required',
               },
             ] as const).map(plan => (
               <div key={plan.name} style={{
