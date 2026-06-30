@@ -125,7 +125,7 @@ async def confirm_checkout(body: ConfirmCheckoutBody, tenant: dict = Depends(get
     except PermissionError:
         raise HTTPException(status_code=403, detail="Invalid checkout session")
     except Exception as e:
-        log.error("confirm checkout failed: %s", e)
+        log.exception("confirm checkout failed for session %s: %s", body.session_id, e)
         # Don't hard-fail the user flow on transient Stripe/API races.
         # Return current billing status so the client can continue polling.
         row = await fetch_user_billing(user_id=tenant["user_id"])

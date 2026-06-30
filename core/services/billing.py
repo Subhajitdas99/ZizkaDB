@@ -211,6 +211,24 @@ def _stripe():
     return stripe
 
 
+def stripe_metadata(raw: Any) -> dict[str, str]:
+    """Normalize Stripe metadata (StripeObject) to a plain dict."""
+    if not raw:
+        return {}
+    if isinstance(raw, dict):
+        return {str(k): str(v) for k, v in raw.items() if v is not None}
+    try:
+        return {str(k): str(v) for k, v in dict(raw).items() if v is not None}
+    except (TypeError, ValueError):
+        pass
+    out: dict[str, str] = {}
+    for key in ("user_id", "plan"):
+        val = getattr(raw, key, None)
+        if val is not None:
+            out[key] = str(val)
+    return out
+
+
 async def select_plan(*, user_id: str, plan: str) -> dict | None:
     if not _valid_plan(plan):
         raise ValueError("Invalid plan")
@@ -295,13 +313,13 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
                 getattr(session, "status", None),
                 getattr(session, "payment_status", None),
             )
-            user_id = (session.metadata or {}).get("user_id") or expected_user_id
+            user_id = stripe_metadata(session.metadata).get("user_id") or expected_user_id
             if user_id:
                 return await fetch_user_billing(user_id=user_id)
             return None
         await asyncio.sleep(1.5)
 
-    meta = session.metadata or {}
+    meta = stripe_metadata(session.metadata)
     user_id = meta.get("user_id") or expected_user_id
     if not user_id:
         return None

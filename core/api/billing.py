@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Request
 
-from services.billing import update_user_billing
+from services.billing import update_user_billing, stripe_metadata
 
 router = APIRouter()
 log = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ async def stripe_webhook(request: Request):
 
     try:
         if etype == "checkout.session.completed":
-            meta = getattr(data, "metadata", None) or {}
+            meta = stripe_metadata(getattr(data, "metadata", None))
             user_id = meta.get("user_id")
             plan = meta.get("plan", "pro")
             sub_id = getattr(data, "subscription", None)
@@ -71,7 +71,7 @@ async def stripe_webhook(request: Request):
 
         elif etype in ("customer.subscription.updated", "customer.subscription.created"):
             sub = data
-            meta = getattr(sub, "metadata", None) or {}
+            meta = stripe_metadata(getattr(sub, "metadata", None))
             user_id = meta.get("user_id")
             trial_end = None
             if getattr(sub, "trial_end", None):
@@ -87,7 +87,7 @@ async def stripe_webhook(request: Request):
 
         elif etype == "customer.subscription.deleted":
             sub = data
-            meta = getattr(sub, "metadata", None) or {}
+            meta = stripe_metadata(getattr(sub, "metadata", None))
             user_id = meta.get("user_id")
             await update_user_billing(
                 user_id=user_id,
@@ -99,7 +99,7 @@ async def stripe_webhook(request: Request):
             sub_id = getattr(inv, "subscription", None)
             if sub_id:
                 sub = stripe.Subscription.retrieve(sub_id)
-                meta = getattr(sub, "metadata", None) or {}
+                meta = stripe_metadata(getattr(sub, "metadata", None))
                 await update_user_billing(
                     user_id=meta.get("user_id"),
                     stripe_subscription_id=sub.id,
