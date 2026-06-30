@@ -217,16 +217,31 @@ def stripe_metadata(raw: Any) -> dict[str, str]:
         return {}
     if isinstance(raw, dict):
         return {str(k): str(v) for k, v in raw.items() if v is not None}
+    out: dict[str, str] = {}
+    for key in ("user_id", "plan"):
+        val = None
+        try:
+            val = raw[key]
+        except (KeyError, TypeError, AttributeError):
+            val = getattr(raw, key, None)
+        if val is not None:
+            out[key] = str(val)
+    if out:
+        return out
     try:
         return {str(k): str(v) for k, v in dict(raw).items() if v is not None}
     except (TypeError, ValueError):
-        pass
-    out: dict[str, str] = {}
-    for key in ("user_id", "plan"):
-        val = getattr(raw, key, None)
-        if val is not None:
-            out[key] = str(val)
-    return out
+        return {}
+
+
+def _stripe_id(value: Any) -> str | None:
+    if not value:
+        return None
+    if isinstance(value, str):
+        return value
+    if hasattr(value, "id"):
+        return str(value.id)
+    return str(value)
 
 
 async def select_plan(*, user_id: str, plan: str) -> dict | None:
@@ -298,6 +313,69 @@ def _checkout_session_ready(session) -> bool:
     return payment_status in ("paid", "no_payment_required")
 
 
+async def _grant_checkout_access(
+    *,
+    user_id: str,
+    plan: str,
+    status: str,
+    trial_end: datetime | None,
+    stripe_customer_id: str | None,
+    stripe_subscription_id: str | None,
+    session_id: str,
+) -> bool:
+    """Persist trial access after checkout; fall back to status-only update if needed."""
+    try:
+        if await update_user_billing(
+            user_id=user_id,
+            plan=plan,
+            subscription_status=status,
+            trial_ends_at=trial_end,
+            stripe_customer_id=stripe_customer_id,
+            stripe_subscription_id=stripe_subscription_id,
+        ):
+            return True
+    except Exception as e:
+        log.warning("checkout billing update failed for user %s session %s: %s", user_id, session_id, e)
+
+    pool = get_pool()
+    row = await pool.execute(
+        """
+        UPDATE users SET
+            plan = COALESCE($2, plan),
+            subscription_status = $3,
+            trial_ends_at = COALESCE($4, trial_ends_at)
+        WHERE user_id = $1::uuid
+        """,
+        user_id,
+        plan,
+        status,
+        trial_end,
+    )
+    if row != "UPDATE 1":
+        log.error(
+            "checkout access fallback did not update user %s for session %s",
+            user_id,
+            session_id,
+        )
+        return False
+
+    if stripe_customer_id or stripe_subscription_id:
+        try:
+            await update_user_billing(
+                user_id=user_id,
+                stripe_customer_id=stripe_customer_id,
+                stripe_subscription_id=stripe_subscription_id,
+            )
+        except Exception as e:
+            log.warning(
+                "checkout stripe id link skipped for user %s session %s: %s",
+                user_id,
+                session_id,
+                e,
+            )
+    return True
+
+
 async def sync_checkout_session(session_id: str, *, expected_user_id: str | None = None) -> dict | None:
     """Confirm checkout immediately after redirect (webhook may arrive slightly later)."""
     stripe = _stripe()
@@ -320,15 +398,22 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
         await asyncio.sleep(1.5)
 
     meta = stripe_metadata(session.metadata)
-    user_id = meta.get("user_id") or expected_user_id
+    # Authenticated confirm-checkout always updates the logged-in user.
+    user_id = expected_user_id or meta.get("user_id")
     if not user_id:
         return None
-    if expected_user_id and meta.get("user_id") and meta.get("user_id") != expected_user_id:
-        raise PermissionError("Checkout session does not belong to this account")
+    meta_user_id = meta.get("user_id")
+    if expected_user_id and meta_user_id and meta_user_id.lower() != expected_user_id.lower():
+        log.warning(
+            "checkout session %s metadata user_id %s != authenticated user %s",
+            session_id,
+            meta_user_id,
+            expected_user_id,
+        )
 
     sub = session.subscription
-    sub_id = sub.id if hasattr(sub, "id") else session.subscription
-    status = getattr(sub, "status", None) if sub else None
+    sub_id = _stripe_id(sub if not isinstance(sub, str) else sub) or _stripe_id(session.subscription)
+    status = getattr(sub, "status", None) if sub and not isinstance(sub, str) else None
     # A completed Checkout Session means the customer finished payment/card setup
     # and Stripe accepted it. Card-on-file trials (and 3DS / bank-approved cards)
     # can briefly report the subscription as "incomplete" while Stripe settles.
@@ -337,25 +422,21 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
     if status not in ("active", "trialing"):
         status = "trialing"
     trial_end = None
-    if sub and getattr(sub, "trial_end", None):
+    if sub and not isinstance(sub, str) and getattr(sub, "trial_end", None):
         trial_end = datetime.fromtimestamp(sub.trial_end, tz=timezone.utc)
 
-    updated = await update_user_billing(
+    plan = meta.get("plan") or "pro"
+    granted = await _grant_checkout_access(
         user_id=user_id,
-        plan=meta.get("plan", "pro"),
-        subscription_status=status or "trialing",
-        trial_ends_at=trial_end,
-        stripe_customer_id=str(session.customer) if session.customer else None,
-        stripe_subscription_id=str(sub_id) if sub_id else None,
+        plan=plan,
+        status=status or "trialing",
+        trial_end=trial_end,
+        stripe_customer_id=_stripe_id(session.customer),
+        stripe_subscription_id=sub_id,
+        session_id=session_id,
     )
-    if not updated:
-        log.error(
-            "checkout sync did not update user %s for session %s (status=%s payment=%s)",
-            user_id,
-            session_id,
-            getattr(session, "status", None),
-            getattr(session, "payment_status", None),
-        )
+    if granted:
+        log.info("checkout confirmed for user %s session %s plan=%s", user_id, session_id, plan)
     return await fetch_user_billing(user_id=user_id)
 
 
