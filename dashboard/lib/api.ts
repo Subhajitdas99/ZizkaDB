@@ -368,3 +368,27 @@ export function billingGateRedirect(status: BillingStatus): string | null {
   if (!status.has_access) return '/signup/plan'
   return null
 }
+
+export interface AccountOptions {
+  managed_cloud: boolean
+  retention_trial_available?: boolean
+  retention_trial_days?: number
+  trial_ends_at?: string | null
+  email?: string | null
+}
+
+export async function getAccountOptions(token: string): Promise<AccountOptions> {
+  return apiFetch('/v1/account/options', token)
+}
+
+export async function grantRetentionTrial(token: string): Promise<{
+  message: string
+  trial_ends_at: string
+  retention_trial_available: boolean
+}> {
+  return apiFetch('/v1/account/retention-trial', token, { method: 'POST' })
+}
+
+export async function deleteManagedAccount(token: string): Promise<{ message: string }> {
+  return apiFetch('/v1/account', token, { method: 'DELETE' })
+}
