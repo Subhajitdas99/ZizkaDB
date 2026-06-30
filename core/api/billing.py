@@ -56,6 +56,8 @@ async def stripe_webhook(request: Request):
             if sub_id:
                 sub = stripe.Subscription.retrieve(sub_id)
                 status = sub.status
+                if status not in ("active", "trialing"):
+                    status = "trialing"
                 if sub.trial_end:
                     trial_end = datetime.fromtimestamp(sub.trial_end, tz=timezone.utc)
             await update_user_billing(

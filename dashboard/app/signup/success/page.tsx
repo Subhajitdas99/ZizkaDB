@@ -60,7 +60,7 @@ function SignupSuccessInner() {
     }
 
     async function confirm() {
-      const maxAttempts = 10
+      const maxAttempts = 5
 
       for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         try {
@@ -79,7 +79,7 @@ function SignupSuccessInner() {
           }
 
           if (isPendingStripeConfirmation(liveStatus) && attempt < maxAttempts) {
-            await wait(1500)
+            await wait(2000)
             continue
           }
 

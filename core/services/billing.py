@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from datetime import datetime, timezone
@@ -271,19 +272,41 @@ async def create_checkout_session(*, user_id: str, email: str, plan: str) -> dic
     return {"url": session.url, "session_id": session.id}
 
 
+def _checkout_session_ready(session) -> bool:
+    """True once Stripe has accepted checkout (may lag redirect by a few seconds)."""
+    if getattr(session, "status", None) == "complete":
+        return True
+    payment_status = getattr(session, "payment_status", None)
+    return payment_status in ("paid", "no_payment_required")
+
+
 async def sync_checkout_session(session_id: str, *, expected_user_id: str | None = None) -> dict | None:
     """Confirm checkout immediately after redirect (webhook may arrive slightly later)."""
     stripe = _stripe()
-    session = stripe.checkout.Session.retrieve(session_id, expand=["subscription"])
+    session = None
+    for attempt in range(1, 21):
+        session = stripe.checkout.Session.retrieve(session_id, expand=["subscription"])
+        if _checkout_session_ready(session):
+            break
+        if attempt == 20:
+            log.warning(
+                "checkout session %s not ready after retries: status=%s payment=%s",
+                session_id,
+                getattr(session, "status", None),
+                getattr(session, "payment_status", None),
+            )
+            user_id = (session.metadata or {}).get("user_id") or expected_user_id
+            if user_id:
+                return await fetch_user_billing(user_id=user_id)
+            return None
+        await asyncio.sleep(1.5)
+
     meta = session.metadata or {}
     user_id = meta.get("user_id") or expected_user_id
     if not user_id:
         return None
     if expected_user_id and meta.get("user_id") and meta.get("user_id") != expected_user_id:
         raise PermissionError("Checkout session does not belong to this account")
-
-    if session.status != "complete":
-        return await fetch_user_billing(user_id=user_id)
 
     sub = session.subscription
     sub_id = sub.id if hasattr(sub, "id") else session.subscription
@@ -299,7 +322,7 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
     if sub and getattr(sub, "trial_end", None):
         trial_end = datetime.fromtimestamp(sub.trial_end, tz=timezone.utc)
 
-    await update_user_billing(
+    updated = await update_user_billing(
         user_id=user_id,
         plan=meta.get("plan", "pro"),
         subscription_status=status or "trialing",
@@ -307,6 +330,14 @@ async def sync_checkout_session(session_id: str, *, expected_user_id: str | None
         stripe_customer_id=str(session.customer) if session.customer else None,
         stripe_subscription_id=str(sub_id) if sub_id else None,
     )
+    if not updated:
+        log.error(
+            "checkout sync did not update user %s for session %s (status=%s payment=%s)",
+            user_id,
+            session_id,
+            getattr(session, "status", None),
+            getattr(session, "payment_status", None),
+        )
     return await fetch_user_billing(user_id=user_id)
 
 
