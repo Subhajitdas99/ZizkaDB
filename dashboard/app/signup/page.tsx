@@ -130,9 +130,7 @@ function SignupForm() {
                   {loading ? 'Sending...' : 'Send verification code →'}
                 </button>
                 <p style={{ fontSize: 12, color: '#bbb', textAlign: 'center', margin: 0 }}>
-                  {process.env.NEXT_PUBLIC_DEV_MODE === 'true'
-                    ? 'Self-hosted — no billing required.'
-                    : '30-day free trial · card required after email verification'}
+                  Free to start · No credit card required
                 </p>
               </form>
             </>
