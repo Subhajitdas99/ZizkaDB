@@ -64,6 +64,8 @@ function SignupPlanInner() {
 
     let cancelled = false
 
+    const wasCanceled = searchParams.get('canceled') === '1'
+
     async function init() {
       try {
         const [config, status] = await Promise.all([
@@ -77,10 +79,14 @@ function SignupPlanInner() {
           return
         }
 
-        const gate = billingGateRedirect(status)
-        if (gate && gate.startsWith('/signup/checkout')) {
-          router.replace(gate)
-          return
+        // If the user clicked Back on Stripe, stay on this page so they can
+        // change or reconfirm their plan instead of looping back to checkout.
+        if (!wasCanceled) {
+          const gate = billingGateRedirect(status)
+          if (gate && gate.startsWith('/signup/checkout')) {
+            router.replace(gate)
+            return
+          }
         }
 
         setPlans(config.plans)
