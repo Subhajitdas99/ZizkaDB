@@ -230,7 +230,10 @@ function SignupPlanInner() {
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 13, color: '#aaa', marginTop: 20 }}>
-          <Link href="/login" style={{ color: '#555', textDecoration: 'none' }}>← Back to sign in</Link>
+          Not sure yet?{' '}
+          <a href="https://db.zizka.ai/docs" style={{ color: '#555', textDecoration: 'none' }}>
+            Explore docs and other options →
+          </a>
         </p>
       </div>
     </div>
