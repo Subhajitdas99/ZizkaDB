@@ -252,12 +252,17 @@ async def verify_otp(
                 if not gdpr_consent:
                     raise ValueError("GDPR consent is required to create an account")
                 consent_at = datetime.now(timezone.utc)
-                await _save_signup_consent(
-                    db=conn,
-                    user_id=user_id,
-                    consent_at=consent_at,
-                    marketing_consent=bool(marketing_consent),
-                )
+                try:
+                    await _save_signup_consent(
+                        db=conn,
+                        user_id=user_id,
+                        consent_at=consent_at,
+                        marketing_consent=bool(marketing_consent),
+                    )
+                except Exception as e:
+                    # Do not block account creation if consent persistence fails unexpectedly.
+                    # We still enforce that consent was checked in the signup UI/API payload.
+                    log.warning("consent persistence skipped for user %s: %s", user_id, e)
 
             from services.billing import billing_enforced
 
