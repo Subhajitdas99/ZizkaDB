@@ -138,8 +138,7 @@ async def _save_signup_consent(
             """
             UPDATE users SET
                 gdpr_consent_at = $2,
-                marketing_consent = $3,
-                marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
+                marketing_consent = $3
             WHERE user_id = $1::uuid
             """,
             user_id,
@@ -162,8 +161,7 @@ async def _save_signup_consent(
         """
         UPDATE users SET
             gdpr_consent_at = $2,
-            marketing_consent = $3,
-            marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
+            marketing_consent = $3
         WHERE user_id = $1::uuid
         """,
         user_id,
