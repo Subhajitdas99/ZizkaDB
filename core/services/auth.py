@@ -90,6 +90,13 @@ async def verify_api_key(raw_key: str) -> dict | None:
 # PASSWORDLESS OTP AUTH
 # ─────────────────────────────────────────
 
+async def email_exists(email: str) -> bool:
+    email = email.lower().strip()
+    pool = get_pool()
+    row = await pool.fetchval("SELECT 1 FROM users WHERE email = $1", email)
+    return row is not None
+
+
 async def request_otp(email: str) -> None:
     email = email.lower().strip()
     otp = str(random.randint(100000, 999999))

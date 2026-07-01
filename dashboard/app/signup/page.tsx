@@ -34,6 +34,7 @@ function SignupForm() {
   const [step, setStep] = useState<'email' | 'otp'>('email')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false)
 
   useEffect(() => {
     const planParam = searchParams.get('plan')
@@ -52,11 +53,16 @@ function SignupForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setAlreadyRegistered(false)
     try {
-      await requestOtp(email)
+      await requestOtp(email, 'signup')
       setStep('otp')
-    } catch {
-      setError('Could not send code. Please try again.')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not send code. Please try again.'
+      if (msg.toLowerCase().includes('already registered')) {
+        setAlreadyRegistered(true)
+      }
+      setError(msg)
     } finally {
       setLoading(false)
     }
@@ -129,7 +135,19 @@ function SignupForm() {
                     onBlur={e => (e.target.style.borderColor = '#ddd')}
                   />
                 </div>
-                {error && <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>{error}</p>}
+                {error && (
+                  <p style={{ fontSize: 13, color: '#ef4444', margin: 0 }}>
+                    {error}
+                    {alreadyRegistered && (
+                      <>
+                        {' '}
+                        <Link href="/login" style={{ color: '#111', fontWeight: 600 }}>
+                          Sign in →
+                        </Link>
+                      </>
+                    )}
+                  </p>
+                )}
                 <button
                   type="submit"
                   disabled={loading || !email}

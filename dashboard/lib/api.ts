@@ -248,15 +248,18 @@ export async function revokeApiKey(token: string, keyId: string) {
   })
 }
 
-export async function requestOtp(email: string) {
+export async function requestOtp(email: string, intent?: 'signup' | 'login') {
   const res = await fetch(`${API}/v1/auth/request-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.toLowerCase().trim() }),
+    body: JSON.stringify({
+      email: email.toLowerCase().trim(),
+      ...(intent ? { intent } : {}),
+    }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))
-    throw new Error(typeof err.detail === 'string' ? err.detail : 'Failed to send code')
+    throw new Error(formatApiError(err.detail, 'Failed to send code'))
   }
   return res.json()
 }

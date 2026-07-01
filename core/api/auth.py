@@ -1,8 +1,10 @@
 import os
 import time
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, EmailStr
-from services.auth import request_otp, verify_otp, _issue_tokens
+from services.auth import request_otp, verify_otp, _issue_tokens, email_exists
 from services.api_keys import create_api_key_record, revoke_api_key_record
 from api.deps import get_tenant
 from fastapi import Depends
@@ -37,6 +39,7 @@ _DEV_EMAIL     = "dev@localhost"
 
 class RequestOTPBody(BaseModel):
     email: EmailStr
+    intent: Literal["signup", "login"] | None = None
 
 
 class VerifyOTPBody(BaseModel):
@@ -55,6 +58,12 @@ async def request_otp_route(body: RequestOTPBody):
 
     email = body.email.lower().strip()
     _check_otp_rate_limit(email)
+
+    if body.intent == "signup" and await email_exists(email):
+        raise HTTPException(
+            status_code=409,
+            detail="This email is already registered. Please sign in instead.",
+        )
 
     try:
         await request_otp(email)
