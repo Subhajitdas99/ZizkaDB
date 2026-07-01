@@ -35,6 +35,10 @@ function SignupForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [alreadyRegistered, setAlreadyRegistered] = useState(false)
+  // Gate the form render until the guard confirms the user belongs on /signup.
+  // Prevents the email screen from flashing before a redirect to /signup/plan
+  // or /signup/start resolves. Monotonic: only ever set true.
+  const [checked, setChecked] = useState(false)
 
   useEffect(() => {
     // Always start from email step when entering /signup to avoid stale OTP view.
@@ -56,7 +60,10 @@ function SignupForm() {
 
     if (sessionStorage.getItem('signup_consent_gdpr') !== '1') {
       router.replace(`/signup/start?plan=${stored}`)
+      return
     }
+
+    setChecked(true)
   }, [searchParams, router])
 
   async function handleRequestOtp(e: React.FormEvent) {
@@ -105,6 +112,10 @@ function SignupForm() {
       setLoading(false)
     }
   }
+
+  // Hold the neutral loader until the guard resolves, so the email/OTP form
+  // never paints before a pending redirect (fixes the signup screen flicker).
+  if (!checked) return <SignupFallback />
 
   return (
     <div style={{
