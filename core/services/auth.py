@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import secrets
 import os
+import logging
 import jwt
 import bcrypt
 import random
@@ -10,6 +11,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta, timezone
 from db.connection import get_pool
+
+log = logging.getLogger(__name__)
 
 def _required_secret(env_var: str, dev_fallback: str) -> str:
     """
@@ -122,6 +125,53 @@ async def request_otp(email: str) -> None:
     await _send_otp_email(email, otp)
 
 
+async def _save_signup_consent(
+    *,
+    pool,
+    user_id: str,
+    consent_at: datetime,
+    marketing_consent: bool,
+) -> None:
+    """Persist signup consents; self-heal if columns are missing."""
+    try:
+        await pool.execute(
+            """
+            UPDATE users SET
+                gdpr_consent_at = $2,
+                marketing_consent = $3,
+                marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
+            WHERE user_id = $1::uuid
+            """,
+            user_id,
+            consent_at,
+            marketing_consent,
+        )
+        return
+    except Exception as e:
+        log.warning("consent update retry for user %s after schema sync: %s", user_id, e)
+
+    # In case API started before migration touched this DB, self-heal once.
+    await pool.execute(
+        """
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS gdpr_consent_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent BOOLEAN NOT NULL DEFAULT FALSE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_at TIMESTAMPTZ;
+        """
+    )
+    await pool.execute(
+        """
+        UPDATE users SET
+            gdpr_consent_at = $2,
+            marketing_consent = $3,
+            marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
+        WHERE user_id = $1::uuid
+        """,
+        user_id,
+        consent_at,
+        marketing_consent,
+    )
+
+
 async def verify_otp(
     email: str,
     otp: str,
@@ -200,17 +250,11 @@ async def verify_otp(
         if not gdpr_consent:
             raise ValueError("GDPR consent is required to create an account")
         consent_at = datetime.now(timezone.utc)
-        await pool.execute(
-            """
-            UPDATE users SET
-                gdpr_consent_at = $2,
-                marketing_consent = $3,
-                marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
-            WHERE user_id = $1::uuid
-            """,
-            user_id,
-            consent_at,
-            bool(marketing_consent),
+        await _save_signup_consent(
+            pool=pool,
+            user_id=user_id,
+            consent_at=consent_at,
+            marketing_consent=bool(marketing_consent),
         )
 
     from services.billing import billing_enforced, mark_pending_checkout

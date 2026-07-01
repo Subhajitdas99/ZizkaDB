@@ -37,6 +37,12 @@ function SignupForm() {
   const [alreadyRegistered, setAlreadyRegistered] = useState(false)
 
   useEffect(() => {
+    // Always start from email step when entering /signup to avoid stale OTP view.
+    setStep('email')
+    setOtp('')
+    setError('')
+    setAlreadyRegistered(false)
+
     const planParam = searchParams.get('plan')
     if (planParam === 'pro' || planParam === 'team') {
       sessionStorage.setItem('signup_plan', planParam)
