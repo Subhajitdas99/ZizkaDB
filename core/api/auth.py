@@ -1,5 +1,6 @@
 import os
 import time
+import logging
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Response
@@ -12,6 +13,7 @@ from db.connection import get_pool
 from services.event_write import write_event
 
 router = APIRouter()
+log = logging.getLogger(__name__)
 
 # Per-email OTP request limits (in-memory; resets after window)
 _OTP_RATE_WINDOW_SEC = 15 * 60   # 15 minutes
@@ -87,6 +89,12 @@ async def verify_otp_route(body: VerifyOTPBody, response: Response):
         )
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        log.exception("verify_otp failed for %s: %s", email, e)
+        raise HTTPException(
+            status_code=500,
+            detail="Could not complete account setup. Please request a new code and try again.",
+        )
 
     from services.billing import billing_status_payload, fetch_user_billing
 

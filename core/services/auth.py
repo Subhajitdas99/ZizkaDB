@@ -127,14 +127,14 @@ async def request_otp(email: str) -> None:
 
 async def _save_signup_consent(
     *,
-    pool,
+    db,
     user_id: str,
     consent_at: datetime,
     marketing_consent: bool,
 ) -> None:
     """Persist signup consents; self-heal if columns are missing."""
     try:
-        await pool.execute(
+        await db.execute(
             """
             UPDATE users SET
                 gdpr_consent_at = $2,
@@ -151,14 +151,14 @@ async def _save_signup_consent(
         log.warning("consent update retry for user %s after schema sync: %s", user_id, e)
 
     # In case API started before migration touched this DB, self-heal once.
-    await pool.execute(
+    await db.execute(
         """
         ALTER TABLE users ADD COLUMN IF NOT EXISTS gdpr_consent_at TIMESTAMPTZ;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent BOOLEAN NOT NULL DEFAULT FALSE;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_at TIMESTAMPTZ;
         """
     )
-    await pool.execute(
+    await db.execute(
         """
         UPDATE users SET
             gdpr_consent_at = $2,
@@ -205,76 +205,89 @@ async def verify_otp(
         row["otp_id"],
     )
 
-    # Upsert user + tenant — explicit ::text casts avoid asyncpg type ambiguity
-    user = await pool.fetchrow(
-        """
-        WITH ins_tenant AS (
-            INSERT INTO tenants (name)
-            SELECT $1::text
-            WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $1::text)
-            RETURNING tenant_id
-        ),
-        ins_user AS (
-            INSERT INTO users (email, tenant_id, last_login)
-            VALUES (
-                $1::text,
-                (SELECT tenant_id FROM ins_tenant),
-                NOW()
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            # Upsert user + tenant — explicit ::text casts avoid asyncpg type ambiguity
+            user = await conn.fetchrow(
+                """
+                WITH ins_tenant AS (
+                    INSERT INTO tenants (name)
+                    SELECT $1::text
+                    WHERE NOT EXISTS (SELECT 1 FROM users WHERE email = $1::text)
+                    RETURNING tenant_id
+                ),
+                ins_user AS (
+                    INSERT INTO users (email, tenant_id, last_login)
+                    VALUES (
+                        $1::text,
+                        (SELECT tenant_id FROM ins_tenant),
+                        NOW()
+                    )
+                    ON CONFLICT (email) DO UPDATE SET last_login = NOW()
+                    RETURNING user_id, email, tenant_id
+                )
+                SELECT * FROM ins_user
+                """,
+                email,
             )
-            ON CONFLICT (email) DO UPDATE SET last_login = NOW()
-            RETURNING user_id, email, tenant_id
-        )
-        SELECT * FROM ins_user
-        """,
-        email,
-    )
 
-    user_id = str(user["user_id"])
-    tenant_id = user["tenant_id"]
+            user_id = str(user["user_id"])
+            tenant_id = user["tenant_id"]
 
-    # Legacy rows: user without tenant breaks /v1/agents (JWT has no valid tenant_id)
-    if not tenant_id:
-        tenant_id = await pool.fetchval(
-            "INSERT INTO tenants (name) VALUES ($1) RETURNING tenant_id",
-            email,
-        )
-        await pool.execute(
-            "UPDATE users SET tenant_id = $1::uuid WHERE user_id = $2::uuid",
-            tenant_id,
-            user_id,
-        )
+            # Legacy rows: user without tenant breaks /v1/agents (JWT has no valid tenant_id)
+            if not tenant_id:
+                tenant_id = await conn.fetchval(
+                    "INSERT INTO tenants (name) VALUES ($1) RETURNING tenant_id",
+                    email,
+                )
+                await conn.execute(
+                    "UPDATE users SET tenant_id = $1::uuid WHERE user_id = $2::uuid",
+                    tenant_id,
+                    user_id,
+                )
 
-    tenant_id = str(tenant_id)
+            tenant_id = str(tenant_id)
 
-    if is_new_user:
-        if not gdpr_consent:
-            raise ValueError("GDPR consent is required to create an account")
-        consent_at = datetime.now(timezone.utc)
-        await _save_signup_consent(
-            pool=pool,
-            user_id=user_id,
-            consent_at=consent_at,
-            marketing_consent=bool(marketing_consent),
-        )
+            if is_new_user:
+                if not gdpr_consent:
+                    raise ValueError("GDPR consent is required to create an account")
+                consent_at = datetime.now(timezone.utc)
+                await _save_signup_consent(
+                    db=conn,
+                    user_id=user_id,
+                    consent_at=consent_at,
+                    marketing_consent=bool(marketing_consent),
+                )
 
-    from services.billing import billing_enforced, mark_pending_checkout
+            from services.billing import billing_enforced
 
-    if billing_enforced():
-        await mark_pending_checkout(user_id)
-    else:
-        # Self-host / local: 30-day Pro trial without Stripe
-        await pool.execute(
-            """
-            UPDATE users
-            SET plan = COALESCE(plan, 'pro'),
-                subscription_status = COALESCE(subscription_status, 'trialing'),
-                trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
-            WHERE user_id = $1::uuid
-              AND plan IS NULL
-              AND subscription_status IS NULL
-            """,
-            user_id,
-        )
+            if billing_enforced():
+                # mark_pending_checkout uses pool-level execute; keep inside txn boundary via direct SQL
+                await conn.execute(
+                    """
+                    UPDATE users
+                    SET subscription_status = 'pending_checkout'
+                    WHERE user_id = $1::uuid
+                      AND stripe_subscription_id IS NULL
+                      AND subscription_status IS DISTINCT FROM 'active'
+                      AND subscription_status IS DISTINCT FROM 'trialing'
+                    """,
+                    user_id,
+                )
+            else:
+                # Self-host / local: 30-day Pro trial without Stripe
+                await conn.execute(
+                    """
+                    UPDATE users
+                    SET plan = COALESCE(plan, 'pro'),
+                        subscription_status = COALESCE(subscription_status, 'trialing'),
+                        trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
+                    WHERE user_id = $1::uuid
+                      AND plan IS NULL
+                      AND subscription_status IS NULL
+                    """,
+                    user_id,
+                )
 
     return _issue_tokens(user_id, email, tenant_id)
 
