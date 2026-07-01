@@ -45,6 +45,8 @@ class RequestOTPBody(BaseModel):
 class VerifyOTPBody(BaseModel):
     email: EmailStr
     otp: str
+    gdpr_consent: bool | None = None
+    marketing_consent: bool | None = None
 
 
 class CreateAPIKeyBody(BaseModel):
@@ -77,7 +79,12 @@ async def request_otp_route(body: RequestOTPBody):
 async def verify_otp_route(body: VerifyOTPBody, response: Response):
     email = body.email.lower().strip()
     try:
-        tokens = await verify_otp(email, body.otp)
+        tokens = await verify_otp(
+            email,
+            body.otp,
+            gdpr_consent=body.gdpr_consent,
+            marketing_consent=body.marketing_consent,
+        )
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 

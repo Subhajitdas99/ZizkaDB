@@ -264,11 +264,20 @@ export async function requestOtp(email: string, intent?: 'signup' | 'login') {
   return res.json()
 }
 
-export async function verifyOtp(email: string, otp: string) {
+export async function verifyOtp(
+  email: string,
+  otp: string,
+  opts?: { gdprConsent?: boolean; marketingConsent?: boolean },
+) {
   const res = await fetch(`${API}/v1/auth/verify-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.toLowerCase().trim(), otp: otp.trim() }),
+    body: JSON.stringify({
+      email: email.toLowerCase().trim(),
+      otp: otp.trim(),
+      ...(opts?.gdprConsent ? { gdpr_consent: true } : {}),
+      ...(opts?.marketingConsent ? { marketing_consent: true } : {}),
+    }),
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }))

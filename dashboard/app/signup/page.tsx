@@ -40,12 +40,16 @@ function SignupForm() {
     const planParam = searchParams.get('plan')
     if (planParam === 'pro' || planParam === 'team') {
       sessionStorage.setItem('signup_plan', planParam)
-    } else {
-      // No plan in URL — check sessionStorage; if nothing, redirect to plan selection
-      const stored = sessionStorage.getItem('signup_plan')
-      if (stored !== 'pro' && stored !== 'team') {
-        router.replace('/signup/plan')
-      }
+    }
+
+    const stored = sessionStorage.getItem('signup_plan')
+    if (stored !== 'pro' && stored !== 'team') {
+      router.replace('/signup/plan')
+      return
+    }
+
+    if (sessionStorage.getItem('signup_consent_gdpr') !== '1') {
+      router.replace(`/signup/start?plan=${stored}`)
     }
   }, [searchParams, router])
 
@@ -73,8 +77,15 @@ function SignupForm() {
     setLoading(true)
     setError('')
     try {
-      const data = await verifyOtp(email, otp)
+      const gdprConsent = sessionStorage.getItem('signup_consent_gdpr') === '1'
+      const marketingConsent = sessionStorage.getItem('signup_consent_marketing') === '1'
+      const data = await verifyOtp(email, otp, {
+        gdprConsent,
+        marketingConsent,
+      })
       setToken(data.access_token)
+      sessionStorage.removeItem('signup_consent_gdpr')
+      sessionStorage.removeItem('signup_consent_marketing')
       // Save the selected plan to the account (best-effort; doesn't block login)
       const plan = sessionStorage.getItem('signup_plan') as 'pro' | 'team' | null
       if (plan === 'pro' || plan === 'team') {

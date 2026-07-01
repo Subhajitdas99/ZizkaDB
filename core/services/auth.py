@@ -122,9 +122,17 @@ async def request_otp(email: str) -> None:
     await _send_otp_email(email, otp)
 
 
-async def verify_otp(email: str, otp: str) -> dict:
+async def verify_otp(
+    email: str,
+    otp: str,
+    *,
+    gdpr_consent: bool | None = None,
+    marketing_consent: bool | None = None,
+) -> dict:
     email = email.lower().strip()
     pool = get_pool()
+
+    is_new_user = not await email_exists(email)
 
     row = await pool.fetchrow(
         """
@@ -187,6 +195,23 @@ async def verify_otp(email: str, otp: str) -> dict:
         )
 
     tenant_id = str(tenant_id)
+
+    if is_new_user:
+        if not gdpr_consent:
+            raise ValueError("GDPR consent is required to create an account")
+        consent_at = datetime.now(timezone.utc)
+        await pool.execute(
+            """
+            UPDATE users SET
+                gdpr_consent_at = $2,
+                marketing_consent = $3,
+                marketing_consent_at = CASE WHEN $3 THEN $2 ELSE NULL END
+            WHERE user_id = $1::uuid
+            """,
+            user_id,
+            consent_at,
+            bool(marketing_consent),
+        )
 
     from services.billing import billing_enforced, mark_pending_checkout
 

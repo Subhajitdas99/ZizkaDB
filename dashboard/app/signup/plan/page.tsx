@@ -33,7 +33,7 @@ export default function SignupPlanPage() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('signup_plan', selected)
     }
-    router.push(`/signup?plan=${selected}`)
+    router.push(`/signup/start?plan=${selected}`)
   }
 
   return (
