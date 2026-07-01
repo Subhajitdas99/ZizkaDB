@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { requestOtp, verifyOtp, postAuthRedirect } from '@/lib/api'
+import { requestOtp, verifyOtp, postAuthRedirect, selectBillingPlan } from '@/lib/api'
 import { setToken } from '@/lib/auth'
 import { BrandLogo } from '@/components/BrandLogo'
 
@@ -36,11 +36,17 @@ function SignupForm() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const plan = searchParams.get('plan')
-    if (plan === 'pro' || plan === 'team') {
-      sessionStorage.setItem('signup_plan', plan)
+    const planParam = searchParams.get('plan')
+    if (planParam === 'pro' || planParam === 'team') {
+      sessionStorage.setItem('signup_plan', planParam)
+    } else {
+      // No plan in URL — check sessionStorage; if nothing, redirect to plan selection
+      const stored = sessionStorage.getItem('signup_plan')
+      if (stored !== 'pro' && stored !== 'team') {
+        router.replace('/signup/plan')
+      }
     }
-  }, [searchParams])
+  }, [searchParams, router])
 
   async function handleRequestOtp(e: React.FormEvent) {
     e.preventDefault()
@@ -63,6 +69,12 @@ function SignupForm() {
     try {
       const data = await verifyOtp(email, otp)
       setToken(data.access_token)
+      // Save the selected plan to the account (best-effort; doesn't block login)
+      const plan = sessionStorage.getItem('signup_plan') as 'pro' | 'team' | null
+      if (plan === 'pro' || plan === 'team') {
+        sessionStorage.removeItem('signup_plan')
+        try { await selectBillingPlan(data.access_token, plan) } catch { /* non-fatal */ }
+      }
       router.replace(postAuthRedirect(data))
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Invalid or expired code.')

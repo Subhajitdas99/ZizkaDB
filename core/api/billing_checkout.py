@@ -73,8 +73,6 @@ async def billing_status(tenant: dict = Depends(get_tenant)):
 
 @router.post("/select-plan")
 async def choose_plan(body: SelectPlanBody, tenant: dict = Depends(get_tenant)):
-    if not billing_enforced():
-        raise HTTPException(status_code=400, detail="Billing is not enabled on this instance")
 
     try:
         row = await select_plan(user_id=tenant["user_id"], plan=body.plan)

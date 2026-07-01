@@ -248,7 +248,9 @@ async def select_plan(*, user_id: str, plan: str) -> dict | None:
     if not _valid_plan(plan):
         raise ValueError("Invalid plan")
     billing = await fetch_user_billing(user_id=user_id)
-    if billing and has_dashboard_access(billing):
+    # When billing is enforced, block if already subscribed via Stripe.
+    # When billing is not enforced (free trial mode), always allow plan preference to be saved.
+    if billing_enforced() and billing and has_dashboard_access(billing):
         raise ValueError("Subscription already active")
     pool = get_pool()
     await pool.execute(

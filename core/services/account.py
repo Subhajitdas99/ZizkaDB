@@ -15,7 +15,7 @@ RETENTION_TRIAL_DAYS = int(os.getenv("RETENTION_TRIAL_DAYS", "30"))
 
 
 def managed_cloud_only() -> bool:
-    return billing_enforced()
+    return os.getenv("ENV", "development") == "production"
 
 
 async def account_options(*, user_id: str) -> dict:
@@ -31,6 +31,7 @@ async def account_options(*, user_id: str) -> dict:
         "retention_trial_available": not bool(row.get("retention_trial_used")),
         "retention_trial_days": RETENTION_TRIAL_DAYS,
         "trial_ends_at": row["trial_ends_at"].isoformat() if row.get("trial_ends_at") else None,
+        "plan": row.get("plan"),
         "email": row.get("email"),
     }
 
@@ -55,18 +56,18 @@ async def grant_retention_trial(*, user_id: str) -> dict:
     new_trial_end = datetime.now(timezone.utc) + timedelta(days=RETENTION_TRIAL_DAYS)
 
     sub_id = row["stripe_subscription_id"]
-    if sub_id and os.getenv("STRIPE_SECRET_KEY"):
+    stripe_secret = os.getenv("STRIPE_SECRET_KEY", "")
+    if sub_id and stripe_secret:
         try:
             import stripe
 
-            stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+            stripe.api_key = stripe_secret
             stripe.Subscription.modify(
                 sub_id,
                 trial_end=int(new_trial_end.timestamp()),
             )
         except Exception as e:
-            log.error("Stripe trial extension failed for %s: %s", user_id, e)
-            raise ValueError("Could not extend trial on billing. Try again or contact support.")
+            log.warning("Stripe trial extension skipped for %s: %s", user_id, e)
 
     await pool.execute(
         """
@@ -122,15 +123,15 @@ async def delete_managed_account(*, user_id: str, tenant_id: str) -> None:
         raise PermissionError("Tenant mismatch")
 
     sub_id = row["stripe_subscription_id"]
-    if sub_id and os.getenv("STRIPE_SECRET_KEY"):
+    stripe_secret = os.getenv("STRIPE_SECRET_KEY", "")
+    if sub_id and stripe_secret:
         try:
             import stripe
 
-            stripe.api_key = os.getenv("STRIPE_SECRET_KEY", "")
+            stripe.api_key = stripe_secret
             stripe.Subscription.cancel(sub_id)
         except Exception as e:
-            log.error("Stripe cancel failed for %s: %s", user_id, e)
-            raise ValueError("Could not cancel subscription. Try again or contact support.")
+            log.warning("Stripe subscription cancel skipped for %s: %s", user_id, e)
 
     email = row["email"]
     tid = str(row["tenant_id"])

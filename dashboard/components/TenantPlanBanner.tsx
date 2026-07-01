@@ -38,7 +38,7 @@ export function TenantPlanBanner() {
     return () => { cancelled = true }
   }, [])
 
-  if (IS_DEV_MODE || !status?.enforced || !status.plan) return null
+  if (IS_DEV_MODE || !status?.plan) return null
 
   const label = PLAN_LABELS[status.plan] ?? status.plan.toUpperCase()
   const trialing = status.subscription_status === 'trialing'
