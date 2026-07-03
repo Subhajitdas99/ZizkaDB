@@ -17,6 +17,7 @@ import {
   hasSignupConsent,
   SIGNUP_CONSENT_MARKETING_KEY,
   SIGNUP_PLAN_KEY,
+  SIGNUP_PROMO_KEY,
 } from '@/lib/signup-funnel'
 import { BrandLogo } from '@/components/BrandLogo'
 
@@ -56,6 +57,7 @@ function SignupForm() {
   // Prevents the email screen from flashing before a redirect to /signup/plan
   // or /signup/start resolves. Monotonic: only ever set true.
   const [checked, setChecked] = useState(false)
+  const [promoCode, setPromoCode] = useState<string | undefined>()
 
   useEffect(() => {
     // Always start from email step when entering /signup to avoid stale OTP view.
@@ -67,6 +69,15 @@ function SignupForm() {
     const planParam = searchParams.get('plan')
     if (planParam === 'pro' || planParam === 'team') {
       sessionStorage.setItem(SIGNUP_PLAN_KEY, planParam)
+    }
+
+    const promo = searchParams.get('promo')
+    if (promo) {
+      setPromoCode(promo.trim())
+      sessionStorage.setItem(SIGNUP_PROMO_KEY, promo.trim())
+    } else {
+      const storedPromo = sessionStorage.getItem(SIGNUP_PROMO_KEY)
+      if (storedPromo) setPromoCode(storedPromo)
     }
 
     const stored = getStoredSignupPlan()
@@ -144,6 +155,7 @@ function SignupForm() {
         intent: 'signup',
         gdprConsent,
         marketingConsent,
+        promoCode,
       })
       const plan = getStoredSignupPlan()
       setToken(data.access_token)
