@@ -7,17 +7,16 @@ import { IntegrationStrip } from '@/components/marketing/IntegrationStrip'
 import { CalendlyBookModal } from '@/components/marketing/CalendlyBookModal'
 import { CompetitorCompare } from '@/components/marketing/CompetitorCompare'
 import { ConversationCompare } from '@/components/marketing/ConversationCompare'
-import { ThreeWaysConnectSection } from '@/components/marketing/ThreeWaysConnectSection'
 import { TrustBar } from '@/components/marketing/TrustBar'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { MarketingPageStyles } from '@/components/marketing/MarketingPageStyles'
-import { BRAND, BRAND_DARK } from '@/components/brand'
+import { BRAND } from '@/components/brand'
 import { M, container, h2, lead, sectionTitle, primaryBtn, blueBtn, violetBtn, ghostBtn, outlineBtn } from '@/components/marketing/marketing-theme'
 
 const GITHUB_URL = 'https://github.com/Zizka-ai/ZizkaDB'
 
 const HERO_TITLE = 'Operational Database For AI Agents'
-const HERO_VALUE = 'Fix failures in minutes, not after customer complaints.'
+const HERO_VALUE = 'Make your agents auditable, reliable, and more deterministic.'
 const FINAL_CTA_LINE = 'Fix before production breaks'
 
 const MCP_CONFIG = `{
@@ -29,6 +28,39 @@ const MCP_CONFIG = `{
     }
   }
 }`
+
+const WHY_BOXES = [
+  {
+    label: 'How Your Agent Fails',
+    accent: '#ef4444',
+    items: [
+      'LLM probability leads to inconsistent decisions',
+      'Behavioral drift changes agent execution over time',
+      'Tool calls and workflows become unpredictable',
+      'Small prompt changes produce unexpected outputs',
+    ],
+  },
+  {
+    label: 'Business Impact',
+    accent: '#f97316',
+    items: [
+      'Incorrect responses reach end users',
+      'Execution failures damage customer trust',
+      'Increased token and infrastructure costs',
+      'Longer debugging time slows development',
+    ],
+  },
+  {
+    label: 'With ZizkaDB',
+    accent: '#16a34a',
+    items: [
+      'Audit and replay every agent execution',
+      'Measure behavioral drift across defined windows',
+      'Search semantic memory with complete timelines',
+      'Trace root causes using decision lineage',
+    ],
+  },
+]
 
 export default function LandingPage() {
   const [copied, setCopied] = useState<string | null>(null)
@@ -46,7 +78,7 @@ export default function LandingPage() {
 
       <SiteNav />
 
-      {/* ── Hero ── */}
+      {/* Hero */}
       <section className="zdb-section" style={{
         padding: '72px 40px 56px',
         background: '#fff',
@@ -84,18 +116,73 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <ThreeWaysConnectSection />
+      {/* Why ZizkaDB */}
+      <section className="zdb-section" style={{ padding: '80px 40px', background: M.wash }}>
+        <div style={container(1000)}>
+          <p style={sectionTitle}>Why ZizkaDB</p>
+          <h2 style={h2}>Your agents need more than logs.</h2>
+          <p style={{ ...lead, marginBottom: 40 }}>
+            ZizkaDB monitors, audits, and provides you the operational data. You correct your agent.
+          </p>
+
+          <div
+            className="zdb-why-grid"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}
+          >
+            {WHY_BOXES.map((box) => (
+              <div
+                key={box.label}
+                style={{
+                  background: '#fff',
+                  borderRadius: 16,
+                  padding: '28px 24px',
+                  border: `1px solid ${M.line}`,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0,
+                }}
+              >
+                <div style={{
+                  display: 'inline-block',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: 0.8,
+                  textTransform: 'uppercase' as const,
+                  color: box.accent,
+                  marginBottom: 16,
+                  padding: '4px 10px',
+                  background: `${box.accent}12`,
+                  borderRadius: 6,
+                  alignSelf: 'flex-start',
+                }}>
+                  {box.label}
+                </div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {box.items.map((item) => (
+                    <li key={item} style={{ display: 'flex', gap: 10, fontSize: 14, color: '#000', fontWeight: 500, lineHeight: 1.55 }}>
+                      <span style={{ color: box.accent, fontWeight: 800, flexShrink: 0, marginTop: 1 }}>
+                        {box.accent === '#16a34a' ? '✓' : '·'}
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <ConversationCompare />
 
-      {/* ── Engineering teams ── */}
-      <section className="zdb-section" style={{ padding: '88px 40px', background: M.wash }}>
+      {/* Ship and debug */}
+      <section className="zdb-section" style={{ padding: '88px 40px', background: '#fff' }}>
         <div style={container(960)}>
-          <p style={sectionTitle}>For engineering teams</p>
+          <p style={sectionTitle}>For teams building with agents</p>
           <h2 style={h2}>Ship agents faster. Debug them in production.</h2>
           <p style={lead}>Whether you are building a single agent or a multi-agent system, ZizkaDB fits how dev teams work.</p>
 
-          <div className="zdb-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="zdb-split" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
             <div style={{
               padding: '32px 28px', borderRadius: 20, background: '#fff',
               border: `1px solid ${M.blue}33`, boxShadow: '0 8px 32px rgba(37,99,235,0.08)',
@@ -138,21 +225,38 @@ export default function LandingPage() {
                 Start free trial
               </Link>
             </div>
+
+            <div style={{
+              padding: '32px 28px', borderRadius: 20, background: '#fff',
+              border: `1px solid ${BRAND}33`, boxShadow: '0 8px 32px rgba(249,115,22,0.07)',
+            }}>
+              <div style={{ fontSize: 28, marginBottom: 16 }}>🏢</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, margin: '0 0 10px', color: '#000' }}>
+                Host on your private cloud
+              </h3>
+              <p style={{ fontSize: 15, color: '#000', lineHeight: 1.65, margin: '0 0 20px', fontWeight: 500 }}>
+                Deploy the complete ZizkaDB stack in your own cloud. Understand your multi-agent fleet with
+                real-time operational insights so your team can correct failures before they reach users.
+              </p>
+              <Link href="/enterprise" style={{ ...outlineBtn, fontSize: 14, padding: '12px 22px', textDecoration: 'none' }}>
+                Explore Enterprise
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Trust ── */}
-      <section className="zdb-section" style={{ padding: '72px 40px', background: '#fff' }}>
+      {/* Trust */}
+      <section className="zdb-section" style={{ padding: '72px 40px', background: M.wash }}>
         <div style={container(960)}>
-          <p style={sectionTitle}>Trust & security</p>
+          <p style={sectionTitle}>Trust and security</p>
           <h2 style={{ ...h2, marginBottom: 36 }}>Production-ready from day one</h2>
           <TrustBar />
         </div>
       </section>
 
-      {/* ── Pricing ── */}
-      <section id="pricing" className="zdb-section" style={{ padding: '88px 40px', background: M.wash }}>
+      {/* Pricing */}
+      <section id="pricing" className="zdb-section" style={{ padding: '88px 40px', background: '#fff' }}>
         <div style={container(900)}>
           <p style={sectionTitle}>Pricing</p>
           <h2 style={h2}>Start free. Scale when you need to.</h2>
@@ -161,21 +265,34 @@ export default function LandingPage() {
           <div className="zdb-price-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
             {([
               {
-                name: 'Self-Hosted', price: 'Free', sub: 'forever',
-                features: ['Full feature set', 'Your infrastructure', 'Docker Compose', 'Community support'],
-                cta: 'Setup guide', href: '/docs', highlight: false,
+                name: 'Self-Hosted',
+                price: 'Free',
+                sub: 'forever',
+                features: ['1 API key', 'Your infrastructure', 'Docker Compose', 'Community support'],
+                cta: 'Setup guide',
+                href: '/docs',
+                highlight: false,
+                note: '',
               },
               {
-                name: 'Pro', price: '€39', sub: '/ month',
-                features: ['100M events', '90-day retention', '3 active API keys', 'Email support'],
-                cta: 'Start free trial', href: '/signup?plan=pro', highlight: true,
-                note: '30-day free trial · No credit card required',
+                name: 'Pro',
+                price: '\u20ac39',
+                sub: '/ month',
+                features: ['1 million events / month', '2 projects', '30-day free trial', 'Email support'],
+                cta: 'Start free trial',
+                href: '/signup?plan=pro',
+                highlight: true,
+                note: '30-day free trial, no card required',
               },
               {
-                name: 'Team', price: '€99', sub: '/ month',
-                features: ['Up to 1B events/mo', '1-year retention', '10 active API keys', 'Priority support'],
-                cta: 'Start free trial', href: '/signup?plan=team', highlight: false,
-                note: '30-day free trial · No credit card required',
+                name: 'Team',
+                price: '\u20ac99',
+                sub: '/ month',
+                features: ['5 million events / month', '5 projects', '30-day free trial', 'Priority support'],
+                cta: 'Start free trial',
+                href: '/signup?plan=team',
+                highlight: false,
+                note: '30-day free trial, no card required',
               },
             ] as const).map(plan => (
               <div key={plan.name} style={{
@@ -214,15 +331,15 @@ export default function LandingPage() {
                 }}>
                   {plan.cta}
                 </Link>
-                {'note' in plan && plan.note && (
-                  <p style={{ textAlign: 'center', fontSize: 11, color: '#000', marginTop: 8, marginBottom: 0, fontWeight: 600 }}>{plan.note}</p>
-                )}
+                {plan.note ? (
+                  <p style={{ textAlign: 'center', fontSize: 11, color: '#555', marginTop: 8, marginBottom: 0, fontWeight: 600 }}>{plan.note}</p>
+                ) : null}
               </div>
             ))}
           </div>
           <p style={{ textAlign: 'center', marginTop: 28, marginBottom: 0, fontSize: 15, fontWeight: 600, color: '#000' }}>
             <Link href="/enterprise" style={{ color: BRAND, textDecoration: 'none' }}>
-              Enterprise — Contact sales →
+              Enterprise - Contact sales
             </Link>
           </p>
         </div>
@@ -230,7 +347,7 @@ export default function LandingPage() {
 
       <CompetitorCompare />
 
-      {/* ── Final CTA ── */}
+      {/* Final CTA */}
       <section className="zdb-section" style={{
         padding: '88px 40px', background: M.heroBg, position: 'relative', overflow: 'hidden',
       }}>
@@ -245,7 +362,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/signup" style={primaryBtn}>Start free trial</Link>
             <Link href="/docs" style={ghostBtn}>Read the docs</Link>
-            <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={ghostBtn}>GitHub →</a>
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" style={ghostBtn}>GitHub</a>
           </div>
         </div>
       </section>
