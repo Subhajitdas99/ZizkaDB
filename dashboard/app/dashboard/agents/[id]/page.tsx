@@ -85,6 +85,7 @@ interface BaselineResponse {
   recent?:       BaselineWindow
   drift?: {
     score:                      number
+    behavior_change_pct:        number
     verdict:                    'stable' | 'minor_drift' | 'noticeable_drift' | 'significant_drift'
     biggest_changes:            BaselineChange[]
     error_rate_change_pp:       number
@@ -155,6 +156,7 @@ export default function AgentPage() {
   // ── behavior tab state ────────────────────────────────────────────────────
   const [baseline,        setBaseline]        = useState<BaselineResponse | null>(null)
   const [baselineLoading, setBaselineLoading] = useState(false)
+  const [baselineWindow,  setBaselineWindow]  = useState<'24h' | '7d' | '30d' | undefined>(undefined)
 
   // ── initial load ──────────────────────────────────────────────────────────
   const loadEvents = useCallback(async (pageNum = 1, append = false, session: string | null = null, type: string | null = null) => {
@@ -180,9 +182,10 @@ export default function AgentPage() {
   }, [agentId])
 
   useEffect(() => {
-    Promise.all([loadStats(), loadEvents(1)])
+    Promise.all([loadStats(), loadEvents(1), loadBaseline(true)])
       .then(() => setLastSync(new Date()))
       .finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStats, loadEvents])
 
   // ── live polling (30s) ──────────────────────────────────────────────────────
@@ -304,13 +307,13 @@ export default function AgentPage() {
   }
 
   // ── behavior / baseline ───────────────────────────────────────────────────
-  const loadBaseline = async (force = false) => {
+  const loadBaseline = async (force = false, win?: '24h' | '7d' | '30d') => {
     if (!force && baseline) return
     setBaselineLoading(true)
     let token: string
     try { token = requireAuth() } catch { return }
     try {
-      const b = await getAgentBaseline(token, agentId)
+      const b = await getAgentBaseline(token, agentId, 50, win ?? baselineWindow)
       setBaseline(b)
     } finally { setBaselineLoading(false) }
   }
@@ -344,7 +347,7 @@ export default function AgentPage() {
     <Shell agentId={agentId} lastSync={lastSync} onDelete={handleDeleteAgent} deleting={deleting}>
       <AgentApiKeys agentId={agentId} onTestSuccess={refresh} />
       {/* ── Stats ── */}
-      {stats && <StatsRow stats={stats} />}
+      {stats && <StatsRow stats={stats} baseline={baseline} />}
 
       {/* ── Tab bar ── */}
       <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
@@ -386,7 +389,13 @@ export default function AgentPage() {
           baseline={baseline}
           loading={baselineLoading}
           agentId={agentId}
-          onRetry={() => { setBaseline(null); loadBaseline() }}
+          window={baselineWindow}
+          onWindowChange={(win) => {
+            setBaselineWindow(win)
+            setBaseline(null)
+            loadBaseline(true, win)
+          }}
+          onRetry={() => { setBaseline(null); loadBaseline(true, baselineWindow) }}
         />
       )}
 
@@ -712,16 +721,19 @@ export default function AgentPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function StatsRow({ stats }: { stats: Stats }) {
-  const errorCount = stats.top_events.find(e => e.event === 'error')?.count ?? 0
+function StatsRow({ stats, baseline }: { stats: Stats; baseline: BaselineResponse | null }) {
+  const bcPct = baseline?.status === 'ok' ? baseline.drift?.behavior_change_pct ?? null : null
+  const bcValue = bcPct !== null ? `${bcPct.toFixed(1)}%` : '—'
+  const bcColor = bcPct === null ? '#e5e5e5' : bcPct < 5 ? '#22c55e' : bcPct < 15 ? '#eab308' : bcPct < 30 ? '#f97316' : '#ef4444'
+
   return (
     <div className="grid grid-cols-5 gap-3 mb-6">
       {[
-        { label: 'Total events',  value: stats.total_events.toLocaleString(),          icon: BarChart2,   color: '#e5e5e5' },
-        { label: 'Event types',   value: stats.unique_event_types,                     icon: GitBranch,   color: '#e5e5e5' },
-        { label: 'Sessions',      value: stats.sessions,                               icon: Layers,      color: '#e5e5e5' },
-        { label: 'Last event',    value: stats.last_event ? formatDistanceToNow(new Date(stats.last_event), { addSuffix: true }) : '—', icon: Clock, color: '#e5e5e5' },
-        { label: 'Errors',        value: errorCount,                                   icon: AlertCircle, color: errorCount > 0 ? '#ef4444' : '#e5e5e5' },
+        { label: 'Total events', value: stats.total_events.toLocaleString(), icon: BarChart2, color: '#e5e5e5' },
+        { label: 'Event types',  value: stats.unique_event_types,            icon: GitBranch, color: '#e5e5e5' },
+        { label: 'Sessions',     value: stats.sessions,                      icon: Layers,    color: '#e5e5e5' },
+        { label: 'Last event',   value: stats.last_event ? formatDistanceToNow(new Date(stats.last_event), { addSuffix: true }) : '—', icon: Clock, color: '#e5e5e5' },
+        { label: 'Behavior Change', value: bcValue, icon: Activity, color: bcColor },
       ].map(({ label, value, icon: Icon, color }) => (
         <div key={label} className="rounded-xl p-4" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
           <div className="flex items-center gap-1.5 mb-1">
@@ -895,14 +907,54 @@ function WhyPanel({ chain }: { chain: WhyChain }) {
 
 // ── Behavior tab ──────────────────────────────────────────────────────────────
 
-function BehaviorTab({ baseline, loading, agentId, onRetry }: {
-  baseline: BaselineResponse | null
-  loading:  boolean
+function BehaviorTab({ baseline, loading, agentId, window: win, onWindowChange, onRetry }: {
+  baseline:       BaselineResponse | null
+  loading:        boolean
+  agentId:        string
+  window:         '24h' | '7d' | '30d' | undefined
+  onWindowChange: (win: '24h' | '7d' | '30d' | undefined) => void
+  onRetry:        () => void
+}) {
+  const WINDOWS = [
+    { key: undefined,  label: 'Sessions' },
+    { key: '24h' as const, label: '24h' },
+    { key: '7d'  as const, label: '7d'  },
+    { key: '30d' as const, label: '30d' },
+  ]
+
+  return (
+    <div className="space-y-5">
+      {/* Window selector */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs" style={{ color: '#666' }}>Window:</span>
+        <div className="flex gap-1">
+          {WINDOWS.map(w => (
+            <button
+              key={String(w.key)}
+              onClick={() => onWindowChange(w.key)}
+              className="px-3 py-1 rounded-lg text-xs transition"
+              style={{
+                background: win === w.key ? '#f9731620' : 'transparent',
+                color:      win === w.key ? '#f97316'   : '#888',
+                border:     `1px solid ${win === w.key ? '#f9731640' : '#2a2a2a'}`,
+              }}
+            >
+              {w.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      {loading || !baseline ? <Skeleton rows={6} /> : <BehaviorTabContent baseline={baseline} agentId={agentId} win={win} onRetry={onRetry} />}
+    </div>
+  )
+}
+
+function BehaviorTabContent({ baseline, agentId, win, onRetry }: {
+  baseline: BaselineResponse
   agentId:  string
+  win:      '24h' | '7d' | '30d' | undefined
   onRetry:  () => void
 }) {
-  if (loading || !baseline) return <Skeleton rows={6} />
-
   if (baseline.status === 'insufficient_data') {
     return (
       <div className="rounded-xl p-8 text-center" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
@@ -952,7 +1004,7 @@ function BehaviorTab({ baseline, loading, agentId, onRetry }: {
             <TrendingUp size={13} style={{ color: '#22c55e' }} />
             <span className="text-sm font-medium text-white">Biggest behavioral changes</span>
             <span className="text-xs ml-auto" style={{ color: '#e5e5e5' }}>
-              recent {recent_window} vs prior {sessions - recent_window} sessions
+              {win ? `last ${win} vs prior sessions` : `recent ${recent_window} vs prior ${sessions - recent_window} sessions`}
             </span>
           </div>
           <div className="divide-y" style={{ borderColor: '#1f1f1f' }}>
@@ -1006,8 +1058,8 @@ function DriftHeadline({ drift, agentId, sessions, recentWindow, onRetry }: {
             <span className="text-xs font-bold uppercase tracking-wider" style={{ color: m.color }}>{m.label}</span>
           </div>
           <h2 className="text-lg font-semibold" style={{ color: '#fff' }}>
-            Drift score: <span className="font-mono">{drift.score.toFixed(3)}</span>
-            <span className="text-sm font-normal ml-2" style={{ color: '#e5e5e5' }}>({scorePct} / 100)</span>
+            Behavior change: <span className="font-mono">{scorePct}%</span>
+            <span className="text-sm font-normal ml-2" style={{ color: '#e5e5e5' }}>(score {drift.score.toFixed(3)})</span>
           </h2>
           <p className="text-sm mt-1" style={{ color: '#d4d4d4' }}>{m.desc}</p>
         </div>
@@ -1029,9 +1081,9 @@ function DriftHeadline({ drift, agentId, sessions, recentWindow, onRetry }: {
       <div className="grid grid-cols-3 gap-3 mt-4">
         <SubStat label="Sessions analyzed" value={String(sessions)} sub={`${recentWindow} recent vs ${sessions - recentWindow} prior`} />
         <SubStat
-          label="Error rate change"
+          label="Error rate delta"
           value={`${drift.error_rate_change_pp >= 0 ? '+' : ''}${drift.error_rate_change_pp.toFixed(2)}pp`}
-          sub={drift.error_rate_change_pp > 0.5 ? 'Errors are up' : drift.error_rate_change_pp < -0.5 ? 'Errors are down' : 'Effectively unchanged'}
+          sub={drift.error_rate_change_pp > 0.5 ? 'Errors up' : drift.error_rate_change_pp < -0.5 ? 'Errors down' : 'Unchanged'}
           tone={drift.error_rate_change_pp > 0.5 ? 'bad' : drift.error_rate_change_pp < -0.5 ? 'good' : 'neutral'}
         />
         <SubStat

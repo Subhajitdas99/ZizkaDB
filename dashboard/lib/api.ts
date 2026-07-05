@@ -152,10 +152,12 @@ export async function getAgentBaseline(
   token: string,
   agentId: string,
   recentWindow = 50,
+  window?: '24h' | '7d' | '30d',
 ) {
-  const qs = new URLSearchParams({ recent_window: String(recentWindow) }).toString()
+  const qs = new URLSearchParams({ recent_window: String(recentWindow) })
+  if (window) qs.set('window', window)
   return apiFetch(
-    `/v1/agents/${encodeURIComponent(agentId)}/baseline?${qs}`,
+    `/v1/agents/${encodeURIComponent(agentId)}/baseline?${qs.toString()}`,
     token,
   )
 }
