@@ -160,6 +160,47 @@ export async function getAgentBaseline(
   )
 }
 
+export type BehaviorChangeWindow = '24h' | '7d' | '30d' | 'custom'
+
+export interface BehaviorChangeResponse {
+  agent:   string
+  status:  'ok' | 'insufficient_data' | 'no_current_data'
+  message?: string
+  window:  BehaviorChangeWindow
+  window_start?: string
+  window_end?:   string
+  behavior_change_pct?: number
+  verdict?: 'stable' | 'minor' | 'noticeable' | 'significant'
+  components?: {
+    distribution_shift_pct: number
+    transition_shift_pct:   number
+    error_rate_delta_pp:    number
+  }
+  baseline_window?: { to_ts: string; event_count: number }
+  current_window?:  { from_ts: string; to_ts: string; event_count: number }
+  biggest_changes?: Array<{ metric: string; baseline: number; recent: number; delta_pp: number }>
+  total_events?:             number
+  baseline_events_needed?:   number
+  baseline_events_available?: number
+  current_event_count?:      number
+}
+
+export async function getAgentBehaviorChange(
+  token: string,
+  agentId: string,
+  window: BehaviorChangeWindow = '7d',
+  fromTs?: string,
+  toTs?: string,
+): Promise<BehaviorChangeResponse> {
+  const qs = new URLSearchParams({ window })
+  if (fromTs) qs.set('from_ts', fromTs)
+  if (toTs)   qs.set('to_ts',   toTs)
+  return apiFetch(
+    `/v1/agents/${encodeURIComponent(agentId)}/behavior-change?${qs.toString()}`,
+    token,
+  )
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Admin (single-tenant; locked to founder@zizka.ai by the backend)
 // ─────────────────────────────────────────────────────────────────────────────
