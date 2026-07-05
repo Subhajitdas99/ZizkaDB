@@ -6,9 +6,8 @@ import { AgentApiKeys } from '@/components/AgentApiKeys'
 import {
   getEvents, getWhyChain, getAgentStats,
   getAgentSessions, getMemoryDiff, timeTravel, searchEvents,
-  getAgentBaseline, getAgentBehaviorChange,
+  getAgentBaseline,
   deleteAgent,
-  type BehaviorChangeResponse, type BehaviorChangeWindow,
 } from '@/lib/api'
 import { requireAuth } from '@/lib/auth'
 import { formatDistanceToNow, format, formatDuration, intervalToDuration } from 'date-fns'
@@ -157,31 +156,6 @@ export default function AgentPage() {
   const [baseline,        setBaseline]        = useState<BaselineResponse | null>(null)
   const [baselineLoading, setBaselineLoading] = useState(false)
 
-  // ── behavior change (time-windowed) ───────────────────────────────────────
-  const [behaviorChange,        setBehaviorChange]        = useState<BehaviorChangeResponse | null>(null)
-  const [behaviorChangeLoading, setBehaviorChangeLoading] = useState(false)
-  const [behaviorWindow,        setBehaviorWindow]        = useState<BehaviorChangeWindow>('7d')
-  const [customFrom,            setCustomFrom]            = useState('')
-  const [customTo,              setCustomTo]              = useState('')
-
-  // ── behavior change loader ────────────────────────────────────────────────
-  const loadBehaviorChange = useCallback(async (
-    win: BehaviorChangeWindow = '7d',
-    fromTs?: string,
-    toTs?: string,
-    force = false,
-  ) => {
-    if (!force && behaviorChange && behaviorChange.window === win) return
-    setBehaviorChangeLoading(true)
-    let token: string
-    try { token = requireAuth() } catch { return }
-    try {
-      const bc = await getAgentBehaviorChange(token, agentId, win, fromTs, toTs)
-      setBehaviorChange(bc)
-    } finally { setBehaviorChangeLoading(false) }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentId, behaviorChange])
-
   // ── initial load ──────────────────────────────────────────────────────────
   const loadEvents = useCallback(async (pageNum = 1, append = false, session: string | null = null, type: string | null = null) => {
     let token: string
@@ -206,10 +180,9 @@ export default function AgentPage() {
   }, [agentId])
 
   useEffect(() => {
-    Promise.all([loadStats(), loadEvents(1), loadBehaviorChange('7d', undefined, undefined, true)])
+    Promise.all([loadStats(), loadEvents(1)])
       .then(() => setLastSync(new Date()))
       .finally(() => setLoading(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStats, loadEvents])
 
   // ── live polling (30s) ──────────────────────────────────────────────────────
@@ -225,7 +198,6 @@ export default function AgentPage() {
       }
       if (tab === 'behavior') {
         await loadBaseline(true)
-        await loadBehaviorChange(behaviorWindow, customFrom || undefined, customTo || undefined, true)
       }
       if (tab === 'sessions') {
         await loadSessions()
@@ -372,7 +344,7 @@ export default function AgentPage() {
     <Shell agentId={agentId} lastSync={lastSync} onDelete={handleDeleteAgent} deleting={deleting}>
       <AgentApiKeys agentId={agentId} onTestSuccess={refresh} />
       {/* ── Stats ── */}
-      {stats && <StatsRow stats={stats} behaviorChange={behaviorChange} />}
+      {stats && <StatsRow stats={stats} />}
 
       {/* ── Tab bar ── */}
       <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
@@ -415,18 +387,6 @@ export default function AgentPage() {
           loading={baselineLoading}
           agentId={agentId}
           onRetry={() => { setBaseline(null); loadBaseline() }}
-          behaviorChange={behaviorChange}
-          behaviorChangeLoading={behaviorChangeLoading}
-          behaviorWindow={behaviorWindow}
-          customFrom={customFrom}
-          customTo={customTo}
-          onWindowChange={(win, from, to) => {
-            setBehaviorWindow(win)
-            if (from !== undefined) setCustomFrom(from)
-            if (to !== undefined) setCustomTo(to)
-            setBehaviorChange(null)
-            loadBehaviorChange(win, from, to, true)
-          }}
         />
       )}
 
@@ -752,25 +712,16 @@ export default function AgentPage() {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function bcColor(pct: number): string {
-  if (pct < 5)  return '#22c55e'
-  if (pct < 15) return '#eab308'
-  if (pct < 30) return '#f97316'
-  return '#ef4444'
-}
-
-function StatsRow({ stats, behaviorChange }: { stats: Stats; behaviorChange: BehaviorChangeResponse | null }) {
-  const bcPct   = behaviorChange?.status === 'ok' ? behaviorChange.behavior_change_pct ?? null : null
-  const bcLabel = bcPct !== null ? `${bcPct.toFixed(1)}%` : behaviorChange?.status === 'insufficient_data' ? 'Building…' : '—'
-  const bcColor_ = bcPct !== null ? bcColor(bcPct) : '#e5e5e5'
-
+function StatsRow({ stats }: { stats: Stats }) {
+  const errorCount = stats.top_events.find(e => e.event === 'error')?.count ?? 0
   return (
     <div className="grid grid-cols-5 gap-3 mb-6">
       {[
-        { label: 'Total events', value: stats.total_events.toLocaleString(), icon: BarChart2, color: '#e5e5e5' },
-        { label: 'Event types',  value: stats.unique_event_types,            icon: GitBranch, color: '#e5e5e5' },
-        { label: 'Sessions',     value: stats.sessions,                      icon: Layers,    color: '#e5e5e5' },
-        { label: 'Last event',   value: stats.last_event ? formatDistanceToNow(new Date(stats.last_event), { addSuffix: true }) : '—', icon: Clock, color: '#e5e5e5' },
+        { label: 'Total events',  value: stats.total_events.toLocaleString(),          icon: BarChart2,   color: '#e5e5e5' },
+        { label: 'Event types',   value: stats.unique_event_types,                     icon: GitBranch,   color: '#e5e5e5' },
+        { label: 'Sessions',      value: stats.sessions,                               icon: Layers,      color: '#e5e5e5' },
+        { label: 'Last event',    value: stats.last_event ? formatDistanceToNow(new Date(stats.last_event), { addSuffix: true }) : '—', icon: Clock, color: '#e5e5e5' },
+        { label: 'Errors',        value: errorCount,                                   icon: AlertCircle, color: errorCount > 0 ? '#ef4444' : '#e5e5e5' },
       ].map(({ label, value, icon: Icon, color }) => (
         <div key={label} className="rounded-xl p-4" style={{ background: '#111', border: '1px solid #1f1f1f' }}>
           <div className="flex items-center gap-1.5 mb-1">
@@ -780,20 +731,6 @@ function StatsRow({ stats, behaviorChange }: { stats: Stats; behaviorChange: Beh
           <div className="font-semibold font-mono text-lg" style={{ color }}>{value}</div>
         </div>
       ))}
-      {/* Behavior Change */}
-      <div className="rounded-xl p-4" style={{ background: '#111', border: `1px solid ${bcPct !== null ? `${bcColor_}30` : '#1f1f1f'}` }}>
-        <div className="flex items-center gap-1.5 mb-1">
-          <Activity size={12} style={{ color: '#e5e5e5' }} />
-          <span className="text-xs" style={{ color: '#e5e5e5' }}>Behavior Change</span>
-          <span className="text-xs ml-auto px-1.5 py-0.5 rounded" style={{ background: '#1a1a1a', color: '#888', fontSize: 9 }}>7d</span>
-        </div>
-        <div className="font-semibold font-mono text-lg" style={{ color: bcColor_ }}>{bcLabel}</div>
-        {bcPct !== null && (
-          <div className="text-xs mt-0.5" style={{ color: '#666' }}>
-            {behaviorChange?.verdict ?? ''}
-          </div>
-        )}
-      </div>
     </div>
   )
 }
@@ -958,259 +895,88 @@ function WhyPanel({ chain }: { chain: WhyChain }) {
 
 // ── Behavior tab ──────────────────────────────────────────────────────────────
 
-function BehaviorTab({ baseline, loading, agentId, onRetry, behaviorChange, behaviorChangeLoading, behaviorWindow, customFrom, customTo, onWindowChange }: {
-  baseline:              BaselineResponse | null
-  loading:               boolean
-  agentId:               string
-  onRetry:               () => void
-  behaviorChange:        BehaviorChangeResponse | null
-  behaviorChangeLoading: boolean
-  behaviorWindow:        BehaviorChangeWindow
-  customFrom:            string
-  customTo:              string
-  onWindowChange:        (win: BehaviorChangeWindow, from?: string, to?: string) => void
+function BehaviorTab({ baseline, loading, agentId, onRetry }: {
+  baseline: BaselineResponse | null
+  loading:  boolean
+  agentId:  string
+  onRetry:  () => void
 }) {
-  const WINDOWS: { key: BehaviorChangeWindow; label: string }[] = [
-    { key: '24h', label: '24h' },
-    { key: '7d',  label: '7d'  },
-    { key: '30d', label: '30d' },
-    { key: 'custom', label: 'Custom' },
-  ]
+  if (loading || !baseline) return <Skeleton rows={6} />
+
+  if (baseline.status === 'insufficient_data') {
+    return (
+      <div className="rounded-xl p-8 text-center" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
+        <Activity size={32} style={{ color: '#e5e5e5', margin: '0 auto 12px' }} />
+        <h3 className="text-base font-medium mb-2" style={{ color: '#e5e5e5' }}>No baseline yet</h3>
+        <p className="text-sm" style={{ color: '#e5e5e5' }}>
+          {baseline.message}
+        </p>
+      </div>
+    )
+  }
+
+  const recent_window = baseline.recent_window
+  const sessions      = baseline.sessions
+
+  if (baseline.status === 'warming_up') {
+    const recent = baseline.recent
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl p-5" style={{ background: '#1a0f00', border: '1px solid #f9731640' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Activity size={14} style={{ color: '#f97316' }} />
+            <h3 className="text-sm font-semibold" style={{ color: '#fed7aa' }}>Warming up</h3>
+          </div>
+          <p className="text-sm" style={{ color: '#fdba74' }}>
+            {baseline.message} Drift detection kicks in once <span className="font-mono">{agentId}</span> has more than {recent_window} sessions.
+          </p>
+        </div>
+        {recent && <WindowCard title="Current behavior" subtitle={`${recent.sessions} sessions, ${recent.events} events`} window={recent} highlight />}
+      </div>
+    )
+  }
+
+  const drift    = baseline.drift!
+  const baseW    = baseline.baseline!
+  const recentW  = baseline.recent!
 
   return (
     <div className="space-y-5">
-      {/* ── Behavior Change panel (time-windowed) ── */}
-      <div className="rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
-        {/* Window selector */}
-        <div className="px-4 pt-4 pb-3 border-b flex items-center gap-3 flex-wrap" style={{ borderColor: '#1f1f1f' }}>
-          <span className="text-xs font-medium" style={{ color: '#e5e5e5' }}>Behavior Change</span>
-          <div className="flex gap-1">
-            {WINDOWS.map(w => (
-              <button
-                key={w.key}
-                onClick={() => w.key !== 'custom' && onWindowChange(w.key)}
-                className="px-3 py-1 rounded-lg text-xs transition"
-                style={{
-                  background: behaviorWindow === w.key ? '#f9731620' : 'transparent',
-                  color:      behaviorWindow === w.key ? '#f97316' : '#888',
-                  border:     `1px solid ${behaviorWindow === w.key ? '#f9731640' : '#2a2a2a'}`,
-                  cursor: w.key === 'custom' ? 'default' : 'pointer',
-                }}
-              >
-                {w.label}
-              </button>
-            ))}
-          </div>
-          {behaviorWindow === 'custom' && (
-            <div className="flex items-center gap-2 ml-2">
-              <input
-                type="datetime-local"
-                value={customFrom}
-                onChange={e => { /* handled on submit */ }}
-                className="text-xs rounded px-2 py-1 outline-none"
-                style={{ background: '#111', border: '1px solid #2a2a2a', color: '#e5e5e5', colorScheme: 'dark' }}
-              />
-              <span className="text-xs" style={{ color: '#555' }}>to</span>
-              <input
-                type="datetime-local"
-                value={customTo}
-                onChange={e => { /* handled on submit */ }}
-                className="text-xs rounded px-2 py-1 outline-none"
-                style={{ background: '#111', border: '1px solid #2a2a2a', color: '#e5e5e5', colorScheme: 'dark' }}
-              />
-              <button
-                onClick={() => onWindowChange('custom', customFrom, customTo)}
-                className="text-xs px-2 py-1 rounded"
-                style={{ background: '#f9731620', color: '#f97316', border: '1px solid #f9731640' }}
-              >
-                Apply
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-4">
-          {(behaviorChangeLoading || !behaviorChange) ? (
-            <Skeleton rows={3} />
-          ) : behaviorChange.status === 'insufficient_data' ? (
-            <div className="text-center py-6">
-              <Activity size={28} style={{ color: '#555', margin: '0 auto 10px' }} />
-              <p className="text-sm font-medium mb-1" style={{ color: '#e5e5e5' }}>Building baseline epoch</p>
-              <p className="text-xs" style={{ color: '#666' }}>
-                {behaviorChange.message}
-              </p>
-              <div className="mt-3 mx-auto" style={{ maxWidth: 240 }}>
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1a1a1a' }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${Math.round(((behaviorChange.baseline_events_available ?? 0) / (behaviorChange.baseline_events_needed ?? 50)) * 100)}%`,
-                      background: '#f97316',
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between text-xs mt-1" style={{ color: '#555' }}>
-                  <span>{behaviorChange.baseline_events_available ?? 0} events</span>
-                  <span>{behaviorChange.baseline_events_needed ?? 50} needed</span>
-                </div>
-              </div>
-            </div>
-          ) : behaviorChange.status === 'no_current_data' ? (
-            <div className="text-center py-6">
-              <p className="text-sm" style={{ color: '#666' }}>{behaviorChange.message}</p>
-            </div>
-          ) : (
-            <BehaviorChangePanel bc={behaviorChange} />
-          )}
-        </div>
-      </div>
-
-      {/* ── Legacy session-count baseline (drift details) ── */}
-      {(loading || !baseline) ? <Skeleton rows={4} /> : baseline.status === 'insufficient_data' ? (
-        <div className="rounded-xl p-5 text-center" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
-          <p className="text-sm" style={{ color: '#666' }}>{baseline.message}</p>
-        </div>
-      ) : baseline.status === 'warming_up' ? (
-        <div className="rounded-xl p-5" style={{ background: '#1a0f00', border: '1px solid #f9731640' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Activity size={13} style={{ color: '#f97316' }} />
-            <span className="text-xs font-semibold" style={{ color: '#fed7aa' }}>Session baseline warming up</span>
-          </div>
-          <p className="text-xs" style={{ color: '#fdba74' }}>{baseline.message}</p>
-        </div>
-      ) : (() => {
-        const drift   = baseline.drift!
-        const baseW   = baseline.baseline!
-        const recentW = baseline.recent!
-        const sessions = baseline.sessions
-        const recent_window = baseline.recent_window
-        return (
-          <div className="space-y-4">
-            <DriftHeadline drift={drift} agentId={agentId} sessions={sessions} recentWindow={recent_window} onRetry={onRetry} />
-            {drift.biggest_changes.length > 0 && (
-              <div className="rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
-                <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#1f1f1f' }}>
-                  <TrendingUp size={13} style={{ color: '#22c55e' }} />
-                  <span className="text-sm font-medium text-white">Biggest behavioral changes</span>
-                  <span className="text-xs ml-auto" style={{ color: '#e5e5e5' }}>
-                    recent {recent_window} vs prior {sessions - recent_window} sessions
-                  </span>
-                </div>
-                <div className="divide-y" style={{ borderColor: '#1f1f1f' }}>
-                  {drift.biggest_changes.map(c => <ChangeRow key={c.metric} change={c} />)}
-                </div>
-              </div>
-            )}
-            <div className="grid grid-cols-2 gap-4">
-              <WindowCard title="Baseline" subtitle={`${baseW.sessions} sessions, ${baseW.events} events (older)`} window={baseW} />
-              <WindowCard title="Recent" subtitle={`${recentW.sessions} sessions, ${recentW.events} events (newest ${recent_window})`} window={recentW} highlight />
-            </div>
-          </div>
-        )
-      })()}
-    </div>
-  )
-}
-
-function BehaviorChangePanel({ bc }: { bc: BehaviorChangeResponse }) {
-  const pct     = bc.behavior_change_pct ?? 0
-  const color   = bcColor(pct)
-  const comp    = bc.components!
-  const verdict = bc.verdict ?? 'stable'
-
-  const verdictLabel: Record<string, string> = {
-    stable:      'Stable',
-    minor:       'Minor change',
-    noticeable:  'Noticeable change',
-    significant: 'Significant change',
-  }
-  const verdictDesc: Record<string, string> = {
-    stable:      'Agent behavior is consistent with the baseline epoch.',
-    minor:       'Small shifts detected. Worth monitoring.',
-    noticeable:  'Behavior has diverged noticeably. Review contributing factors.',
-    significant: 'Major behavioral shift. Likely a regression or intentional change.',
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Headline */}
-      <div className="flex items-center gap-4">
-        <div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-bold font-mono" style={{ color }}>{pct.toFixed(1)}%</span>
-            <span className="text-sm font-medium" style={{ color: '#888' }}>behavior change</span>
-          </div>
-          <div className="flex items-center gap-2 mt-1">
-            <span
-              className="text-xs font-bold px-2 py-0.5 rounded"
-              style={{ background: `${color}20`, color }}
-            >
-              {verdictLabel[verdict]}
-            </span>
-            <span className="text-xs" style={{ color: '#666' }}>{verdictDesc[verdict]}</span>
-          </div>
-        </div>
-        <div className="flex-1" />
-        <div className="text-right">
-          <div className="text-xs" style={{ color: '#555' }}>vs baseline epoch</div>
-          <div className="text-xs mt-0.5" style={{ color: '#444' }}>
-            {bc.baseline_window?.event_count?.toLocaleString()} events baseline
-          </div>
-          <div className="text-xs" style={{ color: '#444' }}>
-            {bc.current_window?.event_count?.toLocaleString()} events in window
-          </div>
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-2 rounded-full overflow-hidden" style={{ background: '#0a0a0a' }}>
-        <div
-          className="h-full rounded-full transition-all"
-          style={{ width: `${Math.min(pct, 100)}%`, background: color }}
-        />
-      </div>
-
-      {/* Components */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-lg p-3" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
-          <div className="text-xs mb-1" style={{ color: '#666' }}>Event distribution shift</div>
-          <div className="text-base font-semibold font-mono" style={{ color: comp.distribution_shift_pct > 15 ? '#f97316' : '#e5e5e5' }}>
-            {comp.distribution_shift_pct.toFixed(1)}%
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: '#555' }}>40% weight</div>
-        </div>
-        <div className="rounded-lg p-3" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
-          <div className="text-xs mb-1" style={{ color: '#666' }}>Transition pattern shift</div>
-          <div className="text-base font-semibold font-mono" style={{ color: comp.transition_shift_pct > 15 ? '#f97316' : '#e5e5e5' }}>
-            {comp.transition_shift_pct.toFixed(1)}%
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: '#555' }}>40% weight</div>
-        </div>
-        <div className="rounded-lg p-3" style={{ background: '#0a0a0a', border: '1px solid #1a1a1a' }}>
-          <div className="text-xs mb-1" style={{ color: '#666' }}>Error rate delta</div>
-          <div
-            className="text-base font-semibold font-mono"
-            style={{ color: Math.abs(comp.error_rate_delta_pp) > 2 ? (comp.error_rate_delta_pp > 0 ? '#ef4444' : '#22c55e') : '#e5e5e5' }}
-          >
-            {comp.error_rate_delta_pp >= 0 ? '+' : ''}{comp.error_rate_delta_pp.toFixed(2)}pp
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: '#555' }}>20% weight</div>
-        </div>
-      </div>
+      {/* Drift headline */}
+      <DriftHeadline drift={drift} agentId={agentId} sessions={sessions} recentWindow={recent_window} onRetry={onRetry} />
 
       {/* Biggest changes */}
-      {bc.biggest_changes && bc.biggest_changes.length > 0 && (
-        <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #1a1a1a' }}>
-          <div className="px-4 py-2.5 flex items-center gap-2" style={{ background: '#0a0a0a', borderBottom: '1px solid #1a1a1a' }}>
-            <TrendingUp size={12} style={{ color: '#888' }} />
-            <span className="text-xs font-medium" style={{ color: '#888' }}>Top contributing changes</span>
+      {drift.biggest_changes.length > 0 && (
+        <div className="rounded-xl" style={{ background: '#0d0d0d', border: '1px solid #1f1f1f' }}>
+          <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#1f1f1f' }}>
+            <TrendingUp size={13} style={{ color: '#22c55e' }} />
+            <span className="text-sm font-medium text-white">Biggest behavioral changes</span>
+            <span className="text-xs ml-auto" style={{ color: '#e5e5e5' }}>
+              recent {recent_window} vs prior {sessions - recent_window} sessions
+            </span>
           </div>
-          <div>
-            {bc.biggest_changes.map(c => <ChangeRow key={c.metric} change={c} />)}
+          <div className="divide-y" style={{ borderColor: '#1f1f1f' }}>
+            {drift.biggest_changes.map(c => (
+              <ChangeRow key={c.metric} change={c} />
+            ))}
           </div>
         </div>
       )}
+
+      {/* Side by side windows */}
+      <div className="grid grid-cols-2 gap-4">
+        <WindowCard
+          title="Baseline"
+          subtitle={`${baseW.sessions} sessions, ${baseW.events} events (older)`}
+          window={baseW}
+        />
+        <WindowCard
+          title="Recent"
+          subtitle={`${recentW.sessions} sessions, ${recentW.events} events (newest ${recent_window})`}
+          window={recentW}
+          highlight
+        />
+      </div>
     </div>
   )
 }
