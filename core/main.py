@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 import logging
 import os
 
-from db.connection import init_db, close_db, get_pool
+from db.connection import init_db, close_db, get_pool, check_postgres, check_redis, check_qdrant
 from api.auth import _ensure_dev_tenant
 from api.events import router as events_router
 from api.agents import router as agents_router
@@ -80,3 +80,14 @@ app.include_router(account_router,   prefix="/v1/account",   tags=["account"])
 @app.get("/health")
 async def health():
     return {"status": "ok", "version": "0.1.0"}
+
+
+@app.get("/health/deep")
+async def health_deep():
+    checks = {
+        "postgres": await check_postgres(),
+        "redis": await check_redis(),
+        "qdrant": await check_qdrant(),
+    }
+    status = "ok" if all(check.get("ok") for check in checks.values()) else "degraded"
+    return {"status": status, "checks": checks}

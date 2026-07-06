@@ -12,6 +12,7 @@ The `-v` flag deletes the Postgres volume — all signups, tenants, API keys, an
 |------|---------|
 | **Production deploy** | `bash infra/deploy-production.sh` |
 | **Backup only** | `bash infra/backup-postgres.sh` |
+| **Qdrant backup** | `bash infra/backup-qdrant.sh` |
 | **Local fresh install** | `bash scripts/reset-local-db.sh` (laptop only) |
 
 ## Safe production deploy (EC2)
@@ -120,3 +121,26 @@ Dashboard runs on port **3001** behind nginx at `db.zizka.ai`.
 2. Check user count in deploy script output (should not drop)
 3. Login to dashboard
 4. Create agent → Test agent → event appears
+
+## Qdrant backup and restore
+
+**Backup:**
+
+```bash
+bash infra/backup-qdrant.sh
+```
+
+- **Docker:** creates a collection snapshot via Qdrant API → `infra/backups/qdrant_docker_<timestamp>.snapshot`
+- **Native:** tar archive of `.local/qdrant/storage/` → `infra/backups/qdrant_native_<timestamp>.tar.gz`
+
+**Restore (native):**
+
+```bash
+bash scripts/stop-native-stack.sh
+rm -rf .local/qdrant/storage
+mkdir -p .local/qdrant/storage
+tar -xzf infra/backups/qdrant_native_<timestamp>.tar.gz -C .local/qdrant
+bash scripts/restart-native-stack.sh
+```
+
+**Restore (Docker):** use Qdrant snapshot upload API or restore the `qdrant_data` volume from backup per [Qdrant docs](https://qdrant.tech/documentation/database/snapshots/).

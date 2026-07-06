@@ -8,8 +8,22 @@ cd "$ROOT"
 echo "→ ZizkaDB local setup"
 echo ""
 
+if [ "$(uname -m)" = "x86_64" ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
+  echo "WARN: Rosetta shell detected. Docker may fail. Use native arm64 Terminal or:"
+  echo "  bash scripts/restart-native-stack.sh"
+  echo ""
+fi
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "ERROR: Docker is required. Install from https://docs.docker.com/get-docker/" >&2
+  echo "  Fallback (no Docker): bash scripts/bootstrap-local.sh && bash scripts/restart-native-stack.sh" >&2
+  exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  echo "ERROR: Docker daemon not running." >&2
+  echo "  Start OrbStack or Docker Desktop, or use native fallback:" >&2
+  echo "  bash scripts/restart-native-stack.sh" >&2
   exit 1
 fi
 
@@ -64,11 +78,11 @@ echo "import asyncio"
 echo "from zizkadb import ZizkaDB"
 echo "async def main():"
 echo "    async with ZizkaDB(host='http://localhost:8000') as db:"
-echo "        r = await db.log(agent='my-bot', event='started', data={'ok': True})"
+echo "        r = await db.log(agent='support-bot', event='started', data={'ok': True})"
 echo "        print('Logged:', r.event_id)"
 echo "asyncio.run(main())\""
 echo ""
-echo "  4. Refresh dashboard — your agent appears under Agents"
+echo "  4. Refresh dashboard — support-bot appears under Agents"
 echo ""
   echo "  Stop:  docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml down"
   echo "  Reset local DB (dev only): bash scripts/reset-local-db.sh"

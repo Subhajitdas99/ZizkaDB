@@ -63,7 +63,7 @@ def _send(mode: str) -> None:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        urllib.request.urlopen(req, timeout=3)
+        urllib.request.urlopen(req, timeout=1)
     except Exception:
         pass  # never surface telemetry errors
 
@@ -76,6 +76,13 @@ def _sdk_version() -> str:
         return "unknown"
 
 
+def _is_local_self_host() -> bool:
+    host = os.getenv("ZIZKADB_HOST", "")
+    if host.startswith("http://localhost") or host.startswith("http://127.0.0.1"):
+        return True
+    return host.startswith("http://0.0.0.0")
+
+
 def ping(mode: str = "cloud") -> None:
     """Fire a single anonymous telemetry ping in a background thread."""
     global _sent
@@ -83,6 +90,8 @@ def ping(mode: str = "cloud") -> None:
     if _sent:
         return
     if os.getenv("ZIZKADB_TELEMETRY", "").lower() in ("false", "0", "no", "off"):
+        return
+    if mode == "self-hosted" or _is_local_self_host():
         return
 
     _sent = True

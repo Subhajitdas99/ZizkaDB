@@ -1,19 +1,38 @@
 # Self-Hosting
 
-Run ZizkaDB on your laptop or VPS with Docker.
+Run ZizkaDB on your laptop or VPS with Docker or a native fallback when Docker is unavailable.
 
 ## Quick local setup
+
+### Docker (recommended — matches production)
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
 bash scripts/setup-local.sh
 ```
 
-Or:
+Requires Docker Desktop or OrbStack running in a **native arm64 Terminal** (not Rosetta on Apple Silicon).
+
+Or manually:
 
 ```bash
 cp .env.example infra/.env
 docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml up -d
+```
+
+### Native fallback (no Docker)
+
+When container runtime is unavailable:
+
+```bash
+bash scripts/bootstrap-local.sh
+bash scripts/restart-native-stack.sh
+```
+
+Stop native stack:
+
+```bash
+bash scripts/stop-native-stack.sh
 ```
 
 ## Services
@@ -21,17 +40,20 @@ docker compose -f infra/docker-compose.yml -f infra/docker-compose.dashboard.yml
 | Service | Default URL |
 |---------|-------------|
 | API | http://localhost:8000 |
+| Deep health | http://localhost:8000/health/deep |
 | Swagger | http://localhost:8000/swagger |
 | Dashboard | http://localhost:3001 |
-| Postgres | internal |
-| Redis | internal |
-| Qdrant | internal |
+| Postgres | localhost:5432 (native) or internal (Docker) |
+| Redis | localhost:6379 (native) or internal (Docker) |
+| Qdrant | localhost:6333 (native) or internal (Docker) |
 
 ## Dashboard login (local)
 
 1. Open http://localhost:3001/login
 2. Click **Open my dashboard →** (dev mode, no email)
 3. Create agents and keys like production
+
+For local smoke testing, prefer `npm run build && npx next start -p 3001` (used by `restart-native-stack.sh`). `npm run dev` requires **Node 20+** (see `dashboard/.nvmrc`).
 
 ## SDK connection
 
@@ -43,6 +65,21 @@ MCP:
 
 ```json
 "env": { "ZIZKADB_HOST": "http://localhost:8000" }
+```
+
+## Validation
+
+```bash
+bash scripts/validate-selfhost-config.sh   # env + connectivity
+bash scripts/smoke-test.sh               # health, log, optional search
+```
+
+Optional: seed drift/baseline test data with `python scripts/seed-support-bot-events.py`.
+
+Integration tests (stack must be running):
+
+```bash
+ZIZKADB_RUN_INTEGRATION=1 .venv/bin/pytest -m integration core/tests/test_integration_selfhost.py -v
 ```
 
 ## Production self-host
@@ -70,8 +107,23 @@ Configure in `infra/.env`:
 - `ENV=production` (disables dev key bypass)
 - **Do not set** `DEV_API_KEY` in production
 
+Validate production config before deploy:
+
+```bash
+bash scripts/validate-selfhost-config.sh --production
+```
+
 ## Embeddings
+
+Set `OPENAI_API_KEY` in `infra/.env` for semantic search, memory context, and drift embeddings. Logging and `why()` work without it.
 
 Dashboard → Settings → choose embedding model (OpenAI platform key or bring your own).
 
-Semantic search requires embeddings configured.
+## Backups
+
+```bash
+bash infra/backup-postgres.sh
+bash infra/backup-qdrant.sh
+```
+
+See [Production-Deployment.md](Production-Deployment.md) for restore steps.
