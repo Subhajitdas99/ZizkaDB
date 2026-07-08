@@ -106,6 +106,7 @@ Configure in `infra/.env`:
 - `EMAIL_*` for OTP login
 - `ENV=production` (disables dev key bypass)
 - **Do not set** `DEV_API_KEY` in production
+- `DEPLOYMENT_MODE=self_hosted` — keep this set even in production. `ENV=production` alone doesn't distinguish a self-hosted install from managed cloud (both use it), so this separate flag is what makes plan-based entitlement checks (e.g. API key limits) resolve to the Self-Hosted plan instead of whatever is in `users.plan`.
 
 Validate production config before deploy:
 

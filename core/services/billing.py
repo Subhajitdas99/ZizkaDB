@@ -6,11 +6,15 @@ import os
 from typing import Any
 
 from db.connection import get_pool
+from services.entitlements import api_key_limit_for_plan, is_self_hosted_deployment
 
 TRIAL_DAYS = int(os.getenv("TRIAL_DAYS", "30"))
 
 VALID_PLANS = frozenset({"pro", "team"})
 
+# API-key-count feature strings are derived from services.entitlements (the
+# single source of truth for the actual limit) so they can never drift from
+# what's enforced — changing a limit there updates this copy automatically.
 PLAN_CATALOG: list[dict[str, Any]] = [
     {
         "id": "pro",
@@ -18,7 +22,13 @@ PLAN_CATALOG: list[dict[str, Any]] = [
         "price": "€29",
         "price_sub": "/ month",
         "highlight": True,
-        "features": ["50k events / month", "2 projects", "3 active API keys", "30-day free trial", "Email support"],
+        "features": [
+            "50k events / month",
+            "2 projects",
+            f"{api_key_limit_for_plan('pro')} active API keys",
+            "30-day free trial",
+            "Email support",
+        ],
     },
     {
         "id": "team",
@@ -26,7 +36,13 @@ PLAN_CATALOG: list[dict[str, Any]] = [
         "price": "€69",
         "price_sub": "/ month",
         "highlight": False,
-        "features": ["100k events / month", "5 projects", "10 active API keys", "30-day free trial", "Priority support"],
+        "features": [
+            "100k events / month",
+            "5 projects",
+            f"{api_key_limit_for_plan('team')} active API keys",
+            "30-day free trial",
+            "Priority support",
+        ],
     },
 ]
 
@@ -78,6 +94,20 @@ async def fetch_tenant_plan(executor, tenant_id: str) -> str | None:
         """,
         tenant_id,
     )
+
+
+async def fetch_effective_plan(executor, tenant_id: str) -> str | None:
+    """Plan to use for entitlement checks.
+
+    Self-hosted deployments always resolve to ``"self_hosted"`` — the
+    ``users.plan`` column is unreliable there (self-host installs never set
+    it, and ``connection.py``'s ``init_db()`` backfills any NULL plan to
+    ``'pro'`` on every boot, which would otherwise silently apply the Pro
+    limit instead of the Self-Hosted one).
+    """
+    if is_self_hosted_deployment():
+        return "self_hosted"
+    return await fetch_tenant_plan(executor, tenant_id)
 
 
 async def select_plan(*, user_id: str, plan: str) -> dict | None:

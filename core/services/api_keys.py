@@ -7,8 +7,8 @@ import logging
 from fastapi import HTTPException
 
 from services.auth import generate_api_key
-from services.billing import fetch_tenant_plan
-from services.plan_limits import api_key_limit_for_plan, limits_enforced
+from services.billing import fetch_effective_plan
+from services.entitlements import api_key_limit_for_plan, limits_enforced
 
 log = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ async def assert_and_reserve_api_key_slot(conn, *, tenant_id: str) -> None:
     try:
         # Read plan on the guard's own connection so it stays inside the
         # advisory lock and never contends for a second pooled connection.
-        plan = await fetch_tenant_plan(conn, tenant_id)
+        plan = await fetch_effective_plan(conn, tenant_id)
     except Exception as e:  # fail-open
         log.warning(
             "api-key limit: plan lookup failed for tenant %s, allowing create: %s",
@@ -66,9 +66,9 @@ async def assert_and_reserve_api_key_slot(conn, *, tenant_id: str) -> None:
             status_code=409,
             detail={
                 "msg": (
-                    "You've reached the maximum number of API keys allowed on your "
-                    f"current plan ({used}/{limit}). Delete an existing API key or "
-                    "upgrade your plan to create more."
+                    "You've reached the maximum number of API keys allowed for your "
+                    f"current plan ({used}/{limit}). Please upgrade your subscription "
+                    "to create additional API keys, or delete an existing one to free up a slot."
                 ),
                 "code": "api_key_limit_reached",
                 "plan": plan,

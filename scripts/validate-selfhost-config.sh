@@ -90,6 +90,11 @@ if [ "$PRODUCTION_MODE" -eq 1 ]; then
   else
     ok "DEV_API_KEY not set (production)"
   fi
+  if [ "${DEPLOYMENT_MODE:-managed}" != "self_hosted" ]; then
+    warn "DEPLOYMENT_MODE is not 'self_hosted' — plan-based entitlement checks (e.g. API key limits) will not apply the Self-Hosted plan"
+  else
+    ok "DEPLOYMENT_MODE=self_hosted"
+  fi
   for var in EMAIL_HOST EMAIL_USER EMAIL_PASS; do
     if [ -z "${!var:-}" ]; then
       fail "$var required for OTP login in production mode validation"
