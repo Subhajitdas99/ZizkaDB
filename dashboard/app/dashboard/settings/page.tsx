@@ -281,10 +281,11 @@ export default function SettingsPage() {
             value={tenantKeyName}
             onChange={e => setTenantKeyName(e.target.value)}
             placeholder="Key name (e.g. zizka.ai production)"
-            className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none"
+            disabled={tenantKeyCreating || quota.at_limit}
+            className="flex-1 rounded-lg px-3 py-2 text-sm text-white outline-none disabled:opacity-40"
             style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
           />
-          <button type="submit" disabled={tenantKeyCreating || quota.at_limit} title={quota.at_limit ? 'API key limit reached for your plan' : undefined} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40 disabled:cursor-not-allowed" style={{ background: '#22c55e' }}>
+          <button type="submit" disabled={tenantKeyCreating || quota.at_limit} title={quota.at_limit ? 'API key limit reached — upgrade your plan to create more' : undefined} className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-black disabled:opacity-40 disabled:cursor-not-allowed" style={{ background: '#22c55e' }}>
             <Plus size={14} />
             {tenantKeyCreating ? 'Creating…' : 'Create'}
           </button>

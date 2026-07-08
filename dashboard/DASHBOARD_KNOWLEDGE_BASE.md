@@ -2,7 +2,7 @@
 
 > Single source of truth for the Dashboard module. Reverse-engineered directly from the codebase.
 >
-> **Last verified:** 2026-07-02 · **No payment provider:** signup is plan → consent → OTP → `/dashboard` with a 30-day trial. Legacy `/signup/checkout` redirects to `/signup/plan`; `/signup/success` redirects to `/dashboard`. API key limits: Pro 3 / Team 10 (enforcement via `API_KEY_LIMITS_ENFORCED`, default OFF).
+> **Last verified:** 2026-07-02 · **No payment provider:** signup is plan → consent → OTP → `/dashboard` with a 30-day trial. Legacy `/signup/checkout` redirects to `/signup/plan`; `/signup/success` redirects to `/dashboard`. API key limits: Self-Hosted 1 / Pro 3 / Team 10 / Enterprise 50 (enforcement via `API_KEY_LIMITS_ENFORCED`, default OFF; self-hosted resolved via `DEPLOYMENT_MODE`, not `users.plan`).
 >
 > **Important finding:** There is **no "Pricing Modal"** in this codebase. Pricing is a static section on the landing page (`app/page.tsx`, `#pricing`). The only actual modal is the **Calendly "Book demo" modal** (`components/marketing/CalendlyBookModal.tsx`).
 >
@@ -270,12 +270,16 @@ There is a **separate** lead-capture path (`lib/demo.ts` → `submitDemoRequest`
 
 **Feature gating:** Self-host (`DEV_MODE`) enables dev-token login and changes onboarding copy; billing is not enforced anywhere.
 
-**API key plan limits:** the number of **active** (`revoked = FALSE`) API keys per tenant is capped by plan — Pro 3, Team 10; every other case (no/unknown plan) is **unlimited** when enforcement is off. The limit counts **all** keys (tenant-wide + agent-scoped), and because creating an agent auto-creates a key (`create_agent`), each agent consumes one slot on Pro/Team.
-- **Single source of truth:** `core/services/plan_limits.py` (`API_KEY_LIMITS`, `api_key_limit_for_plan(plan)`). Adding a plan is a one-line change.
-- **Enforcement (backend, real guard):** `assert_and_reserve_api_key_slot` in `core/services/api_keys.py` runs inside a per-tenant advisory-locked transaction (race-safe) before every insert; wired into `create_api_key`, `create_agent_api_key`, and `create_agent`. Fail-open on plan-lookup error. Behind kill switch `API_KEY_LIMITS_ENFORCED` (defaults OFF; ships dormant for staged rollout).
+**API key plan limits:** the number of **active** (`revoked = FALSE`) API keys per tenant is capped by plan — Self-Hosted 1, Pro 3, Team 10, Enterprise 50; every other case (no/unknown plan) is **unlimited** when enforcement is off. The limit counts **all** keys (tenant-wide + agent-scoped), and because creating an agent auto-creates a key (`create_agent`), each agent consumes one slot on capped plans.
+- **Single source of truth:** `core/services/entitlements.py` (`PLAN_ENTITLEMENTS`, `entitlements_for_plan(plan)`/`api_key_limit_for_plan(plan)`). Generalized beyond just API keys — adding a new capped resource (e.g. max agents) is a one-field change to `PlanEntitlements` plus a value per plan; adding a plan is a one-line dict entry.
+- **No-deploy override:** set `API_KEY_LIMIT_<PLAN>` (e.g. `API_KEY_LIMIT_PRO=5`) and restart to change one plan's limit without touching code. Falls back to the `PLAN_ENTITLEMENTS` default when unset/blank/non-integer. `billing.py`'s `PLAN_CATALOG` copy ("N active API keys") is computed from this same source, so it can't drift from what's enforced.
+- **Enforcement (backend, real guard):** `assert_and_reserve_api_key_slot` in `core/services/api_keys.py` runs inside a per-tenant advisory-locked transaction (race-safe) before every insert; wired into `create_api_key`, `create_agent_api_key`, and `create_agent`. Resolves the plan via `services.billing.fetch_effective_plan` (not `fetch_tenant_plan` directly — see below). Fail-open on plan-lookup error. Behind kill switch `API_KEY_LIMITS_ENFORCED` (defaults OFF; ships dormant for staged rollout).
+- **Self-hosted plan resolution:** self-host installs never set `users.plan`, and the startup NULL→`'pro'` backfill in `core/db/connection.py` would otherwise silently apply the Pro limit. `fetch_effective_plan(executor, tenant_id)` (`core/services/billing.py`) checks `is_self_hosted_deployment()` (env var `DEPLOYMENT_MODE=self_hosted`, set by self-host Docker/native configs) first and short-circuits to plan `"self_hosted"` before ever reading `users.plan`. Managed cloud never sets `DEPLOYMENT_MODE`, so its behavior is unchanged.
 - **Creation is JWT-only:** all three creation routes use `require_dashboard_session` (a scoped API key can no longer mint keys). List/revoke unchanged.
-- **Usage:** `GET /v1/auth/api-keys/usage` → `{plan, limit, used, unlimited, at_limit}` (unlimited whenever enforcement is off / uncapped). Frontend hook `useApiKeyQuota` + `ApiKeyUsage` component; the UI reads limits from this endpoint (never hardcodes them) and disables create at the limit. Deleting a key **or an agent** (cascade via `fk_api_keys_agent ON DELETE CASCADE`) frees a slot.
+- **Usage:** `GET /v1/auth/api-keys/usage` → `{plan, limit, used, unlimited, at_limit}` (unlimited whenever enforcement is off / uncapped). Frontend hook `useApiKeyQuota` + `ApiKeyUsage` component; the UI reads limits from this endpoint (never hardcodes them) and disables create + the key-name input at the limit. Deleting a key **or an agent** (cascade via `fk_api_keys_agent ON DELETE CASCADE`) frees a slot immediately (live `COUNT(*)`, no caching).
 - **Error shape:** limit breach returns `409` with `detail={msg, code:"api_key_limit_reached", plan, limit, used}` (the `msg` key renders through `formatApiError`).
+- **Enterprise/self-hosted plan assignment:** `enterprise` is sales-assigned (manual `users.plan` update by an operator, matching the existing `/enterprise#contact` lead-capture flow — no self-serve signup); `self_hosted` is automatic via `DEPLOYMENT_MODE`. Neither goes through `select_plan`/`VALID_PLANS` (still `{"pro", "team"}`, self-serve only).
+- **Out of scope (by design):** `subscription_status` (`trialing|active|past_due|canceled`) is not factored into entitlement decisions — no feature in this codebase gates on it today (`billing_status_payload` always returns `has_access: true`). A `past_due`/`canceled` user keeps their plan's key limit until real billing enforcement exists.
 
 ---
 
@@ -401,7 +405,7 @@ Landing → (Pricing: Pro) → `/signup?plan=pro` → `/signup/start` (consent) 
 7. **No client-side rate-limit/backoff on OTP request** (relies on backend).
 8. **No request timeouts:** only `adminRequestOtp` passes an `AbortSignal` (`api.ts:157`); other fetches (incl. 10s agents poll, 30s `/health` poll) can hang/stack. Consider an `AbortController` + timeout in `apiFetch`.
 9. **API does not enforce subscription:** `get_tenant` validates the token but not `subscription_status`; there is no billing gate on API routes (by design after Stripe removal).
-10. **API key limits dormant by default:** `API_KEY_LIMITS_ENFORCED` defaults OFF — enable deliberately in production after measuring tenant key counts.
+10. **API key limits dormant by default:** `API_KEY_LIMITS_ENFORCED` defaults OFF — enable deliberately in production after measuring tenant key counts. Self-hosted plan resolution additionally requires `DEPLOYMENT_MODE=self_hosted` to be set — it does not depend on the enforcement flag.
 
 ---
 
@@ -552,7 +556,7 @@ The dashboard **reads and visualizes** data that the **rest of the ecosystem wri
 
 ### 17.5 Service layer behind the routers (`core/services/`)
 
-`auth.py` (JWT + API-key hashing, OTP), `billing.py` (plan catalog, trials, status payload — no payment provider), `plan_limits.py` + `api_keys.py` (API key caps), `account.py` (retention/delete), `embeddings.py` + `embedding_config.py`, `event_write.py`. Routers are thin; business logic lives here — the first place to look when a dashboard call returns unexpected data.
+`auth.py` (JWT + API-key hashing, OTP), `billing.py` (plan catalog, trials, status payload — no payment provider; also `fetch_effective_plan` for entitlement checks), `entitlements.py` + `api_keys.py` (API key caps), `account.py` (retention/delete), `embeddings.py` + `embedding_config.py`, `event_write.py`. Routers are thin; business logic lives here — the first place to look when a dashboard call returns unexpected data.
 
 ### 17.6 External integrations
 
@@ -847,7 +851,9 @@ erDiagram
 | **API key** | Credential used by SDKs/MCP to write events (`zizkadb_live_*`, stored hashed). Tenant-wide or **agent-scoped** (bound to one agent). |
 | **JWT (session)** | Dashboard user's access token from OTP login; distinct from API keys. Resolved by `get_tenant`. |
 | **OTP** | One-time 6-digit code for passwordless email login/signup (`auth_otps`, 15-min expiry). |
-| **API key limit** | Pro = 3 active keys, Team = 10 (tenant-wide + agent-scoped). Enforced when `API_KEY_LIMITS_ENFORCED=true`. |
+| **API key limit** | Self-Hosted = 1, Pro = 3, Team = 10, Enterprise = 50 active keys (tenant-wide + agent-scoped). Enforced when `API_KEY_LIMITS_ENFORCED=true`. |
+| **Entitlements** | `core/services/entitlements.py` — per-plan capability config (`PlanEntitlements`); currently `max_api_keys`, designed to grow (max agents, storage, etc.) without touching call sites. |
+| **Deployment mode** | `DEPLOYMENT_MODE=self_hosted` env var — marks a backend instance as self-hosted so entitlement checks resolve plan `"self_hosted"` instead of trusting `users.plan`. |
 | **Retention trial** | One-time extra free month offered in the delete-account modal (`retention_trial_used`). |
 | **Honeypot** | Hidden `website`/`botcheck` form field; if a bot fills it, the submission is silently dropped (community + demo forms). |
 | **Self-host / DEV_MODE** | `NEXT_PUBLIC_DEV_MODE=true` (frontend) / non-production backend — enables dev-token login, changes onboarding copy. |
@@ -879,7 +885,7 @@ erDiagram
 | Auth resolution (JWT / API key / dev) | `core/api/deps.py` |
 | Auth service (JWT, OTP, API keys) | `core/services/auth.py`, `core/api/auth.py` |
 | Billing + trials (no payment) | `core/services/billing.py`, `core/api/billing_checkout.py` |
-| API key plan limits | `core/services/plan_limits.py`, `core/services/api_keys.py` |
+| API key plan limits | `core/services/entitlements.py`, `core/services/api_keys.py` |
 | Account (retention trial, delete) | `core/api/account.py`, `core/services/account.py` |
 | Event write pipeline | `core/services/event_write.py`, `core/api/events.py` |
 | Memory (context/diff/forget) | `core/api/memory.py` |

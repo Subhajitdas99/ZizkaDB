@@ -41,7 +41,8 @@ export function ApiKeyUsage({
       </div>
       {at_limit && (
         <p className="text-xs mt-1.5" style={{ color: '#f87171' }}>
-          Delete an API key or upgrade your plan to create more.
+          You&apos;ve reached the maximum number of API keys allowed for your current plan.
+          Please upgrade your subscription to create additional API keys.
         </p>
       )}
     </div>
