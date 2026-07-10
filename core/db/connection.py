@@ -226,3 +226,28 @@ def get_qdrant() -> AsyncQdrantClient:
     if not _qdrant:
         raise RuntimeError("Qdrant not initialized")
     return _qdrant
+
+
+async def check_postgres() -> dict:
+    try:
+        await get_pool().fetchval("SELECT 1")
+        return {"ok": True}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_redis() -> dict:
+    try:
+        pong = await get_redis().ping()
+        return {"ok": bool(pong)}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_qdrant() -> dict:
+    try:
+        collections = await get_qdrant().get_collections()
+        names = [collection.name for collection in collections.collections]
+        return {"ok": True, "collections": names}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
