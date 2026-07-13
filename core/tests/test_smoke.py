@@ -72,7 +72,7 @@ async def test_dev_token_and_log_event():
             "/v1/events",
             headers={"Authorization": f"Bearer {dev_key}"},
             json={
-                "agent": "smoke-test-bot",
+                "agent": "support-bot",
                 "event": "smoke_test",
                 "data": {"ok": True},
             },

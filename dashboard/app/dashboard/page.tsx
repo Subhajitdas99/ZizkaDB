@@ -206,7 +206,8 @@ export default function DashboardPage() {
             value={newAgentId}
             onChange={e => setNewAgentId(e.target.value)}
             placeholder="agent-id"
-            className="flex-1 rounded-lg px-3 py-2 text-sm text-white font-mono outline-none"
+            disabled={creating || quota.at_limit}
+            className="flex-1 rounded-lg px-3 py-2 text-sm text-white font-mono outline-none disabled:opacity-40"
             style={{ background: '#1a1a1a', border: '1px solid #2a2a2a' }}
             onFocus={e => (e.target.style.borderColor = '#22c55e')}
             onBlur={e => (e.target.style.borderColor = '#2a2a2a')}
@@ -224,7 +225,8 @@ export default function DashboardPage() {
         </form>
         {quota.at_limit && (
           <p className="text-xs mt-2" style={{ color: '#f87171' }}>
-            You&apos;ve reached your plan&apos;s API key limit. Delete an API key or upgrade to add more agents.
+            You&apos;ve reached the maximum number of API keys allowed for your current plan.
+            Please upgrade your subscription to create additional API keys.
           </p>
         )}
         {createErr && (

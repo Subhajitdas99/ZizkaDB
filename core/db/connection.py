@@ -178,6 +178,7 @@ async def init_db():
 
     _qdrant = AsyncQdrantClient(url=os.getenv("QDRANT_URL", "http://localhost:6333"))
     await _ensure_qdrant_collection()
+    await _log_qdrant_version()
     logger.info("Qdrant connected")
 
 
@@ -221,3 +222,42 @@ def get_qdrant() -> AsyncQdrantClient:
     if not _qdrant:
         raise RuntimeError("Qdrant not initialized")
     return _qdrant
+
+
+async def _log_qdrant_version() -> None:
+    try:
+        import httpx
+
+        url = os.getenv("QDRANT_URL", "http://localhost:6333").rstrip("/")
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            response = await client.get(f"{url}/")
+            if response.status_code == 200:
+                version = response.json().get("version", "unknown")
+                logger.info("Qdrant server version: %s", version)
+    except Exception as exc:
+        logger.warning("Could not fetch Qdrant version: %s", exc)
+
+
+async def check_postgres() -> dict:
+    try:
+        await get_pool().fetchval("SELECT 1")
+        return {"ok": True}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_redis() -> dict:
+    try:
+        pong = await get_redis().ping()
+        return {"ok": bool(pong)}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_qdrant() -> dict:
+    try:
+        collections = await get_qdrant().get_collections()
+        names = [collection.name for collection in collections.collections]
+        return {"ok": True, "collections": names}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}

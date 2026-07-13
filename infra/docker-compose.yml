@@ -17,13 +17,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../core/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U zizkadb"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 5s
       timeout: 5s
       retries: 5
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.13.5
     container_name: zizkadb_qdrant
     ports:
       - "6333:6333"
@@ -64,6 +64,12 @@ services:
       ENV: ${ENV:-development}
       # Local dev only — leave unset on managed cloud (ENV=production)
       DEV_API_KEY: ${DEV_API_KEY:-zizkadb_dev_local}
+      # Marks this stack as self-hosted for plan-based entitlement checks
+      # (e.g. API key limits). This compose file is also used to deploy
+      # managed cloud (infra/deploy-production.sh), so the default here MUST
+      # stay "managed" — self-host installs opt in explicitly via their own
+      # infra/.env (see .env.example / wiki/Self-Hosting.md).
+      DEPLOYMENT_MODE: ${DEPLOYMENT_MODE:-managed}
       # Email — optional; enables OTP login on self-hosted dashboard
       EMAIL_HOST: ${EMAIL_HOST}
       EMAIL_PORT: ${EMAIL_PORT:-465}

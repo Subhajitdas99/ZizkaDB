@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# Validate self-host configuration and connectivity.
+# Usage: bash scripts/validate-selfhost-config.sh [--production]
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$ROOT"
+
+PRODUCTION_MODE=0
+if [ "${1:-}" = "--production" ]; then
+  PRODUCTION_MODE=1
+fi
+
+ERRORS=0
+WARNS=0
+
+fail() {
+  echo "ERROR: $1" >&2
+  ERRORS=$((ERRORS + 1))
+}
+
+warn() {
+  echo "WARN: $1" >&2
+  WARNS=$((WARNS + 1))
+}
+
+ok() {
+  echo "✓ $1"
+}
+
+if [ ! -f infra/.env ]; then
+  fail "infra/.env missing — run: cp .env.example infra/.env"
+else
+  set -a
+  # shellcheck disable=SC1091
+  source infra/.env
+  set +a
+  ok "infra/.env loaded"
+fi
+
+# Rosetta check (macOS)
+if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "x86_64" ]; then
+  if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null || echo 0)" = "1" ]; then
+    warn "Rosetta shell — Docker may fail; use native arm64 Terminal or restart-native-stack.sh"
+  fi
+fi
+
+# Docker availability
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  ok "Docker daemon running"
+else
+  warn "Docker not available — use bash scripts/restart-native-stack.sh"
+fi
+
+# Required vars
+for var in DATABASE_URL REDIS_URL QDRANT_URL JWT_SECRET JWT_REFRESH_SECRET; do
+  if [ -z "${!var:-}" ]; then
+    fail "$var is not set"
+  else
+    ok "$var is set"
+  fi
+done
+
+# OpenAI key
+if [ -z "${OPENAI_API_KEY:-}" ] || [ "$OPENAI_API_KEY" = "sk-..." ] || [ "${#OPENAI_API_KEY}" -lt 20 ]; then
+  warn "OPENAI_API_KEY missing or placeholder — search/embeddings will fail"
+else
+  ok "OPENAI_API_KEY looks configured"
+fi
+
+# JWT placeholders
+if [ "${JWT_SECRET:-}" = "change-this-to-a-random-32-char-string" ]; then
+  if [ "$PRODUCTION_MODE" -eq 1 ]; then
+    fail "JWT_SECRET is still the default placeholder"
+  else
+    warn "JWT_SECRET is default placeholder (ok for local dev)"
+  fi
+fi
+
+# Environment mode
+ENV_VAL="${ENV:-development}"
+if [ "$PRODUCTION_MODE" -eq 1 ]; then
+  if [ "$ENV_VAL" != "production" ]; then
+    fail "ENV must be production (currently: $ENV_VAL)"
+  else
+    ok "ENV=production"
+  fi
+  if [ -n "${DEV_API_KEY:-}" ]; then
+    fail "DEV_API_KEY must be unset in production"
+  else
+    ok "DEV_API_KEY not set (production)"
+  fi
+  if [ "${DEPLOYMENT_MODE:-managed}" != "self_hosted" ]; then
+    warn "DEPLOYMENT_MODE is not 'self_hosted' — plan-based entitlement checks (e.g. API key limits) will not apply the Self-Hosted plan"
+  else
+    ok "DEPLOYMENT_MODE=self_hosted"
+  fi
+  for var in EMAIL_HOST EMAIL_USER EMAIL_PASS; do
+    if [ -z "${!var:-}" ]; then
+      fail "$var required for OTP login in production mode validation"
+    fi
+  done
+else
+  if [ "$ENV_VAL" = "production" ]; then
+    warn "ENV=production in infra/.env — dev key bypass disabled"
+  fi
+  if [ -n "${DEV_API_KEY:-}" ]; then
+    ok "DEV_API_KEY set for local dev"
+  else
+    warn "DEV_API_KEY not set — SDK may need ZIZKADB_API_KEY on localhost"
+  fi
+fi
+
+# Port connectivity
+check_port() {
+  local name="$1"
+  local url="$2"
+  if curl -sf --connect-timeout 2 --max-time 5 "$url" >/dev/null 2>&1; then
+    ok "$name reachable ($url)"
+  else
+    warn "$name not reachable ($url) — start stack first"
+  fi
+}
+
+check_port "API" "http://localhost:8000/health"
+check_port "Deep health" "http://localhost:8000/health/deep"
+check_port "Qdrant" "http://localhost:6333/"
+check_port "Dashboard" "http://127.0.0.1:3001/login"
+
+# Python SDK
+if [ -x .venv/bin/python ] && .venv/bin/python -c "import zizkadb" 2>/dev/null; then
+  ok "Python SDK installed in .venv"
+else
+  warn "Python SDK not installed — run: bash scripts/bootstrap-local.sh"
+fi
+
+echo ""
+if [ "$ERRORS" -gt 0 ]; then
+  echo "Validation failed: $ERRORS error(s), $WARNS warning(s)"
+  exit 1
+fi
+
+echo "Validation passed: $WARNS warning(s)"
+exit 0

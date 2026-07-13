@@ -16,6 +16,11 @@ COMPOSE=(docker compose -f infra/docker-compose.yml)
 
 # shellcheck disable=SC1091
 source "$ROOT/infra/lib/production-guard.sh"
+ZIZKA_ROOT="$ROOT"
+_zizka_load_env
+
+POSTGRES_USER="${POSTGRES_USER:-zizkadb}"
+POSTGRES_DB="${POSTGRES_DB:-zizkadb}"
 
 if ! zizka_is_production; then
   echo "WARNING: ENV is not 'production' in infra/.env." >&2
@@ -35,7 +40,7 @@ echo "→ Step 1/5: Postgres backup"
 bash "$ROOT/infra/backup-postgres.sh"
 
 USERS_BEFORE=$("${COMPOSE[@]}" exec -T postgres \
-  psql -U "${POSTGRES_USER:-zizkadb}" -d "${POSTGRES_DB:-zizkadb}" -tAc "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d '[:space:]' || echo "?")
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d '[:space:]' || echo "?")
 echo "   Users before deploy: $USERS_BEFORE"
 
 echo "→ Step 2/5: git pull"
@@ -62,7 +67,7 @@ echo "→ Step 5/5: Dashboard (PM2)"
 bash "$ROOT/infra/deploy-dashboard.sh"
 
 USERS_AFTER=$("${COMPOSE[@]}" exec -T postgres \
-  psql -U "${POSTGRES_USER:-zizkadb}" -d "${POSTGRES_DB:-zizkadb}" -tAc "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d '[:space:]' || echo "?")
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d '[:space:]' || echo "?")
 
 echo ""
 echo "════════════════════════════════════════════════════════"

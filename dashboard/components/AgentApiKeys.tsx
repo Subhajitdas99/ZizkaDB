@@ -131,7 +131,7 @@ export function AgentApiKeys({
             type="button"
             disabled={creating || quota.at_limit}
             onClick={handleCreate}
-            title={quota.at_limit ? 'API key limit reached for your plan' : undefined}
+            title={quota.at_limit ? 'API key limit reached — upgrade your plan to create more' : undefined}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-black disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: '#22c55e' }}
           >
