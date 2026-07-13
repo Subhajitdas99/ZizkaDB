@@ -2,14 +2,24 @@
 
 Run ZizkaDB on your laptop or VPS with Docker.
 
-## Quick local setup
+## OSS quickstart (recommended)
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
+bash scripts/quickstart.sh
+```
+
+One command: Docker stack (pre-built GHCR images when available) + `db.why()` demo + dashboard link.
+
+Stack only:
+
+```bash
 bash scripts/setup-local.sh
 ```
 
-Or:
+Connect your agent: [CONNECT.md](https://github.com/Zizka-ai/ZizkaDB/blob/main/CONNECT.md)
+
+## Manual compose
 
 ```bash
 cp .env.example infra/.env

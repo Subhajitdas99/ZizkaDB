@@ -34,7 +34,7 @@ const NAV: { id: Section; label: string; group: 'start' | 'integrate' | 'ref' }[
   { id: 'typescript', label: 'TypeScript SDK', group: 'integrate' },
   { id: 'rest',       label: 'REST API',       group: 'integrate' },
   { id: 'mcp',        label: 'MCP',            group: 'integrate' },
-  { id: 'selfhost',   label: 'Self-host',      group: 'integrate' },
+  { id: 'selfhost',   label: 'Self-host (OSS)', group: 'integrate' },
   { id: 'concepts',   label: 'Core concepts',  group: 'ref' },
 ]
 
