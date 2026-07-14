@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { CookiePrivacyConsent } from '@/components/CookiePrivacyConsent'
+import { MarketingSubscribePopup } from '@/components/MarketingSubscribePopup'
 
 const TAGLINE = 'Operational Database For AI Agents. Open source. Self-host free or managed cloud.'
 
@@ -37,7 +39,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookiePrivacyConsent />
+        <MarketingSubscribePopup />
+      </body>
     </html>
   )
 }

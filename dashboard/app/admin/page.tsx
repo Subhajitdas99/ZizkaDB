@@ -6,6 +6,7 @@ import {
   adminOverview, adminTelemetrySummary, adminTelemetryRecent,
   adminManagedOverview, adminManagedSubscribers, adminManagedUsers, adminManagedUsage,
   adminDemoRequests,
+  adminMarketingSubscriptions,
 } from '@/lib/api'
 import { format, formatDistanceToNow } from 'date-fns'
 
@@ -13,7 +14,7 @@ import { setAdminToken, clearAdminToken, getAdminToken } from '@/lib/auth'
 
 const ADMIN_EMAIL = 'founder@zizka.ai'
 
-type Section = 'subscribers' | 'managed' | 'telemetry' | 'demo_requests'
+type Section = 'subscribers' | 'managed' | 'telemetry' | 'demo_requests' | 'marketing_subscriptions'
 
 interface Overview {
   telemetry: { total_installs?: number; active_7d?: number; active_24h?: number; total_pings?: number }
@@ -105,6 +106,14 @@ interface DemoRequest {
   website: string
   position: string | null
   source: string | null
+  ip_address: string | null
+  created_at: string | null
+}
+
+interface MarketingSubscription {
+  subscription_id: string
+  email: string
+  source: string
   ip_address: string | null
   created_at: string | null
 }
@@ -325,6 +334,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
             { key: 'managed',     label: 'All customers' },
             { key: 'telemetry',   label: 'SDKs & telemetry' },
             { key: 'demo_requests', label: 'Demo requests' },
+            { key: 'marketing_subscriptions', label: 'Marketing Material Subscriptions' },
           ] as { key: Section; label: string }[]).map((t) => (
             <button key={t.key} onClick={() => setSection(t.key)}
                     style={{
@@ -350,6 +360,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         {section === 'managed'     && <ManagedSection   token={token} />}
         {section === 'telemetry'   && <TelemetrySection token={token} />}
         {section === 'demo_requests' && <DemoRequestsSection token={token} />}
+        {section === 'marketing_subscriptions' && <MarketingSubscriptionsSection token={token} />}
       </div>
     </div>
   )
@@ -845,6 +856,75 @@ function DemoRequestsSection({ token }: { token: string }) {
                         {r.website}
                       </a>
                     </Td>
+                    <Td align="right" subtle>
+                      {r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : '—'}
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+    </div>
+  )
+}
+
+function MarketingSubscriptionsSection({ token }: { token: string }) {
+  const [rows, setRows] = useState<MarketingSubscription[] | null>(null)
+  const [search, setSearch] = useState('')
+
+  const load = () => {
+    adminMarketingSubscriptions(token, { search, limit: 300 }).then(setRows).catch(() => setRows([]))
+  }
+
+  useEffect(() => {
+    load()
+    const interval = setInterval(load, 10_000)
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+        <Stat label="Total subscriptions" value={fmt(rows?.length)} sub="email captures" accent="#22c55e" />
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && load()}
+          placeholder="Search email…"
+          style={{
+            flex: '1 1 220px', padding: '8px 12px', background: '#0a0a0a',
+            border: '1px solid #2a2a2a', borderRadius: 8, color: '#fff', fontSize: 13,
+          }}
+        />
+        <button type="button" onClick={load} style={btnSmall()}>Refresh</button>
+      </div>
+
+      <Card title="Marketing Material Subscriptions" subtitle="Emails submitted from the marketing popup. Newest first.">
+        {!rows ? <SkeletonBlock /> : rows.length === 0 ? (
+          <Empty>No subscriptions yet.</Empty>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, minWidth: 860 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #1f1f1f', color: '#737373', fontSize: 11, textTransform: 'uppercase' }}>
+                  <Th>Email</Th>
+                  <Th>Source</Th>
+                  <Th>IP</Th>
+                  <Th align="right">Submitted</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.subscription_id} style={{ borderBottom: '1px solid #161616' }}>
+                    <Td mono>{r.email}</Td>
+                    <Td subtle>{r.source || '—'}</Td>
+                    <Td subtle mono>{r.ip_address || '—'}</Td>
                     <Td align="right" subtle>
                       {r.created_at ? formatDistanceToNow(new Date(r.created_at), { addSuffix: true }) : '—'}
                     </Td>
