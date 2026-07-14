@@ -10,7 +10,7 @@
 [![npm](https://img.shields.io/npm/v/zizkadb-sdk?label=npm)](https://www.npmjs.com/package/zizkadb-sdk)
 [![MCP](https://img.shields.io/pypi/v/zizkadb-mcp?label=MCP)](https://pypi.org/project/zizkadb-mcp/)
 
-[Get started](#get-started) · [Docs](https://db.zizka.ai/docs) · [Examples](examples/) · [Community](https://db.zizka.ai/community)
+[Get started](#get-started) · [SDKs](#sdks) · [Docs](https://db.zizka.ai/docs) · [Community](https://db.zizka.ai/community)
 
 </div>
 
@@ -35,6 +35,18 @@ No more guessing. No more digging through logs.
 <p align="center">
   <sub>Causal chain view &nbsp;·&nbsp; Agent fleet dashboard &nbsp;·&nbsp; MCP tools inside Cursor</sub>
 </p>
+
+---
+
+## Who uses ZizkaDB?
+
+| | |
+|---|---|
+| **AI / ML engineers** | Causal lineage, time-travel debugging, and semantic search — built for agents in production |
+| **Indie hackers & vibe-coders** | Two lines of code add full observability to any agent. No setup required on Zizka Cloud. |
+| **LangChain / CrewAI users** | Native adapters — pass a callback handler and every step is logged automatically |
+| **Enterprise & teams** | Self-hostable, open source (AGPL-3.0), GDPR-ready, audit logs, fleet dashboard |
+| **Investors & evaluators** | [Live demo →](https://db.zizka.ai) · [Docs →](https://db.zizka.ai/docs) · [Architecture →](https://github.com/Zizka-ai/ZizkaDB/wiki/Architecture) |
 
 ---
 
@@ -72,9 +84,9 @@ bash scripts/quickstart.sh
 
 ---
 
-## Quickstart
+## SDKs
 
-**Install your SDK:**
+**Pick your language and install:**
 
 | Language / Framework | Install |
 |---|---|
@@ -84,6 +96,14 @@ bash scripts/quickstart.sh
 | **CrewAI** | `pip install zizkadb-sdk zizkadb-crewai` |
 | **AI Editor (Cursor, Claude)** | `uvx zizkadb-mcp` |
 | **REST (any language)** | No install needed — use any HTTP client |
+
+---
+
+### Python
+
+```bash
+pip install zizkadb-sdk
+```
 
 **Minimal working example (Python):**
 
@@ -119,26 +139,6 @@ tool_call · lookup_order
 > **`parent_id`** links one event to the previous one — this is how ZizkaDB builds causal lineage.
 > **`session_id`** groups events into a single run (useful for `db.baseline()` and `db.memory_diff()`).
 
-For your SDK's full copy-paste example, see **[Connect your code](#connect-your-code)** below.
-
----
-
-## Connect your code
-
-### Python
-
-```bash
-pip install zizkadb-sdk
-```
-
-```python
-from zizkadb import ZizkaDB
-
-async with ZizkaDB(api_key="zizkadb_live_...") as db:
-    event = await db.log(agent="my-bot", event="user_message", data={"text": "Hello"})
-    print(event.event_id)
-```
-
 → [Full Python guide](CONNECT.md#python-sdk) · `zizkadb init my-agent --template basic`
 
 ---
@@ -149,6 +149,8 @@ async with ZizkaDB(api_key="zizkadb_live_...") as db:
 npm install zizkadb-sdk
 ```
 
+**Minimal working example (TypeScript / JavaScript):**
+
 ```typescript
 import { ZizkaDB } from 'zizkadb-sdk'
 
@@ -156,7 +158,10 @@ const db = new ZizkaDB({ apiKey: 'zizkadb_live_...' })
 // const db = new ZizkaDB({ host: 'http://localhost:8000' })   ← local
 
 const user = await db.log({ agent: 'my-bot', event: 'user_message', data: { text: 'Hello' } })
-await db.log({ agent: 'my-bot', event: 'tool_call', data: { tool: 'search' }, parentId: user.eventId })
+const tool = await db.log({ agent: 'my-bot', event: 'tool_call', data: { tool: 'search' }, parentId: user.eventId })
+
+const chain = await db.why(tool.eventId)
+console.log(chain)
 ```
 
 > TypeScript uses camelCase: `parentId`, `eventId`. LangChain and CrewAI adapters are Python-only.
@@ -171,6 +176,8 @@ await db.log({ agent: 'my-bot', event: 'tool_call', data: { tool: 'search' }, pa
 pip install zizkadb-sdk zizkadb-langchain
 ```
 
+**Minimal working example (LangChain):**
+
 ```python
 from zizkadb import ZizkaDB
 from zizkadb_langchain import ZizkaDBCallbackHandler
@@ -178,6 +185,7 @@ from zizkadb_langchain import ZizkaDBCallbackHandler
 async with ZizkaDB(api_key="zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
 
+    # Pass the handler to any LangChain chain — events are logged automatically
     result = await chain.ainvoke({"input": "..."}, config={"callbacks": [handler]})
 
     # Trace why the agent made its final decision
@@ -193,6 +201,8 @@ async with ZizkaDB(api_key="zizkadb_live_...") as db:
 ```bash
 pip install zizkadb-sdk zizkadb-crewai
 ```
+
+**Minimal working example (CrewAI):**
 
 ```python
 from zizkadb import ZizkaDB
@@ -216,7 +226,7 @@ async with ZizkaDB(api_key="zizkadb_live_...") as db:
 uvx zizkadb-mcp
 ```
 
-Add to `~/.cursor/mcp.json` (or your editor's MCP config file):
+**Minimal working example (MCP config):**
 
 ```json
 {
@@ -233,13 +243,15 @@ Add to `~/.cursor/mcp.json` (or your editor's MCP config file):
 }
 ```
 
-Your AI editor can now call ZizkaDB tools directly from chat.
+Add this to `~/.cursor/mcp.json` (or your editor's MCP config file). Your AI editor can now call ZizkaDB tools directly from chat.
 
 → [Full MCP guide](mcp/README.md) · `zizkadb init my-agent --template mcp-cursor`
 
 ---
 
 ### REST — any language
+
+**Minimal working example (REST):**
 
 ```bash
 curl -X POST http://localhost:8000/v1/events \
@@ -248,7 +260,11 @@ curl -X POST http://localhost:8000/v1/events \
   -d '{"agent":"my-bot","event":"user_message","data":{"text":"Hello"}}'
 ```
 
-Response: `{ "event_id": "...", "timestamp": "...", "sequence_no": 1 }`
+Expected response:
+
+```json
+{ "event_id": "b3a1c...", "timestamp": "2026-07-15T10:00:00Z", "sequence_no": 1 }
+```
 
 → [Swagger / API explorer](http://localhost:8000/swagger) · [Docs](https://db.zizka.ai/docs)
 
@@ -286,7 +302,7 @@ Response: `{ "event_id": "...", "timestamp": "...", "sequence_no": 1 }`
 | Check if my agent is behaving differently than before | `db.baseline(agent)` |
 | Delete a specific user's data | `db.forget("user_id", "usr_123")` |
 | Use ZizkaDB directly in Cursor or Claude | [AI Editor setup](#ai-editor-cursor-claude-desktop-windsurf) |
-| Scaffold a new project from a template | `zizkadb init my-agent --template basic` |
+| Start a new project from a template | `zizkadb init my-agent --template basic` |
 
 ---
 
