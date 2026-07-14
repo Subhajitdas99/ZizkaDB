@@ -46,7 +46,7 @@ No more guessing. No more digging through logs.
 | **Indie hackers & vibe-coders** | Two lines of code add full observability to any agent. No setup required on Zizka Cloud. |
 | **LangChain / CrewAI users** | Native adapters — pass a callback handler and every step is logged automatically |
 | **Enterprise & teams** | Self-hostable, open source (AGPL-3.0), GDPR-ready, audit logs, fleet dashboard |
-| **Investors & evaluators** | [Live demo →](https://db.zizka.ai) · [Docs →](https://db.zizka.ai/docs) · [Architecture →](https://github.com/Zizka-ai/ZizkaDB/wiki/Architecture) |
+| **Investors & evaluators** | [Live demo →](https://db.zizka.ai) · [Docs →](https://db.zizka.ai/docs) · [Architecture →](https://github.com/Zizka-ai/ZizkaDB/wiki/Architecture) |  
 
 ---
 

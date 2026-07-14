@@ -3,40 +3,48 @@ import './globals.css'
 import { CookiePrivacyConsent } from '@/components/CookiePrivacyConsent'
 import { MarketingSubscribePopup } from '@/components/MarketingSubscribePopup'
 
-const TAGLINE = 'Operational Database For AI Agents. Open source. Self-host free or managed cloud.'
+const TAGLINE =
+  "Operational Database For AI Agents. Open source. Self-host free or managed cloud.";
+const SITE_URL = process.env.DASHBOARD_URL || "https://db.zizka.ai";
 
 export const metadata: Metadata = {
   title: {
-    default: 'ZizkaDB — Operational database for AI agents',
-    template: '%s · ZizkaDB',
+    default: "ZizkaDB — Operational database for AI agents",
+    template: "%s · ZizkaDB",
   },
   description: TAGLINE,
-  metadataBase: new URL('https://db.zizka.ai'),
+  metadataBase: new URL(SITE_URL),
   icons: {
     icon: [
-      { url: '/icon-32.png', type: 'image/png', sizes: '32x32' },
-      { url: '/zizka-logo.png', type: 'image/png' },
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/zizka-logo.png", type: "image/png" },
     ],
-    shortcut: '/icon-32.png',
-    apple: '/apple-touch-icon.png',
+    shortcut: "/icon-32.png",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
-    title: 'ZizkaDB — Operational database for AI agents',
+    title: "ZizkaDB — Operational database for AI agents",
     description: TAGLINE,
-    url: 'https://db.zizka.ai',
-    siteName: 'ZizkaDB',
-    type: 'website',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'ZizkaDB' }],
+    url: SITE_URL,
+    siteName: "ZizkaDB",
+    type: "website",
+    images: [
+      { url: "/opengraph-image", width: 1200, height: 630, alt: "ZizkaDB" },
+    ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'ZizkaDB — Operational database for AI agents',
+    card: "summary_large_image",
+    title: "ZizkaDB — Operational database for AI agents",
     description: TAGLINE,
-    images: ['/opengraph-image'],
+    images: ["/opengraph-image"],
   },
-}
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
@@ -45,5 +53,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <MarketingSubscribePopup />
       </body>
     </html>
-  )
+  );
 }

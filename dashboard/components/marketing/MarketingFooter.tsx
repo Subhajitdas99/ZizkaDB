@@ -118,5 +118,5 @@ export function MarketingFooter() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

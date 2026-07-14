@@ -1,3 +1,5 @@
+import { BRAND } from "@/components/brand";
+
 export function MarketingPageStyles() {
   return (
     <style>{`
@@ -8,11 +10,11 @@ export function MarketingPageStyles() {
         display: none;
       }
       .zdb-faq-summary:focus-visible {
-        outline: 2px solid #f97316;
+        outline: 2px solid ${BRAND};
         outline-offset: -2px;
       }
       .zdb-connect-submit:focus-visible {
-        outline: 2px solid #f97316;
+        outline: 2px solid ${BRAND};
         outline-offset: 2px;
       }
       .zdb-price-grid {
@@ -25,7 +27,7 @@ export function MarketingPageStyles() {
         opacity: 0.92;
       }
       .zdb-pricing-card-footer a:focus-visible {
-        outline: 2px solid #f97316;
+        outline: 2px solid ${BRAND};
         outline-offset: 2px;
       }
       .zdb-footer-grid a:hover {
@@ -61,5 +63,5 @@ export function MarketingPageStyles() {
         .zdb-footer-grid { grid-template-columns: 1fr 1fr !important; }
       }
     `}</style>
-  )
+  );
 }

@@ -73,6 +73,15 @@ else
   echo "→ Pre-built images not found — building locally (first run may take a few minutes)"
 fi
 
+if [ ${#BUILD_FLAG[@]} -gt 0 ]; then
+  # Registry metadata checks during `compose build` occasionally hang/timeout
+  # (DeadlineExceeded) even when the base image is already cached locally.
+  # Pre-pulling once avoids that flake and speeds up every subsequent build.
+  echo "→ Warming base image cache..."
+  docker pull python:3.12-slim >/dev/null 2>&1 || true
+  docker pull node:20-alpine >/dev/null 2>&1 || true
+fi
+
 echo "→ Starting API + Postgres + Qdrant + Redis + Dashboard..."
 docker compose "${COMPOSE[@]}" up -d "${BUILD_FLAG[@]}"
 
