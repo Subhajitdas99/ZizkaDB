@@ -107,6 +107,29 @@ That is what `zizkadb demo` prints — your first win in under a minute.
 
 ---
 
+## Worked example — support-bot order delay
+
+Same story as the demo, as readable code you can fork:
+
+```bash
+# stack running (quickstart above), then:
+pip install zizkadb-sdk
+python worked/01-support-order-delay/demo.py   # from a git clone
+# or: zizkadb demo
+```
+
+Expected terminal output:
+
+```
+tool_call · lookup_order ORD-8842
+  └── llm_response · gpt-4o
+        └── user_message · Why was my order delayed?
+```
+
+Full walkthrough: [worked/01-support-order-delay/](worked/01-support-order-delay/) · connect your own agent in [CONNECT.md](CONNECT.md)
+
+---
+
 ## Three steps
 
 <table>
@@ -116,7 +139,7 @@ That is what `zizkadb demo` prints — your first win in under a minute.
 ### 1 · Taste lineage
 
 ```bash
-curl -fsSL …/quickstart-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Zizka-ai/ZizkaDB/main/scripts/quickstart-remote.sh | bash
 ```
 
 Pre-built images. No clone.
@@ -246,6 +269,22 @@ cd core && python -m pytest tests -q
 <summary><strong>Managed cloud</strong></summary>
 
 Prefer not to run Docker? **[db.zizka.ai/signup](https://db.zizka.ai/signup)** — hosted API keys, dashboard, billing. Same SDK.
+
+</details>
+
+<details>
+<summary><strong>Troubleshooting (solo dev)</strong></summary>
+
+| Problem | Fix |
+|---------|-----|
+| `Docker daemon not running` | Start Docker Desktop or [OrbStack](https://orbstack.dev), then re-run quickstart |
+| `API did not become healthy` | `docker compose -f ~/.zizkadb/infra/docker-compose.quickstart.yml logs api` — wait 60s on first pull |
+| GHCR pull fails / images missing | Clone repo and run `bash scripts/quickstart.sh` (builds locally) |
+| Port 8000 or 3001 in use | Stop other stacks or change ports in compose |
+| Dashboard empty after demo | Open http://localhost:3001/login → **Open my dashboard →** → agent **support-bot** |
+| No Python | Stack still runs; `pip install zizkadb-sdk && zizkadb demo` after |
+
+More: [wiki/Troubleshooting](https://github.com/Zizka-ai/ZizkaDB/wiki/Troubleshooting) · [GitHub Issues](https://github.com/Zizka-ai/ZizkaDB/issues)
 
 </details>
 

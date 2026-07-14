@@ -38,7 +38,13 @@ curl -fsSL "${BASE}/infra/.env.quickstart" -o "${INFRA}/.env"
 
 echo "→ Pulling pre-built images from ghcr.io/zizka-ai/..."
 cd "${INFRA}"
-docker compose -f docker-compose.quickstart.yml pull
+if ! docker compose -f docker-compose.quickstart.yml pull 2>/dev/null; then
+  echo ""
+  echo "WARN: Could not pull pre-built images from GHCR." >&2
+  echo "  Fallback — clone the repo and build locally:" >&2
+  echo "    git clone https://github.com/${REPO}.git && cd ZizkaDB && bash scripts/quickstart.sh" >&2
+  exit 1
+fi
 
 echo "→ Starting stack..."
 docker compose -f docker-compose.quickstart.yml up -d

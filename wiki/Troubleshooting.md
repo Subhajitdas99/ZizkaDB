@@ -1,5 +1,18 @@
 # Troubleshooting
 
+## OSS quickstart (localhost)
+
+| Problem | Fix |
+|---------|-----|
+| Docker not running | Start Docker Desktop or OrbStack |
+| `API did not become healthy` | First pull can take 1–2 min. Check `docker compose -f ~/.zizkadb/infra/docker-compose.quickstart.yml logs api` |
+| GHCR image pull fails | Clone repo: `git clone … && bash scripts/quickstart.sh` (builds locally) |
+| Port 8000 / 3001 in use | Stop other services or edit compose ports |
+| Dashboard empty after demo | Login → **Open my dashboard →** → agent **support-bot** |
+| `zizkadb demo` fails | Ensure API healthy: `curl http://localhost:8000/health` |
+
+---
+
 ## API key shows "Never used"
 
 No successful authenticated request reached the API.

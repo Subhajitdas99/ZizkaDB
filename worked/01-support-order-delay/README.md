@@ -1,6 +1,6 @@
 # Worked example 01 — Support order delay
 
-A minimal agent session you can run in under a minute after [OSS quickstart](../../README.md#quickstart-oss).
+A minimal agent session you can run in under a minute after [OSS quickstart](../../README.md#-start-in-60-seconds-no-repo-clone).
 
 ## Story
 
@@ -8,19 +8,22 @@ A **support-bot** receives *"Why was my order delayed?"*, calls the LLM, then in
 
 ## Run it
 
-From the repo root (stack must be running):
+**No clone** (stack already up from curl quickstart):
 
 ```bash
-bash scripts/quickstart.sh
-```
-
-Or step by step:
-
-```bash
-bash scripts/setup-local.sh
 pip install zizkadb-sdk
 zizkadb demo
-# or: python worked/01-support-order-delay/demo.py
+```
+
+**From a git clone:**
+
+```bash
+git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
+bash scripts/quickstart.sh
+# or step by step:
+bash scripts/setup-local.sh
+pip install zizkadb-sdk
+python worked/01-support-order-delay/demo.py
 ```
 
 ## Expected output
