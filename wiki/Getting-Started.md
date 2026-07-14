@@ -1,23 +1,26 @@
 # Getting Started
 
-**Open source (recommended for this repo):** run ZizkaDB locally with Docker — no cloud account.
+**Open source (recommended):** run ZizkaDB locally — **no full repo download required.**
 
-## OSS quickstart (~2 minutes)
+## Fastest path — no git clone (~60 seconds)
 
-**Prerequisites:** [Docker](https://docs.docker.com/get-docker/) + Python 3.10+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Zizka-ai/ZizkaDB/main/scripts/quickstart-remote.sh | bash
+```
+
+Downloads only compose + schema to `~/.zizkadb`, pulls pre-built images, runs `zizkadb demo`.
+
+| Service | URL |
+|---------|-----|
+| Dashboard | http://localhost:3001/login → **Open my dashboard →** |
+| API | http://localhost:8000/health |
+
+## Have the repo? One-command quickstart
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
 bash scripts/quickstart.sh
 ```
-
-This starts the stack (pre-built GHCR images when available), runs the **support-bot / order delay** lineage demo, and prints next steps.
-
-| Service | URL |
-|---------|-----|
-| API health | http://localhost:8000/health |
-| Swagger | http://localhost:8000/swagger |
-| Dashboard | http://localhost:3001/login → **Open my dashboard →** |
 
 ### Run the demo again
 

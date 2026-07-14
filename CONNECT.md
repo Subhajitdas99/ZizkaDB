@@ -1,6 +1,16 @@
 # Connect your agent (self-host / OSS)
 
-Run the stack first:
+## Start the stack (pick one)
+
+**No repo clone** (recommended for new users):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Zizka-ai/ZizkaDB/main/scripts/quickstart-remote.sh | bash
+```
+
+Only ~4 small files land in `~/.zizkadb/infra/`. Pre-built images from `ghcr.io/zizka-ai/`.
+
+**From a git clone** (contributors):
 
 ```bash
 git clone https://github.com/Zizka-ai/ZizkaDB.git && cd ZizkaDB
