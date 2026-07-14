@@ -28,7 +28,7 @@ export const ZIZKADB_FOOTER_COLUMNS: FooterColumn[] = [
   {
     title: 'Resources',
     links: [
-      { label: 'Self-host (OSS)', href: `${GITHUB}/wiki/Self-Hosting`, external: true },
+      { label: 'Self-host (OSS)', href: GITHUB, external: true },
       { label: 'GitHub', href: GITHUB, external: true },
       { label: 'Wiki', href: WIKI, external: true },
       { label: 'Community', href: '/community' },
