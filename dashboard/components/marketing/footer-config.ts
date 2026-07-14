@@ -32,7 +32,7 @@ export const ZIZKADB_FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'GitHub', href: GITHUB, external: true },
       { label: 'Wiki', href: WIKI, external: true },
       { label: 'Community', href: '/community' },
-      { label: 'MCP setup', href: `${GITHUB}/wiki/MCP-and-Cursor`, external: true },
+      { label: 'MCP setup', href: '/docs#mcp' },
       { label: 'Status', href: 'https://db.zizka.ai/health', external: true },
     ],
   },
@@ -40,7 +40,7 @@ export const ZIZKADB_FOOTER_COLUMNS: FooterColumn[] = [
     title: 'Legal',
     links: [
       { label: 'Terms', href: `${ZIZKA_AI}/terms`, external: true },
-      { label: 'Privacy', href: `${ZIZKA_AI}/privacy`, external: true },
+      { label: 'Privacy', href: '/privacy' },
       { label: 'Security', href: '/trust#security' },
       { label: 'Contact', href: '/enterprise#contact' },
       { label: 'Responsible disclosure', href: 'mailto:founder@zizka.ai?subject=Security%20disclosure', external: true },

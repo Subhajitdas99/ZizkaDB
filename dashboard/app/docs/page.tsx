@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SiteNav } from '@/components/SiteNav'
 import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import {
@@ -68,12 +68,39 @@ function NavItem({ active, onClick, children }: { active: boolean; onClick: () =
   )
 }
 
+const VALID_SECTIONS: Section[] = ['overview', 'frameworks', 'python', 'typescript', 'rest', 'mcp', 'selfhost', 'concepts']
+
+function sectionFromUrl(): Section | null {
+  if (typeof window === 'undefined') return null
+  const hash = window.location.hash.replace('#', '')
+  if (VALID_SECTIONS.includes(hash as Section)) return hash as Section
+  const param = new URLSearchParams(window.location.search).get('section')
+  if (param && VALID_SECTIONS.includes(param as Section)) return param as Section
+  return null
+}
+
 export default function DocsPage() {
   const [section, setSection] = useState<Section>('overview')
 
+  useEffect(() => {
+    const fromUrl = sectionFromUrl()
+    if (fromUrl) setSection(fromUrl)
+  }, [])
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const fromUrl = sectionFromUrl()
+      if (fromUrl) setSection(fromUrl)
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
   const navigate = (id: string) => {
-    const valid: Section[] = ['overview', 'frameworks', 'python', 'typescript', 'rest', 'mcp', 'selfhost', 'concepts']
-    if (valid.includes(id as Section)) setSection(id as Section)
+    if (VALID_SECTIONS.includes(id as Section)) {
+      setSection(id as Section)
+      window.history.replaceState(null, '', `/docs#${id}`)
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
