@@ -45,6 +45,8 @@ curl -fsSL https://raw.githubusercontent.com/Zizka-ai/ZizkaDB/main/scripts/quick
 
 No signup. No API key on localhost.
 
+> **Note:** Pre-built images pull from `ghcr.io/zizka-ai/` (public). If GHCR is unavailable, the script auto-clones shallow and builds locally — first run may take a few minutes.
+
 <details>
 <summary><strong>Alternative paths</strong> (contributors, air-gapped, or no curl)</summary>
 
