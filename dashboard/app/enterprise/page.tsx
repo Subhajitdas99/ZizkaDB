@@ -1,7 +1,6 @@
 'use client'
 
 import { BRAND } from '@/components/brand'
-import { BrandLogo } from '@/components/BrandLogo'
 import { CalendlyBookModal } from '@/components/marketing/CalendlyBookModal'
 import { EnterpriseConnectForm } from '@/components/marketing/enterprise/EnterpriseConnectForm'
 import {
@@ -14,6 +13,7 @@ import {
   sectionTitle,
 } from '@/components/marketing/marketing-theme'
 import { MarketingPageStyles } from '@/components/marketing/MarketingPageStyles'
+import { MarketingFooter } from '@/components/marketing/MarketingFooter'
 import { SiteNav } from '@/components/SiteNav'
 import Link from 'next/link'
 import { useState } from 'react'
@@ -144,8 +144,6 @@ export default function EnterprisePage() {
           .ent-price-grid { grid-template-columns: 1fr !important; }
           .ent-hero-btns { flex-direction: column !important; align-items: stretch !important; }
           .ent-hero-btns a, .ent-hero-btns button { justify-content: center !important; }
-          .ent-footer { flex-direction: column !important; gap: 16px !important; align-items: flex-start !important; }
-          .ent-footer-links { flex-wrap: wrap !important; gap: 16px !important; }
           .ent-split { grid-template-columns: 1fr !important; }
         }
         .ent-table { width: 100%; border-collapse: collapse; }
@@ -609,29 +607,7 @@ export default function EnterprisePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="ent-footer" style={{
-        borderTop: `1px solid ${M.line}`, padding: '32px 24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontSize: 13, color: '#000', background: '#fff', flexWrap: 'wrap', gap: 16,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <BrandLogo variant="mark" showWordmark={false} href="/" />
-          <span style={{ fontWeight: 700, color: '#000' }}>ZizkaDB</span>
-          <span style={{ color: '#000' }}>·</span>
-          <span style={{ fontWeight: 500, color: '#000' }}>Open source operational database for AI agents</span>
-        </div>
-        <div className="ent-footer-links" style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-          {[['Docs', '/docs'], ['Pricing', '/#pricing'], ['Trust', '/trust'], ['GitHub', GITHUB_URL], ['Sign in', '/login']].map(([label, href]) =>
-            href!.startsWith('http') ? (
-              <a key={label} href={href} target="_blank" rel="noreferrer" style={{ color: '#000', textDecoration: 'none', fontWeight: 500 }}>{label}</a>
-            ) : (
-              <Link key={label} href={href!} style={{ color: '#000', textDecoration: 'none', fontWeight: 500 }}>{label}</Link>
-            )
-          )}
-          <a href="#contact" style={{ color: '#000', fontWeight: 700, textDecoration: 'none' }}>Lets connect</a>
-        </div>
-      </footer>
+      <MarketingFooter />
     </div>
   )
 }
