@@ -33,7 +33,6 @@ export const ZIZKADB_FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'Wiki', href: WIKI, external: true },
       { label: 'Community', href: '/community' },
       { label: 'MCP setup', href: '/docs#mcp' },
-      { label: 'Status', href: 'https://db.zizka.ai/health', external: true },
     ],
   },
   {
