@@ -56,3 +56,15 @@ jobs:
           tags: |
             ${{ env.DASHBOARD_IMAGE }}:latest
             ${{ env.DASHBOARD_IMAGE }}:${{ steps.meta.outputs.tag }}
+
+      - name: Make GHCR packages public (required for curl quickstart)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          for pkg in zizkadb-api zizkadb-dashboard; do
+            echo "→ Setting visibility=public for ${pkg}"
+            gh api --method PATCH "/orgs/zizka-ai/packages/container/${pkg}" \
+              -f visibility=public \
+              || echo "WARN: could not set ${pkg} public — enable manually in GitHub Packages settings"
+          done
