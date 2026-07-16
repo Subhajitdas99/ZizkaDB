@@ -20,7 +20,10 @@ def test_build_outreach_html_includes_pixel_and_image():
     assert "dashboard-preview.png" in html
     assert "Dashboard preview" in html
     assert "Star on GitHub" in html
+    assert "Join our Discord community" in html
+    assert "https://discord.gg/EBjAABKkh" in html
     assert "api.example/v1/outreach/o/abc.gif" in html
+
 
 
 def test_build_outreach_escapes_html():
@@ -54,3 +57,4 @@ def test_build_outreach_text():
     assert "Line one" in text
     assert "[Screenshot:" in text
     assert "Star: https://github.com" in text
+    assert "Join our Discord community: https://discord.gg/EBjAABKkh" in text
