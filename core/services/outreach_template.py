@@ -56,14 +56,24 @@ def build_outreach_html(
         </div>
         """
 
-    cta_block = ""
+    discord_url = "https://discord.gg/EBjAABKkh"
+    star_btn = ""
     if cta_label and cta_url:
-        cta_block = f"""
-        <div style="margin:28px 0 8px;text-align:center;">
+        star_btn = f"""
           <a href="{_escape(cta_url)}"
              style="display:inline-block;background:#22c55e;color:#0a0a0a;text-decoration:none;
                     font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;">
             {_escape(cta_label)}
+          </a>
+          <div style="height:12px;line-height:12px;font-size:12px;">&nbsp;</div>
+        """
+    cta_block = f"""
+        <div style="margin:28px 0 8px;text-align:center;">
+          {star_btn}
+          <a href="{_escape(discord_url)}"
+             style="display:inline-block;background:#5865F2;color:#ffffff;text-decoration:none;
+                    font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;">
+            Join our Discord community
           </a>
         </div>
         """
@@ -137,7 +147,10 @@ def build_outreach_text(
     if cta_label and cta_url:
         lines.append(f"{cta_label}: {cta_url}")
         lines.append("")
+    lines.append("Join our Discord community: https://discord.gg/EBjAABKkh")
+    lines.append("")
     lines.append(f"GitHub: {github_url}")
+
     lines.append("")
     lines.append(sign_off.strip())
     return "\n".join(lines)
