@@ -11,6 +11,8 @@ def test_build_outreach_html_includes_pixel_and_image():
         image_caption="Dashboard preview",
         cta_label="Star on GitHub",
         cta_url="https://github.com/Zizka-ai/ZizkaDB",
+        discord_cta_label="Join our Discord community",
+        discord_cta_url="https://discord.gg/EBjAABKkh",
         github_url="https://github.com/Zizka-ai/ZizkaDB",
         pixel_url="https://api.example/v1/outreach/o/abc.gif",
         sign_off="Best,\nMir",
@@ -25,7 +27,6 @@ def test_build_outreach_html_includes_pixel_and_image():
     assert "api.example/v1/outreach/o/abc.gif" in html
 
 
-
 def test_build_outreach_escapes_html():
     html = build_outreach_html(
         recipient_name="<script>alert(1)</script>",
@@ -34,6 +35,8 @@ def test_build_outreach_escapes_html():
         image_caption=None,
         cta_label=None,
         cta_url=None,
+        discord_cta_label=None,
+        discord_cta_url=None,
         github_url="https://github.com/Zizka-ai/ZizkaDB",
         pixel_url="https://x/p.gif",
         sign_off="Mir",
@@ -41,6 +44,7 @@ def test_build_outreach_escapes_html():
     assert "<script>" not in html
     assert "&lt;script&gt;" in html
     assert "&lt;b&gt;here&lt;/b&gt;" in html
+    assert "Join our Discord" not in html
 
 
 def test_build_outreach_text():
@@ -50,6 +54,8 @@ def test_build_outreach_text():
         image_url="https://img.example/a.png",
         cta_label="Star",
         cta_url="https://github.com/Zizka-ai/ZizkaDB",
+        discord_cta_label="Join our Discord community",
+        discord_cta_url="https://discord.gg/EBjAABKkh",
         github_url="https://github.com/Zizka-ai/ZizkaDB",
         sign_off="Mir",
     )
