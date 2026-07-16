@@ -487,6 +487,82 @@ export async function adminMarketingSubscriptions(
   return apiFetch(`/v1/admin/marketing-subscriptions${q ? `?${q}` : ''}`, token)
 }
 
+// ── Admin email outreach ──────────────────────────────────────────────────────
+
+export interface OutreachStats {
+  sent_today: number
+  daily_limit: number
+  remaining_today: number
+  total_sent: number
+  total_opened: number
+  total_failed: number
+  open_rate_pct: number
+  smtp_configured: boolean
+  from_address: string
+}
+
+export interface OutreachSend {
+  send_id: string
+  to_email: string
+  subject: string
+  recipient_name: string | null
+  status: string
+  error: string | null
+  open_count: number
+  opened_at: string | null
+  sent_at: string | null
+  created_at: string | null
+  image_url: string | null
+}
+
+export interface OutreachComposePayload {
+  to_email?: string
+  subject?: string
+  recipient_name?: string
+  body: string
+  image_url?: string
+  image_caption?: string
+  cta_label?: string
+  cta_url?: string
+  github_url?: string
+  sign_off?: string
+}
+
+export async function adminOutreachStats(token: string): Promise<OutreachStats> {
+  return apiFetch('/v1/admin/outreach/stats', token)
+}
+
+export async function adminOutreachSends(token: string, limit = 50): Promise<OutreachSend[]> {
+  return apiFetch(`/v1/admin/outreach/sends?limit=${limit}`, token)
+}
+
+export async function adminOutreachPreview(
+  token: string,
+  body: Omit<OutreachComposePayload, 'to_email' | 'subject'>,
+): Promise<{ html: string; text: string }> {
+  return apiFetch('/v1/admin/outreach/preview', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function adminOutreachSend(
+  token: string,
+  body: OutreachComposePayload & { to_email: string; subject: string },
+): Promise<{
+  send_id: string
+  status: string
+  to_email: string
+  sent_today: number
+  remaining_today: number
+  dev_fallback: boolean
+}> {
+  return apiFetch('/v1/admin/outreach/send', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
 export async function getApiKeys(token: string) {
   return apiFetch('/v1/auth/api-keys', token)
 }

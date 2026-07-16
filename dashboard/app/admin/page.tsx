@@ -18,9 +18,10 @@ import { format, formatDistanceToNow } from 'date-fns'
 
 import { setAdminToken, clearAdminToken, getAdminToken } from "@/lib/auth";
 import { FOUNDER_EMAIL, POLL_INTERVAL_MS, OTP_LENGTH } from "@/lib/constants";
+import { EmailOutreachSection } from "@/components/admin/EmailOutreachSection";
 
 
-type Section = 'subscribers' | 'managed' | 'telemetry' | 'demo_requests' | 'marketing_subscriptions'
+type Section = 'subscribers' | 'managed' | 'telemetry' | 'demo_requests' | 'marketing_subscriptions' | 'outreach'
 
 interface Overview {
   telemetry: { total_installs?: number; active_7d?: number; active_24h?: number; total_pings?: number }
@@ -499,7 +500,7 @@ function Dashboard({
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px" }}>
         <OverviewRow overview={overview} />
 
-        <div style={{ display: 'flex', gap: 4, padding: 4, background: '#111',
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, padding: 4, background: '#111',
                       border: '1px solid #1f1f1f', borderRadius: 12, marginTop: 28, marginBottom: 24 }}>
           {([
             { key: 'subscribers', label: 'Subscribers' },
@@ -507,10 +508,11 @@ function Dashboard({
             { key: 'telemetry',   label: 'SDKs & telemetry' },
             { key: 'demo_requests', label: 'Demo requests' },
             { key: 'marketing_subscriptions', label: 'Marketing Material Subscriptions' },
+            { key: 'outreach', label: 'Email Outreach' },
           ] as { key: Section; label: string }[]).map((t) => (
             <button key={t.key} onClick={() => setSection(t.key)}
                     style={{
-                      flex: 1, padding: '10px 14px', borderRadius: 8, border: 'none',
+                      flex: '1 1 140px', padding: '10px 14px', borderRadius: 8, border: 'none',
                       background: section === t.key ? '#1a1a1a' : 'transparent',
                       color: section === t.key ? '#fff' : '#737373',
                       fontSize: 13, fontWeight: 500, cursor: 'pointer',
@@ -541,6 +543,7 @@ function Dashboard({
         {section === 'telemetry'   && <TelemetrySection token={token} />}
         {section === 'demo_requests' && <DemoRequestsSection token={token} />}
         {section === 'marketing_subscriptions' && <MarketingSubscriptionsSection token={token} />}
+        {section === 'outreach' && <EmailOutreachSection token={token} />}
       </div>
     </div>
   );
