@@ -348,6 +348,8 @@ async def forget(
     deleted = len(event_ids)
 
     # Delete from Postgres
+    # PostgreSQL does not support aggregate functions in RETURNING clauses.
+    # We already know the count from the SELECT above, so use that directly.
     await pool.execute(
         """
         DELETE FROM events
@@ -356,14 +358,8 @@ async def forget(
         """,
         tenant_id,
         event_ids,
-
-    # Note: PostgreSQL does not support aggregate functions in RETURNING clauses.
-    # We already know the count from the SELECT above, so use that directly.
-    await pool.execute(
-        "DELETE FROM events WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2",
-        event_ids, tenant_id,
-
     )
+    
     deleted = len(event_ids)
 
     # Delete vectors from Qdrant
