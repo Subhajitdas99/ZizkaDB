@@ -1,12 +1,15 @@
 import json
 import re
+from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
+from services.exceptions import bad_request, conflict, not_found
 from pydantic import BaseModel, Field
 
-from api.deps import get_tenant
+from api.deps import assert_agent_allowed, get_tenant, require_dashboard_session
 from db.connection import get_pool
 from services.api_keys import (
+    assert_and_reserve_api_key_slot,
     create_api_key_record,
     list_api_keys_for_agent,
     revoke_api_key_record,
@@ -21,9 +24,8 @@ _AGENT_ID_RE = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$")
 def _validate_agent_id(agent_id: str) -> str:
     agent_id = agent_id.strip()
     if not agent_id or not _AGENT_ID_RE.match(agent_id):
-        raise HTTPException(
-            status_code=400,
-            detail="agent_id must be 1–255 chars: letters, numbers, dots, dashes, underscores",
+        raise bad_request(
+            "agent_id must be 1–255 chars: letters, numbers, dots, dashes, underscores"
         )
     return agent_id
 
@@ -74,35 +76,44 @@ async def list_agents(tenant: dict = Depends(get_tenant)):
 @router.post("", status_code=201)
 async def create_agent(
     body: CreateAgentBody,
-    tenant: dict = Depends(get_tenant),
+    session: dict = Depends(require_dashboard_session),
 ):
-    """Create an agent and its first API key (shown once)."""
+    """Create an agent and its first API key (shown once).
+
+    Agent + first key are created in one transaction so a plan-limit rejection
+    (the auto-created key counts against the quota) rolls back the agent instead
+    of leaving an agent with no key.
+    """
     agent_id = _validate_agent_id(body.agent_id)
     pool = get_pool()
-    tenant_id = tenant["tenant_id"]
+    tenant_id = session["tenant_id"]
 
-    existing = await pool.fetchrow(
-        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
-        tenant_id, agent_id,
-    )
-    if existing:
-        raise HTTPException(status_code=409, detail="Agent already exists")
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            existing = await conn.fetchrow(
+                "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+                tenant_id, agent_id,
+            )
+            if existing:
+                raise conflict("Agent already exists")
 
-    await pool.execute(
-        """
-        INSERT INTO agents (agent_id, tenant_id, metadata)
-        VALUES ($1, $2, $3::jsonb)
-        """,
-        agent_id, tenant_id, json.dumps(body.metadata or {}),
-    )
+            await assert_and_reserve_api_key_slot(conn, tenant_id=tenant_id)
 
-    key_name = body.key_name or f"{agent_id} production"
-    api_key = await create_api_key_record(
-        pool,
-        tenant_id=tenant_id,
-        name=key_name,
-        agent_id=agent_id,
-    )
+            await conn.execute(
+                """
+                INSERT INTO agents (agent_id, tenant_id, metadata)
+                VALUES ($1, $2, $3::jsonb)
+                """,
+                agent_id, tenant_id, json.dumps(body.metadata or {}),
+            )
+
+            key_name = body.key_name or f"{agent_id} production"
+            api_key = await create_api_key_record(
+                conn,
+                tenant_id=tenant_id,
+                name=key_name,
+                agent_id=agent_id,
+            )
 
     return {
         "agent": agent_id,
@@ -114,7 +125,7 @@ async def create_agent(
 @router.delete("/{agent_id}")
 async def delete_agent(
     agent_id: str,
-    tenant: dict = Depends(get_tenant),
+    tenant: dict = Depends(require_dashboard_session),
 ):
     """Delete an agent and all of its events. Cannot be undone."""
     agent_id = _validate_agent_id(agent_id)
@@ -126,20 +137,22 @@ async def delete_agent(
         tenant_id, agent_id,
     )
     if not row:
-        raise HTTPException(status_code=404, detail="Agent not found")
+        raise not_found("Agent not found")
 
-    await pool.execute(
-        "UPDATE events SET parent_event_id = NULL WHERE tenant_id = $1 AND agent_id = $2",
-        tenant_id, agent_id,
-    )
-    await pool.execute(
-        "DELETE FROM events WHERE tenant_id = $1 AND agent_id = $2",
-        tenant_id, agent_id,
-    )
-    await pool.execute(
-        "DELETE FROM agents WHERE tenant_id = $1 AND agent_id = $2",
-        tenant_id, agent_id,
-    )
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            await conn.execute(
+                "UPDATE events SET parent_event_id = NULL WHERE tenant_id = $1 AND agent_id = $2",
+                tenant_id, agent_id,
+            )
+            await conn.execute(
+                "DELETE FROM events WHERE tenant_id = $1 AND agent_id = $2",
+                tenant_id, agent_id,
+            )
+            await conn.execute(
+                "DELETE FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+                tenant_id, agent_id,
+            )
     return {
         "deleted": True,
         "agent": agent_id,
@@ -162,7 +175,7 @@ async def test_agent_event(
         tenant_id, agent_id,
     )
     if not exists:
-        raise HTTPException(status_code=404, detail="Agent not found")
+        raise not_found("Agent not found")
 
     result = await write_event(
         tenant_id=tenant_id,
@@ -191,7 +204,7 @@ async def list_agent_api_keys(
         tenant_id, agent_id,
     )
     if not exists:
-        raise HTTPException(status_code=404, detail="Agent not found")
+        raise not_found("Agent not found")
 
     return await list_api_keys_for_agent(pool, tenant_id, agent_id)
 
@@ -200,25 +213,29 @@ async def list_agent_api_keys(
 async def create_agent_api_key(
     agent_id: str,
     body: CreateAgentKeyBody,
-    tenant: dict = Depends(get_tenant),
+    session: dict = Depends(require_dashboard_session),
 ):
     agent_id = _validate_agent_id(agent_id)
     pool = get_pool()
-    tenant_id = tenant["tenant_id"]
+    tenant_id = session["tenant_id"]
 
-    exists = await pool.fetchrow(
-        "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
-        tenant_id, agent_id,
-    )
-    if not exists:
-        raise HTTPException(status_code=404, detail="Agent not found")
+    async with pool.acquire() as conn:
+        async with conn.transaction():
+            exists = await conn.fetchrow(
+                "SELECT 1 FROM agents WHERE tenant_id = $1 AND agent_id = $2",
+                tenant_id, agent_id,
+            )
+            if not exists:
+                raise not_found("Agent not found")
 
-    return await create_api_key_record(
-        pool,
-        tenant_id=tenant_id,
-        name=body.name or f"{agent_id} key",
-        agent_id=agent_id,
-    )
+            await assert_and_reserve_api_key_slot(conn, tenant_id=tenant_id)
+
+            return await create_api_key_record(
+                conn,
+                tenant_id=tenant_id,
+                name=body.name or f"{agent_id} key",
+                agent_id=agent_id,
+            )
 
 
 @router.delete("/{agent_id}/api-keys/{key_id}")
@@ -232,12 +249,13 @@ async def revoke_agent_api_key(
     tenant_id = tenant["tenant_id"]
 
     if not await revoke_api_key_record(pool, tenant_id, key_id, agent_id):
-        raise HTTPException(status_code=404, detail="API key not found")
+        raise not_found("API key not found")
     return {"revoked": True, "key_id": key_id, "agent": agent_id}
 
 
 @router.get("/{agent_id}/stats")
 async def agent_stats(agent_id: str, tenant: dict = Depends(get_tenant)):
+    assert_agent_allowed(tenant, agent_id)
     pool = get_pool()
 
     stats = await pool.fetchrow(
@@ -283,6 +301,7 @@ async def list_sessions(
     limit: int = Query(default=50, le=500),
     tenant: dict = Depends(get_tenant),
 ):
+    assert_agent_allowed(tenant, agent_id)
     pool = get_pool()
     rows = await pool.fetch(
         """
@@ -454,16 +473,17 @@ async def _baseline_for(
 async def agent_baseline(
     agent_id: str,
     recent_window: int = Query(default=50, ge=5, le=500),
+    window: str | None = Query(default=None, pattern=r"^(24h|7d|30d)$"),
     tenant: dict = Depends(get_tenant),
 ):
     """
     Behavioral baseline for an agent.
 
-    Splits sessions into two windows: the most recent N sessions (`recent`) and
-    everything before that (`baseline`). Returns event-type distribution,
-    parent->child transition distribution, session shape, and error rate for
-    each window, plus a drift score and the largest behavioural deltas.
+    When `window` is provided (24h / 7d / 30d) the split is time-based:
+    `recent` = sessions ending inside that window, `baseline` = everything before.
+    Otherwise falls back to the most recent N sessions vs everything prior.
     """
+    assert_agent_allowed(tenant, agent_id)
     pool = get_pool()
 
     sessions = await pool.fetch(
@@ -486,8 +506,15 @@ async def agent_baseline(
             "recent_window": recent_window,
         }
 
-    recent_ids   = [r["session_id"] for r in sessions[:recent_window]]
-    baseline_ids = [r["session_id"] for r in sessions[recent_window:]]
+    # Time-based split when a window param is supplied
+    if window:
+        delta = {"24h": timedelta(hours=24), "7d": timedelta(days=7), "30d": timedelta(days=30)}[window]
+        cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - delta
+        recent_ids   = [r["session_id"] for r in sessions if r["ended_at"] >= cutoff]
+        baseline_ids = [r["session_id"] for r in sessions if r["ended_at"] <  cutoff]
+    else:
+        recent_ids   = [r["session_id"] for r in sessions[:recent_window]]
+        baseline_ids = [r["session_id"] for r in sessions[recent_window:]]
 
     if not baseline_ids:
         return {
@@ -528,17 +555,240 @@ async def agent_baseline(
         "status":        "ok",
         "sessions":      len(sessions),
         "recent_window": recent_window,
+        "window":        window,
         "baseline":      baseline,
         "recent":        recent,
         "drift": {
-            "score":           drift_score,   # 0 = identical, 1 = totally different
-            "verdict":         verdict,
-            "biggest_changes": biggest_changes[:8],
-            "error_rate_change_pp": round(recent["error_rate_pct"] - baseline["error_rate_pct"], 2),
+            "score":                     drift_score,
+            "behavior_change_pct":       round(drift_score * 100, 1),
+            "verdict":                   verdict,
+            "biggest_changes":           biggest_changes[:8],
+            "behavior_change_pp":        round(recent["error_rate_pct"] - baseline["error_rate_pct"], 2),
+            "error_rate_change_pp":      round(recent["error_rate_pct"] - baseline["error_rate_pct"], 2),
             "session_length_change_pct": round(
                 100 * ((recent["avg_events_per_session"] - baseline["avg_events_per_session"])
                        / (baseline["avg_events_per_session"] or 1)),
                 1,
             ),
         },
+    }
+
+
+# ── Time-windowed behavior change ──────────────────────────────────────────
+#
+# Unlike the session-count baseline above, this endpoint measures behavior
+# change between a calendar-time window (24h / 7d / 30d / custom) and the
+# entire history of events before that window (the baseline epoch).
+#
+# Calculation only starts once there are >= 50 events before the window,
+# ensuring the baseline epoch is statistically meaningful.
+#
+# Composite score (0-100 %):
+#   40 % * L1(event_distribution_baseline, event_distribution_current)
+#   40 % * L1(transition_baseline,         transition_current)
+#   20 % * min(|error_rate_delta_pp| / 20, 1.0)   <- capped at ±20pp = 100 %
+
+
+async def _baseline_for_timewindow(
+    pool,
+    tenant_id: str,
+    agent_id: str,
+    from_ts: datetime | None,
+    to_ts: datetime,
+) -> dict:
+    """Compute baseline metrics for events in [from_ts, to_ts)."""
+    if from_ts is None:
+        ts_filter = "timestamp < $3"
+        params_base = (tenant_id, agent_id, to_ts)
+    else:
+        ts_filter = "timestamp >= $3 AND timestamp < $4"
+        params_base = (tenant_id, agent_id, from_ts, to_ts)
+
+    type_rows = await pool.fetch(
+        f"""
+        SELECT event_type AS key, COUNT(*) AS count
+        FROM events
+        WHERE tenant_id = $1 AND agent_id = $2 AND {ts_filter}
+        GROUP BY event_type
+        """,
+        *params_base,
+    )
+
+    transition_rows = await pool.fetch(
+        f"""
+        SELECT
+            p.event_type || ' -> ' || c.event_type AS key,
+            COUNT(*) AS count
+        FROM events c
+        JOIN events p ON c.parent_event_id = p.event_id
+        WHERE c.tenant_id = $1 AND c.agent_id = $2 AND c.{ts_filter.replace('timestamp', 'c.timestamp')}
+        GROUP BY p.event_type, c.event_type
+        ORDER BY count DESC
+        LIMIT 20
+        """,
+        *params_base,
+    )
+
+    error_row = await pool.fetchrow(
+        f"""
+        SELECT
+            COUNT(*) FILTER (
+                WHERE event_type ILIKE '%error%'
+                   OR event_type ILIKE '%fail%'
+                   OR data ? 'error'
+            )::float * 100.0 / NULLIF(COUNT(*), 0) AS pct
+        FROM events
+        WHERE tenant_id = $1 AND agent_id = $2 AND {ts_filter}
+        """,
+        *params_base,
+    )
+
+    total_events = sum(r["count"] for r in type_rows)
+    return {
+        "events":             total_events,
+        "event_distribution": _distribution(type_rows, "key"),
+        "transitions":        _distribution(transition_rows, "key"),
+        "error_rate_pct":     round(error_row["pct"] or 0, 2),
+    }
+
+
+MINIMUM_BASELINE_EVENTS = 50
+MINIMUM_CURRENT_EVENTS  = 10
+
+
+@router.get("/{agent_id}/behavior-change")
+async def agent_behavior_change(
+    agent_id: str,
+    window: str = Query(default="7d", pattern=r"^(24h|7d|30d|custom)$"),
+    from_ts: str | None = Query(default=None),
+    to_ts:   str | None = Query(default=None),
+    tenant:  dict = Depends(get_tenant),
+):
+    """
+    Time-windowed behavior change for an agent.
+
+    Compares the event distribution and transition patterns inside the selected
+    time window against all events before that window (the baseline epoch).
+    Returns a composite behavior change percentage (0-100) and a breakdown of
+    contributing factors.
+
+    Requires >= 50 events before the window to establish a meaningful baseline.
+    """
+    agent_id  = _validate_agent_id(agent_id)
+    assert_agent_allowed(tenant, agent_id)
+    pool      = get_pool()
+    tenant_id = tenant["tenant_id"]
+
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+
+    if window == "24h":
+        win_start = now - timedelta(hours=24)
+        win_end   = now
+    elif window == "7d":
+        win_start = now - timedelta(days=7)
+        win_end   = now
+    elif window == "30d":
+        win_start = now - timedelta(days=30)
+        win_end   = now
+    else:
+        if not from_ts or not to_ts:
+            raise bad_request(detail="from_ts and to_ts are required for custom window")
+        try:
+            win_start = datetime.fromisoformat(from_ts.replace("Z", "+00:00")).replace(tzinfo=None)
+            win_end   = datetime.fromisoformat(to_ts.replace("Z", "+00:00")).replace(tzinfo=None)
+        except ValueError:
+            raise bad_request(detail="from_ts / to_ts must be ISO 8601 timestamps")
+
+    baseline_count = await pool.fetchval(
+        "SELECT COUNT(*) FROM events WHERE tenant_id = $1 AND agent_id = $2 AND timestamp < $3",
+        tenant_id, agent_id, win_start,
+    ) or 0
+
+    if baseline_count < MINIMUM_BASELINE_EVENTS:
+        total = await pool.fetchval(
+            "SELECT COUNT(*) FROM events WHERE tenant_id = $1 AND agent_id = $2",
+            tenant_id, agent_id,
+        ) or 0
+        return {
+            "agent":                    agent_id,
+            "status":                   "insufficient_data",
+            "message":                  (
+                f"Need at least {MINIMUM_BASELINE_EVENTS} events before the selected window to "
+                f"establish a baseline epoch. You have {baseline_count} pre-window events "
+                f"({total} total). Keep logging."
+            ),
+            "total_events":             total,
+            "baseline_events_needed":   MINIMUM_BASELINE_EVENTS,
+            "baseline_events_available": baseline_count,
+            "window":                   window,
+        }
+
+    current_count = await pool.fetchval(
+        "SELECT COUNT(*) FROM events WHERE tenant_id = $1 AND agent_id = $2 AND timestamp >= $3 AND timestamp < $4",
+        tenant_id, agent_id, win_start, win_end,
+    ) or 0
+
+    if current_count < MINIMUM_CURRENT_EVENTS:
+        return {
+            "agent":               agent_id,
+            "status":              "no_current_data",
+            "message":             (
+                f"Only {current_count} events in the selected {window} window. "
+                f"Need at least {MINIMUM_CURRENT_EVENTS} for a meaningful comparison."
+            ),
+            "current_event_count": current_count,
+            "window":              window,
+            "window_start":        win_start.isoformat(),
+            "window_end":          win_end.isoformat(),
+        }
+
+    baseline_w = await _baseline_for_timewindow(pool, tenant_id, agent_id, None,      win_start)
+    current_w  = await _baseline_for_timewindow(pool, tenant_id, agent_id, win_start, win_end)
+
+    dist_shift    = _l1_distance(baseline_w["event_distribution"], current_w["event_distribution"])
+    trans_shift   = _l1_distance(baseline_w["transitions"],        current_w["transitions"])
+    error_delta   = current_w["error_rate_pct"] - baseline_w["error_rate_pct"]
+    error_component = min(abs(error_delta) / 20.0, 1.0)
+
+    behavior_score = 0.4 * dist_shift + 0.4 * trans_shift + 0.2 * error_component
+    behavior_change_pct = round(behavior_score * 100, 1)
+
+    if behavior_change_pct < 5:
+        verdict = "stable"
+    elif behavior_change_pct < 15:
+        verdict = "minor"
+    elif behavior_change_pct < 30:
+        verdict = "noticeable"
+    else:
+        verdict = "significant"
+
+    biggest = (
+        _biggest_changes("event_distribution", baseline_w["event_distribution"], current_w["event_distribution"])
+        + _biggest_changes("transitions",       baseline_w["transitions"],        current_w["transitions"])
+    )
+    biggest.sort(key=lambda d: abs(d["delta_pp"]), reverse=True)
+
+    return {
+        "agent":               agent_id,
+        "status":              "ok",
+        "window":              window,
+        "window_start":        win_start.isoformat(),
+        "window_end":          win_end.isoformat(),
+        "behavior_change_pct": behavior_change_pct,
+        "verdict":             verdict,
+        "components": {
+            "distribution_shift_pct": round(dist_shift  * 100, 1),
+            "transition_shift_pct":   round(trans_shift * 100, 1),
+            "error_rate_delta_pp":    round(error_delta, 2),
+        },
+        "baseline_window": {
+            "to_ts":       win_start.isoformat(),
+            "event_count": baseline_w["events"],
+        },
+        "current_window": {
+            "from_ts":     win_start.isoformat(),
+            "to_ts":       win_end.isoformat(),
+            "event_count": current_w["events"],
+        },
+        "biggest_changes": biggest[:8],
     }

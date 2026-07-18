@@ -18,6 +18,7 @@ build/
 node_modules/
 .next/
 .turbo/
+*.tsbuildinfo
 *.log
 
 # macOS
@@ -32,7 +33,25 @@ redis_data/
 .idea/
 .vscode/
 .cursor/mcp.json
+.mcp.json
 *.swp
 
-# Profiling
+# Postgres backups (created by infra/backup-postgres.sh)
+infra/backups/
+
+# Local native stack (Qdrant binary, storage)
+.local/
+
+# Qdrant data when started from repo root by mistake
+storage/
+.qdrant-initialized
+
+# Extra local venvs / caches
+.venv-phase0/
+.venv-ci/
+.ruff_cache/
+core/.venv/
+
+# Profiling artifacts
 *.profraw
+default.profraw

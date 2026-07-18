@@ -67,14 +67,14 @@ If your app logs to **different agent ids** per user (e.g. `conv-alice`, `conv-b
 |----------|---------|
 | `ZIZKADB_API_KEY` | Your cloud API key (preferred) |
 | `AGENTDB_API_KEY` | Legacy alias for `ZIZKADB_API_KEY` |
+| `ZIZKADB_AGENT` | Default agent name (used in templates/examples) |
 | `ZIZKADB_HOST` | Self-hosted API URL |
 | `ZIZKADB_TELEMETRY` | Set `false` to opt out |
 
 ## Self-host dashboard
 
-1. `docker compose -f infra/docker-compose.yml up -d`
-2. `NEXT_PUBLIC_API_URL=http://localhost:8000 NEXT_PUBLIC_DEV_MODE=true npm run dev` in `dashboard/`
-3. Open http://localhost:3000/login → **Open my dashboard →**
+1. `bash scripts/setup-local.sh` (API + dashboard on port **3001**)
+2. Open http://localhost:3001/login → **Open my dashboard →**
 
 ## Links
 

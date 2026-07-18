@@ -9,7 +9,8 @@ This guide explains how to get started, what we expect in pull requests, and the
 | Resource | URL |
 |----------|-----|
 | Repository | https://github.com/Zizka-ai/ZizkaDB |
-| Live demo | https://db.zizka.ai |
+| OSS quickstart (no clone) | `curl -fsSL https://raw.githubusercontent.com/Zizka-ai/ZizkaDB/main/scripts/quickstart-remote.sh \| bash` |
+| Connect guide | [CONNECT.md](CONNECT.md) |
 | Docs | https://db.zizka.ai/docs |
 | Architecture / trust | https://db.zizka.ai/trust |
 | Wiki | https://github.com/Zizka-ai/ZizkaDB/wiki |
@@ -103,6 +104,15 @@ pytest
 ```
 
 ### Dashboard (optional)
+
+Prefer the one-command stack (port **3001**):
+
+```bash
+bash scripts/setup-local.sh
+# http://localhost:3001/login → Open my dashboard →
+```
+
+Or run the dashboard alone for UI work:
 
 ```bash
 cd dashboard
@@ -325,4 +335,4 @@ You do not need permission to open a PR. You **do** need alignment for large des
 
 Contributors are credited in release notes and, with permission, on the project site. Thank you for helping build operational infrastructure for AI agents.
 
-**Questions?** [Community board](https://db.zizka.ai/community) · [GitHub Discussions/Issues](https://github.com/Zizka-ai/ZizkaDB/issues) · hello@zizka.ai
+**Questions?** [Community board](https://db.zizka.ai/community) · [GitHub Discussions/Issues](https://github.com/Zizka-ai/ZizkaDB/issues) · founder@zizka.ai

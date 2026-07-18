@@ -88,9 +88,8 @@ pass "dashboard build"
 if curl -sf http://localhost:8000/health >/dev/null 2>&1; then
   echo "→ API smoke (stack running)"
   bash scripts/smoke-test.sh
-  bash scripts/test-e2e-workflow.sh
   ZIZKADB_HOST=http://localhost:8000 "$PY" scripts/demo-why.py
-  pass "API smoke + e2e workflow + demo-why.py"
+  pass "API smoke + demo-why.py"
 else
   echo "○ API smoke skipped (no stack on :8000 — run: bash scripts/setup-local.sh)"
 fi

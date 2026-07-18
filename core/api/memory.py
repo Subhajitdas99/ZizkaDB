@@ -7,7 +7,8 @@ replacement for LLM-provided memory:
   DELETE /v1/memory/forget →  GDPR forget by any metadata field
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
+from services.exceptions import bad_request, not_found
 from pydantic import BaseModel
 from typing import Any
 import json
@@ -77,57 +78,65 @@ async def get_context(
     # 2. Semantically relevant events via Qdrant
     semantic_rows = []
     embedding = await generate_embedding(body.task, tenant_id)
-    if embedding:
-        try:
-            from qdrant_client.models import Filter, FieldCondition, MatchValue
-            qdrant = get_qdrant()
+    if not embedding:
+        raise bad_request(
+            detail=(
+                "Embedding generation failed. Configure embeddings in Dashboard → Settings "
+                "(platform key or your OpenAI API key)."
+            ),
+        )
+    try:
+        from qdrant_client.models import Filter, FieldCondition, MatchValue
+        qdrant = get_qdrant()
 
-            must = [
-                FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)),
-                FieldCondition(key="agent_id", match=MatchValue(value=body.agent)),
-            ]
-            results = await qdrant.search(
-                collection_name="agent_events",
-                query_vector=embedding,
-                query_filter=Filter(must=must),
-                limit=body.semantic_limit,
-                with_payload=True,
+        must = [
+            FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)),
+            FieldCondition(key="agent_id", match=MatchValue(value=body.agent)),
+        ]
+        results = await qdrant.search(
+            collection_name="agent_events",
+            query_vector=embedding,
+            query_filter=Filter(must=must),
+            limit=body.semantic_limit,
+            with_payload=True,
+        )
+
+        if results:
+            sem_ids = [r.id for r in results]
+            score_map = {str(r.id): round(r.score, 3) for r in results}
+
+            sem_rows = await pool.fetch(
+                """
+                SELECT event_id, agent_id, timestamp, event_type, data, session_id
+                FROM events
+                WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2
+                  AND ($3::text IS NULL OR session_id::text != $3)
+                """,
+                sem_ids, tenant_id, body.session_id,
             )
 
-            if results:
-                sem_ids = [r.id for r in results]
-                score_map = {str(r.id): round(r.score, 3) for r in results}
+            for row in sem_rows:
+                semantic_rows.append((row, score_map.get(str(row["event_id"]), 0.0)))
+    except Exception as e:
+        log.warning(f"Semantic search failed for context: {e}")
 
-                sem_rows = await pool.fetch(
-                    """
-                    SELECT event_id, agent_id, timestamp, event_type, data, session_id
-                    FROM events
-                    WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2
-                      AND ($3::text IS NULL OR session_id::text != $3)
-                    """,
-                    sem_ids, tenant_id, body.session_id,
-                )
-
-                for row in sem_rows:
-                    semantic_rows.append((row, score_map.get(str(row["event_id"]), 0.0)))
-        except Exception as e:
-            log.warning(f"Semantic search failed for context: {e}")
-
-    # 3. Merge — deduplicate, recent first
+    # 3. Merge — deduplicate, recent first then semantic fills gaps
+    # Recent events take priority: they provide temporal grounding. Semantic
+    # results that overlap with recent are skipped to avoid duplication.
     seen_ids = set()
     merged = []
-
-    for row, score in sorted(semantic_rows, key=lambda x: x[1], reverse=True):
-        eid = str(row["event_id"])
-        if eid not in seen_ids:
-            seen_ids.add(eid)
-            merged.append({"row": row, "source": "semantic", "score": score})
 
     for row in recent_rows:
         eid = str(row["event_id"])
         if eid not in seen_ids:
             seen_ids.add(eid)
             merged.append({"row": row, "source": "recent", "score": 0.0})
+
+    for row, score in sorted(semantic_rows, key=lambda x: x[1], reverse=True):
+        eid = str(row["event_id"])
+        if eid not in seen_ids:
+            seen_ids.add(eid)
+            merged.append({"row": row, "source": "semantic", "score": score})
 
     # 4. Format as a prompt-ready string within token budget
     # Rough estimate: 1 token ≈ 4 chars
@@ -214,7 +223,7 @@ async def session_diff(
     )
 
     if not rows:
-        raise HTTPException(status_code=404, detail="Session not found")
+        raise not_found("Session not found")
 
     agent_id = rows[0]["agent_id"]
     events = []
@@ -347,7 +356,15 @@ async def forget(
         """,
         tenant_id,
         event_ids,
+
+    # Note: PostgreSQL does not support aggregate functions in RETURNING clauses.
+    # We already know the count from the SELECT above, so use that directly.
+    await pool.execute(
+        "DELETE FROM events WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2",
+        event_ids, tenant_id,
+
     )
+    deleted = len(event_ids)
 
     # Delete vectors from Qdrant
     try:

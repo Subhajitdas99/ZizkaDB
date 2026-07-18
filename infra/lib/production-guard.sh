@@ -6,8 +6,8 @@ _zizka_root() {
     echo "$ZIZKA_ROOT"
     return
   fi
-  local caller="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
-  echo "$(cd "$(dirname "$caller")/.." && pwd)"
+  # This file lives at infra/lib/ — repo root is two levels up (stable for all callers).
+  echo "$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 }
 
 _zizka_load_env() {

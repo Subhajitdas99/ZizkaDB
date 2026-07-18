@@ -1,11 +1,10 @@
 """Dashboard settings — embedding provider/model (managed cloud)."""
 
-from fastapi import APIRouter, Depends, HTTPException, Security, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, Depends
+from services.exceptions import bad_request
 from pydantic import BaseModel, Field
 
-from api.deps import get_tenant, resolve_api_key_tenant
-from services.auth import decode_access_token
+from api.deps import dashboard_session_dependency, get_tenant
 from services.embedding_config import (
     embedding_config_for_response,
     get_tenant_embedding_config,
@@ -14,27 +13,11 @@ from services.embedding_config import (
 )
 
 router = APIRouter()
-bearer = HTTPBearer()
 
-
-async def require_dashboard_session(
-    credentials: HTTPAuthorizationCredentials = Security(bearer),
-) -> dict:
-    """JWT only — API keys cannot change tenant embedding settings."""
-    token = credentials.credentials
-    if await resolve_api_key_tenant(token):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Sign in to the dashboard to manage embedding settings",
-        )
-    try:
-        payload = decode_access_token(token)
-        return {
-            "tenant_id": payload["tenant_id"],
-            "user_id": payload["sub"],
-        }
-    except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+# JWT only — API keys cannot change tenant embedding settings.
+require_dashboard_session = dashboard_session_dependency(
+    "Sign in to the dashboard to manage embedding settings"
+)
 
 
 class UpdateEmbeddingsBody(BaseModel):
@@ -70,12 +53,11 @@ async def put_embeddings(
             api_key=body.api_key,
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise bad_request(str(e))
 
     out = embedding_config_for_response(config)
     if not out["ready"]:
-        raise HTTPException(
-            status_code=400,
-            detail="Embedding not configured. Use platform key or provide a valid API key.",
+        raise bad_request(
+            "Embedding not configured. Use platform key or provide a valid API key."
         )
     return {**out, "message": "Embedding settings saved. New events will use this model."}

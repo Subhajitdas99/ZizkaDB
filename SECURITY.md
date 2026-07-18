@@ -16,7 +16,7 @@ Managed cloud at **db.zizka.ai** runs the latest stable deployment from this rep
 
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
-Email **hello@zizka.ai** with subject line `ZizkaDB Security` and include:
+Email **founder@zizka.ai** with subject line `ZizkaDB Security` and include:
 
 1. Description of the issue and potential impact
 2. Steps to reproduce (proof-of-concept if available)
@@ -75,4 +75,4 @@ See [Production Deployment wiki](https://github.com/Zizka-ai/ZizkaDB/wiki/Produc
 
 ## Contact
 
-**hello@zizka.ai** — security reports and code of conduct enforcement
+**founder@zizka.ai** — security reports and code of conduct enforcement

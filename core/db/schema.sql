@@ -56,8 +56,15 @@ CREATE TABLE users (
     plan                    VARCHAR(50),   -- pro | team | starter
     subscription_status     VARCHAR(50),   -- trialing | active | past_due | canceled
     trial_ends_at           TIMESTAMPTZ,
+    -- DEPRECATED: legacy columns from a removed Stripe integration.
+    -- No Python code reads or writes these. Retained to avoid DDL on a live table.
+    -- Candidate for removal in a future schema cleanup migration.
     stripe_customer_id      VARCHAR(255) UNIQUE,
     stripe_subscription_id  VARCHAR(255) UNIQUE,
+    retention_trial_used    BOOLEAN NOT NULL DEFAULT FALSE,
+    gdpr_consent_at         TIMESTAMPTZ,
+    marketing_consent       BOOLEAN NOT NULL DEFAULT FALSE,
+    marketing_consent_at    TIMESTAMPTZ,
     created_at              TIMESTAMPTZ DEFAULT NOW(),
     last_login              TIMESTAMPTZ
 );
@@ -129,23 +136,25 @@ CREATE TABLE usage_daily (
     tenant_id       UUID NOT NULL REFERENCES tenants(tenant_id) ON DELETE CASCADE,
     date            DATE NOT NULL,
     events_written  BIGINT DEFAULT 0,
+    -- NOTE: queries_run and searches_run are reserved for future metering.
+    -- Only events_written is currently incremented (core/services/event_write.py).
     queries_run     BIGINT DEFAULT 0,
     searches_run    BIGINT DEFAULT 0,
     PRIMARY KEY (tenant_id, date)
 );
 
 -- ─────────────────────────────────────────
--- DEMO REQUESTS (landing page)
+-- SDK TELEMETRY (anonymous install pings — no PII)
+-- (also created at runtime via init_db() in core/db/connection.py)
 -- ─────────────────────────────────────────
-CREATE TABLE demo_requests (
-    request_id    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    first_name    VARCHAR(80) NOT NULL,
-    last_name     VARCHAR(80) NOT NULL,
-    email         VARCHAR(255) NOT NULL,
-    company_name  VARCHAR(255) NOT NULL,
-    website       VARCHAR(500) NOT NULL,
-    ip_address    VARCHAR(64),
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS sdk_telemetry (
+    install_id   VARCHAR(64) PRIMARY KEY,
+    sdk          VARCHAR(50),
+    sdk_version  VARCHAR(30),
+    runtime      VARCHAR(50),
+    os           VARCHAR(50),
+    mode         VARCHAR(30),
+    first_seen   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_seen    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ping_count   INT NOT NULL DEFAULT 1
 );
-
-CREATE INDEX idx_demo_requests_created ON demo_requests (created_at DESC);

@@ -16,7 +16,7 @@ async with ZizkaDB("zizkadb_live_...") as db:
     handler = ZizkaDBCallbackHandler(db, agent="my-bot")
     llm = ChatOpenAI(model="gpt-4o-mini")
     await llm.ainvoke([HumanMessage(content="Hello")], config={"callbacks": [handler]})
-    await db.why(handler.last_event_id).print()
+    (await db.why(handler.last_event_id)).print()
 ```
 
 Monorepo dev install:

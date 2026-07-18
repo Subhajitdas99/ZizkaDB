@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel, Field
+from services.exceptions import not_found
 from typing import Any
 from uuid import UUID
 from datetime import datetime
@@ -17,23 +18,12 @@ router = APIRouter()
 # ─────────────────────────────────────────
 
 class LogEventRequest(BaseModel):
-    agent: str
-    event: str
+    agent: str = Field(..., min_length=1, max_length=255)
+    event: str = Field(..., min_length=1, max_length=255)
     data: dict[str, Any]
     parent_id: str | None = None
     session_id: str | None = None
     metadata: dict[str, Any] | None = None
-
-
-class EventResponse(BaseModel):
-    event_id: str
-    agent: str
-    timestamp: datetime
-    event: str
-    data: dict[str, Any]
-    parent_id: str | None
-    session_id: str | None
-    sequence_no: int
 
 
 # ─────────────────────────────────────────
@@ -129,6 +119,11 @@ async def why(
     pool = get_pool()
     tenant_id = tenant["tenant_id"]
 
+    try:
+        UUID(event_id)
+    except ValueError:
+        raise not_found("Event not found")
+
     rows = await pool.fetch(
         """
         WITH RECURSIVE causal_chain AS (
@@ -156,7 +151,7 @@ async def why(
     )
 
     if not rows:
-        raise HTTPException(status_code=404, detail="Event not found")
+        raise not_found("Event not found")
 
     return {
         "event_id": event_id,
@@ -176,6 +171,7 @@ async def time_travel(
     timestamp: datetime,
     tenant: dict = Depends(get_tenant),
 ):
+    assert_agent_allowed(tenant, agent)
     pool = get_pool()
     tenant_id = tenant["tenant_id"]
 

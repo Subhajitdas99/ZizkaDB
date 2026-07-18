@@ -69,6 +69,10 @@ async def init_db():
         ALTER TABLE users ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMPTZ;
         ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR(255);
         ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_subscription_id VARCHAR(255);
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS retention_trial_used BOOLEAN NOT NULL DEFAULT FALSE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS gdpr_consent_at TIMESTAMPTZ;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent BOOLEAN NOT NULL DEFAULT FALSE;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS marketing_consent_at TIMESTAMPTZ;
     """)
 
     await _pg_pool.execute("""
@@ -84,8 +88,8 @@ async def init_db():
             plan IS NULL
             OR subscription_status IS NULL;
     """)
-
     await _pg_pool.execute("""
+
         CREATE TABLE IF NOT EXISTS community_posts (
             post_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
             author_name VARCHAR(120) NOT NULL,
@@ -109,6 +113,12 @@ async def init_db():
             body TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         );
+
+        UPDATE users
+        SET subscription_status = 'trialing',
+            trial_ends_at = COALESCE(trial_ends_at, NOW() + INTERVAL '30 days')
+        WHERE subscription_status = 'pending_checkout'
+
     """)
 
     await _pg_pool.execute("""
@@ -170,6 +180,7 @@ async def init_db():
         )
     """)
 
+
     # ---------------- Redis ----------------
 
     _redis = redis.from_url(
@@ -196,6 +207,8 @@ async def init_db():
     await _pg_pool.execute("""
         ALTER TABLE demo_requests ADD COLUMN IF NOT EXISTS email VARCHAR(255) NOT NULL DEFAULT '';
     """)
+
+
 
     _redis = redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
     logger.info("Redis connected")
@@ -241,6 +254,10 @@ async def init_db():
         )
 
     await _ensure_qdrant_collection()
+
+
+
+    await _log_qdrant_version()
 
     logger.info("Qdrant connected")
 
@@ -307,3 +324,42 @@ def get_qdrant() -> AsyncQdrantClient:
     if _qdrant is None:
         raise RuntimeError("Qdrant not initialized")
     return _qdrant
+
+
+async def _log_qdrant_version() -> None:
+    try:
+        import httpx
+
+        url = os.getenv("QDRANT_URL", "http://localhost:6333").rstrip("/")
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            response = await client.get(f"{url}/")
+            if response.status_code == 200:
+                version = response.json().get("version", "unknown")
+                logger.info("Qdrant server version: %s", version)
+    except Exception as exc:
+        logger.warning("Could not fetch Qdrant version: %s", exc)
+
+
+async def check_postgres() -> dict:
+    try:
+        await get_pool().fetchval("SELECT 1")
+        return {"ok": True}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_redis() -> dict:
+    try:
+        pong = await get_redis().ping()
+        return {"ok": bool(pong)}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}
+
+
+async def check_qdrant() -> dict:
+    try:
+        collections = await get_qdrant().get_collections()
+        names = [collection.name for collection in collections.collections]
+        return {"ok": True, "collections": names}
+    except Exception as exc:
+        return {"ok": False, "error": str(exc)}

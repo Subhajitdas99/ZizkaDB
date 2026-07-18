@@ -11,10 +11,15 @@ KEEP_DAYS="${BACKUP_KEEP_DAYS:-14}"
 
 # shellcheck disable=SC1091
 source "$ROOT/infra/lib/production-guard.sh"
+ZIZKA_ROOT="$ROOT"
 _zizka_load_env
 
 POSTGRES_USER="${POSTGRES_USER:-zizkadb}"
 POSTGRES_DB="${POSTGRES_DB:-zizkadb}"
+
+if [ ! -f "$ROOT/infra/.env" ]; then
+  echo "WARN: infra/.env not found — using defaults ($POSTGRES_USER / $POSTGRES_DB)" >&2
+fi
 CONTAINER="${POSTGRES_CONTAINER:-zizkadb_postgres}"
 
 mkdir -p "$BACKUP_DIR"

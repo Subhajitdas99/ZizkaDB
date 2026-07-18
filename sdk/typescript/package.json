@@ -1,6 +1,6 @@
 {
   "name": "zizkadb-sdk",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "ZizkaDB tells you when your agent stops behaving like itself. Causal lineage, time travel and behavioral baselines for any AI agent.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -19,7 +19,9 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "keywords": [
     "ai",
@@ -40,7 +42,9 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^4.1.9",
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.9"
   }
 }

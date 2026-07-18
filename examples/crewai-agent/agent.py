@@ -7,7 +7,7 @@ from crewai import Agent, Crew, Task
 from langchain_openai import ChatOpenAI
 
 from zizkadb import ZizkaDB
-from zizkadb.integrations.crewai import ZizkaDBCrewLogger
+from zizkadb_crewai import ZizkaDBCrewLogger
 
 AGENT = os.getenv("ZIZKADB_AGENT", "crewai-researcher")
 API_KEY = os.getenv("ZIZKADB_API_KEY")
@@ -33,7 +33,7 @@ async def main() -> None:
             agent=researcher,
         )
         crew = Crew(agents=[researcher], tasks=[task], verbose=True)
-        result = crew.kickoff()
+        result = await crew.kickoff_async()
         await logger.log_output(str(result), parent_id=kickoff.event_id)
         print(result)
 

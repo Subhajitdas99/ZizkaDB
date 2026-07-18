@@ -1,68 +1,42 @@
-"""Shared pytest fixtures for ZizkaDB core tests."""
-
 import os
-import uuid
+import sys
+from pathlib import Path
 
-import httpx
 import pytest
 
-API_BASE = os.getenv("ZIZKADB_TEST_URL", "http://localhost:8000")
-DEV_KEY = os.getenv("DEV_API_KEY", "zizkadb_dev_local")
+ROOT = Path(__file__).resolve().parents[1]
+SDK = ROOT.parent / "sdk" / "python"
+
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(SDK))
 
 
-def _stack_reachable() -> bool:
-    try:
-        r = httpx.get(f"{API_BASE}/health", timeout=3.0)
-        return r.status_code == 200
-    except Exception:
-        return False
+def _truthy(value: str | None) -> bool:
+    return (value or "").lower() in {"1", "true", "yes", "on"}
 
 
-@pytest.fixture(scope="session")
-def api_base() -> str:
-    return API_BASE.rstrip("/")
+def pytest_addoption(parser):
+    parser.addoption(
+        "--run-integration",
+        action="store_true",
+        default=False,
+        help="Run integration tests that require a running ZizkaDB stack.",
+    )
 
 
-@pytest.fixture(scope="session")
-def dev_key() -> str:
-    return DEV_KEY
+def pytest_collection_modifyitems(config, items):
+    run_integration = config.getoption("--run-integration") or _truthy(
+        os.getenv("ZIZKADB_RUN_INTEGRATION")
+    )
+    if run_integration:
+        return
 
-
-@pytest.fixture
-def dev_headers(dev_key: str) -> dict[str, str]:
-    return {
-        "Authorization": f"Bearer {dev_key}",
-        "Content-Type": "application/json",
-    }
-
-
-@pytest.fixture
-async def jwt_headers(api_base: str) -> dict[str, str]:
-    async with httpx.AsyncClient(base_url=api_base, timeout=10.0) as client:
-        r = await client.post("/v1/auth/dev-token")
-        if r.status_code != 200:
-            pytest.skip(f"dev-token unavailable ({r.status_code}) — is ENV=development?")
-        token = r.json()["access_token"]
-    return {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json",
-    }
-
-
-@pytest.fixture
-def unique_agent() -> str:
-    return f"test-agent-{uuid.uuid4().hex[:10]}"
-
-
-@pytest.fixture
-async def api_client(api_base: str):
-    async with httpx.AsyncClient(base_url=api_base, timeout=15.0) as client:
-        yield client
-
-
-def pytest_runtest_setup(item):
-    """Skip integration tests when stack is not running."""
-    if item.get_closest_marker("integration") and not _stack_reachable():
-        pytest.skip(
-            f"ZizkaDB stack not reachable at {API_BASE} — run: bash scripts/setup-local.sh"
+    skip_integration = pytest.mark.skip(
+        reason=(
+            "requires a running ZizkaDB stack; set ZIZKADB_RUN_INTEGRATION=1 "
+            "or pass --run-integration to enable"
         )
+    )
+    for item in items:
+        if "integration" in item.keywords:
+            item.add_marker(skip_integration)

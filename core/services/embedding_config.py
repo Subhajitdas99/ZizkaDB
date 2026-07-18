@@ -84,7 +84,28 @@ def model_dimensions(provider: str, model: str) -> int:
 
 
 def _fernet() -> Fernet:
-    secret = os.getenv("EMBEDDING_ENCRYPTION_KEY") or os.getenv("JWT_SECRET", "dev-insecure-key")
+    """
+    Derive the Fernet key used to encrypt per-tenant BYOK embedding API keys.
+
+    Falls back to JWT_SECRET when EMBEDDING_ENCRYPTION_KEY is unset, matching
+    .env.example. In development this also falls back to a fixed insecure
+    string so local self-host works out of the box without any env setup.
+
+    In production (ENV != "development"), neither secret being set is a
+    misconfiguration, not something to silently paper over: the hardcoded
+    fallback string is visible in this public repository, so encrypting
+    tenant API keys with it would mean every BYOK key is effectively
+    unencrypted. Refuse to start serving embeddings in that case.
+    """
+    secret = os.getenv("EMBEDDING_ENCRYPTION_KEY") or os.getenv("JWT_SECRET")
+    if not secret:
+        if os.getenv("ENV", "development") != "development":
+            raise RuntimeError(
+                "EMBEDDING_ENCRYPTION_KEY or JWT_SECRET must be set in production. "
+                "Refusing to encrypt tenant API keys with a hardcoded fallback "
+                "value, since that value is visible in the public source code."
+            )
+        secret = "dev-insecure-key"
     key = base64.urlsafe_b64encode(hashlib.sha256(secret.encode()).digest())
     return Fernet(key)
 

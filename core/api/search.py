@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-from typing import Any
+import json
 
-from api.deps import get_tenant, assert_agent_allowed
+from fastapi import APIRouter, Depends
+from services.exceptions import bad_request
+from pydantic import BaseModel
+from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+from api.deps import assert_agent_allowed, get_tenant
 from db.connection import get_pool, get_qdrant
 from services.embeddings import generate_embedding
 
@@ -27,19 +30,14 @@ async def semantic_search(
 
     embedding = await generate_embedding(body.query, tenant_id)
     if not embedding:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Embedding generation failed. Configure embeddings in Dashboard → Settings "
-                "(platform key or your OpenAI API key)."
-            ),
+        raise bad_request(
+            "Embedding generation failed. Configure embeddings in Dashboard → Settings "
+            "(platform key or your OpenAI API key)."
         )
 
     qdrant = get_qdrant()
 
-    query_filter = None
     if agent:
-        from qdrant_client.models import Filter, FieldCondition, MatchValue
         query_filter = Filter(
             must=[
                 FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id)),
@@ -47,7 +45,6 @@ async def semantic_search(
             ]
         )
     else:
-        from qdrant_client.models import Filter, FieldCondition, MatchValue
         query_filter = Filter(
             must=[FieldCondition(key="tenant_id", match=MatchValue(value=tenant_id))]
         )
@@ -60,10 +57,7 @@ async def semantic_search(
         with_payload=True,
     )
 
-    # Fetch full events from Postgres
     pool = get_pool()
-    import json
-
     event_ids = [r.id for r in results]
     if not event_ids:
         return {"results": []}
