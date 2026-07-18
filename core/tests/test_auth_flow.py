@@ -25,6 +25,9 @@ TEST_OTP_ROW = {"otp_id": "otp-1", "otp_hash": TEST_OTP_HASH}
 class TestRequestOtpIntent:
     def setup_method(self):
         import asyncio
+        from services.rate_limiter import InMemoryStorage
+
+        otp_limiter.storage = InMemoryStorage()
         asyncio.run(otp_limiter.storage.clear())
 
     @patch("api.auth.request_otp", new_callable=AsyncMock)

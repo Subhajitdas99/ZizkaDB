@@ -1,7 +1,7 @@
 # ADR-005: In-Process Python Dict Rate Limiting
 
-**Status**: Accepted (with known limitations)  
-**Date**: 2024
+**Status**: Accepted (with known limitations); **OTP path updated 2026** — `POST /v1/auth/request-otp` uses Redis via `OTP_RATE_LIMIT_STORAGE` / `ENV=production` default (see `core/api/auth.py`). Other in-process limiters may still apply where those routes exist.  
+**Date**: 2024 (OTP Redis note: 2026)
 
 ---
 

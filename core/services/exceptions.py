@@ -61,6 +61,10 @@ def rate_limit_exceeded(detail: Any = "Rate limit exceeded", headers: Optional[D
     """Return a 429 Too Many Requests HTTPException."""
     return make_exception(status.HTTP_429_TOO_MANY_REQUESTS, detail, headers, **kwargs)
 
+def service_unavailable(detail: Any = "Service Unavailable", headers: Optional[Dict[str, str]] = None, **kwargs: Any) -> HTTPException:
+    """Return a 503 Service Unavailable HTTPException."""
+    return make_exception(status.HTTP_503_SERVICE_UNAVAILABLE, detail, headers, **kwargs)
+
 def internal_error(detail: Any = "Internal Server Error", headers: Optional[Dict[str, str]] = None, **kwargs: Any) -> HTTPException:
     """Return a 500 Internal Server Error HTTPException."""
     return make_exception(status.HTTP_500_INTERNAL_SERVER_ERROR, detail, headers, **kwargs)
