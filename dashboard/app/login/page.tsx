@@ -1,21 +1,56 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { requestOtp, verifyOtp } from '@/lib/api'
-import { setToken } from '@/lib/auth'
+import { getToken, setToken } from '@/lib/auth'
+import { BrandLogo } from '@/components/BrandLogo'
 
 const IS_DEV_MODE = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginFallback() {
+  return (
+    <div style={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: '#fafafa', fontFamily: 'Inter, system-ui, sans-serif', color: '#888',
+    }}>
+      Loading…
+    </div>
+  )
+}
+
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [step, setStep] = useState<'email' | 'otp'>('email')
   const [loading, setLoading] = useState(false)
   const [devLoading, setDevLoading] = useState(false)
   const [error, setError] = useState('')
+
+  const nextPath = searchParams.get('next')
+  const safeNext =
+    nextPath && nextPath.startsWith('/dashboard') && !nextPath.startsWith('//')
+      ? nextPath
+      : '/dashboard'
+
+  useEffect(() => {
+    const existing = getToken()
+    if (existing) {
+      setToken(existing)
+      router.replace(safeNext)
+    }
+  }, [router, safeNext])
 
   async function handleDevLogin() {
     setDevLoading(true)
@@ -25,7 +60,7 @@ export default function LoginPage() {
       if (!res.ok) throw new Error('Dev token failed')
       const data = await res.json() as { access_token: string }
       setToken(data.access_token)
-      router.push('/dashboard')
+      router.push(safeNext)
     } catch {
       setError('Could not connect to ZizkaDB API. Is docker-compose running on port 8000?')
     } finally {
@@ -54,7 +89,7 @@ export default function LoginPage() {
     try {
       const data = await verifyOtp(email, otp)
       setToken(data.access_token)
-      router.replace('/dashboard')
+      router.replace(safeNext)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Invalid or expired code.')
     } finally {
@@ -69,20 +104,8 @@ export default function LoginPage() {
     }}>
       <div style={{ width: '100%', maxWidth: 400, padding: '0 24px' }}>
 
-        {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 9, background: '#111',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>ZizkaDB</span>
-          </a>
-          <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
-            The operational database for AI agents
-          </p>
+          <BrandLogo variant="full" suffix="The operational database for AI agents" />
         </div>
 
         {/* Dev Mode Banner — shown only in self-hosted mode */}

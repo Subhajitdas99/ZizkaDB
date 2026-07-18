@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 
-const TAGLINE =
-  'Operational database for AI agents, causal lineage (why()), semantic memory, live dashboards, MCP + Python/TypeScript SDK. Self-host or use db.zizka.ai.'
+const TAGLINE = 'Operational Database For AI Agents. Open source. Self-host free or managed cloud.'
 
 export const metadata: Metadata = {
   title: {
@@ -13,10 +12,10 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://db.zizka.ai'),
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
       { url: '/icon-32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/zizka-logo.png', type: 'image/png' },
     ],
-    shortcut: '/favicon.ico',
+    shortcut: '/icon-32.png',
     apple: '/apple-touch-icon.png',
   },
   openGraph: {

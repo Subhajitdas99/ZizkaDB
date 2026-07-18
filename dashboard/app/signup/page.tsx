@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { requestOtp, verifyOtp } from '@/lib/api'
 import { setToken } from '@/lib/auth'
+import { BrandLogo } from '@/components/BrandLogo'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -50,20 +51,8 @@ export default function SignupPage() {
     }}>
       <div style={{ width: '100%', maxWidth: 420, padding: '0 24px' }}>
 
-        {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 9, background: '#111',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{ color: '#fff', fontWeight: 700, fontSize: 16 }}>A</span>
-            </div>
-            <span style={{ fontWeight: 700, fontSize: 20, color: '#111' }}>ZizkaDB</span>
-          </Link>
-          <p style={{ fontSize: 14, color: '#888', marginTop: 8 }}>
-            The operational database for AI agents
-          </p>
+          <BrandLogo variant="full" suffix="The operational database for AI agents" />
         </div>
 
         {/* Card */}
