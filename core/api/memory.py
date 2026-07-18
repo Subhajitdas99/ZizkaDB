@@ -316,7 +316,7 @@ async def forget(
 
     Examples:
         await db.forget(filter_key="user_id", filter_value="user_123")
-        await db.forget(filter_key="email",   filter_value="user@company.com")
+        await db.forget(filter_key="email", filter_value="user@company.com")
     """
     tenant_id = tenant["tenant_id"]
     pool = get_pool()
@@ -324,44 +324,79 @@ async def forget(
     # Find matching event IDs
     rows = await pool.fetch(
         """
-        SELECT event_id FROM events
+        SELECT event_id
+        FROM events
         WHERE tenant_id = $1
           AND data->$2 = to_jsonb($3::text)
         """,
-        tenant_id, body.filter_key, body.filter_value,
+        tenant_id,
+        body.filter_key,
+        body.filter_value,
     )
 
     if not rows:
-        return {"deleted_events": 0, "message": "No matching events found"}
+        return {
+            "deleted_events": 0,
+            "filter": {
+                "key": body.filter_key,
+                "value": body.filter_value,
+            },
+            "message": "No matching events found",
+        }
 
-    event_ids = [str(r["event_id"]) for r in rows]
-
-    # Delete from Postgres
-    # Note: PostgreSQL does not support aggregate functions in RETURNING clauses.
-    # We already know the count from the SELECT above, so use that directly.
-    await pool.execute(
-        "DELETE FROM events WHERE event_id = ANY($1::uuid[]) AND tenant_id = $2",
-        event_ids, tenant_id,
-    )
+    event_ids = [r["event_id"] for r in rows]
     deleted = len(event_ids)
 
-    # Delete from Qdrant
+    # Delete from Postgres
+    # PostgreSQL does not support aggregate functions in RETURNING clauses.
+    # We already know the count from the SELECT above, so use that directly.
+    await pool.execute(
+        """
+        DELETE FROM events
+        WHERE tenant_id = $1
+          AND event_id = ANY($2::uuid[])
+        """,
+        tenant_id,
+        event_ids,
+    )
+    
+    deleted = len(event_ids)
+
+    # Delete vectors from Qdrant
     try:
         from qdrant_client.models import PointIdsList
+
         qdrant = get_qdrant()
+
         await qdrant.delete(
             collection_name="agent_events",
-            points_selector=PointIdsList(points=event_ids),
+            points_selector=PointIdsList(
+                points=[str(eid) for eid in event_ids]
+            ),
         )
-    except Exception as e:
-        log.warning(f"Qdrant delete partial failure: {e}")
 
-    log.info(f"GDPR forget: tenant={tenant_id} key={body.filter_key} value={body.filter_value} deleted={len(event_ids)}")
+    except Exception as e:
+        log.warning(
+            "Qdrant delete partial failure for tenant %s: %s",
+            tenant_id,
+            e,
+        )
+
+    log.info(
+        "GDPR forget: tenant=%s key=%s value=%s deleted=%s",
+        tenant_id,
+        body.filter_key,
+        body.filter_value,
+        deleted,
+    )
 
     return {
-        "deleted_events": len(event_ids),
-        "filter": {"key": body.filter_key, "value": body.filter_value},
-        "message": f"Deleted {len(event_ids)} events. Vectors removed from search index.",
+        "deleted_events": deleted,
+        "filter": {
+            "key": body.filter_key,
+            "value": body.filter_value,
+        },
+        "message": f"Deleted {deleted} events. Vectors removed from search index.",
     }
 
 

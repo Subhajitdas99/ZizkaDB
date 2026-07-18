@@ -1,21 +1,31 @@
-# API + data services only. Dashboard runs on the host via PM2 (see dashboard/ecosystem.config.js).
+# API + data services only.
+# Dashboard runs on the host via PM2 (see dashboard/ecosystem.config.js).
 
 services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: zizkadb_postgres
+
+
+    # WARNING:
+    # docker compose down -v deletes ALL user accounts and events.
+    # Production: use bash infra/deploy-production.sh — never -v.
     # WARNING: docker compose down -v deletes ALL user accounts and events.
     # Never use -v on a machine with data you care about.
     # Local reset only: bash scripts/reset-local-db.sh
+
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-zizkadb}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zizkadb}
       POSTGRES_DB: ${POSTGRES_DB:-zizkadb}
+
     ports:
       - "5432:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ../core/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 5s
@@ -23,46 +33,64 @@ services:
       retries: 5
 
   qdrant:
+    # Pin the version instead of using latest
+    image: qdrant/qdrant:v1.15.4
     image: qdrant/qdrant:v1.13.5
     container_name: zizkadb_qdrant
+
     ports:
       - "6333:6333"
       - "6334:6334"
+
     volumes:
       - qdrant_data:/qdrant/storage
+
     environment:
       QDRANT__SERVICE__GRPC_PORT: 6334
+
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
     container_name: zizkadb_redis
+
     ports:
       - "6379:6379"
+
     volumes:
       - redis_data:/data
+
     command: redis-server --appendonly yes
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+    restart: unless-stopped
+
   api:
     build:
       context: ../core
       dockerfile: Dockerfile
+
     container_name: zizkadb_api
+
     ports:
       - "8000:8000"
+
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-zizkadb}:${POSTGRES_PASSWORD:-zizkadb}@postgres:5432/${POSTGRES_DB:-zizkadb}
-      QDRANT_URL: http://qdrant:6333
       REDIS_URL: redis://redis:6379
+      QDRANT_URL: http://qdrant:6333
+
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production}
+
       ENV: ${ENV:-development}
-      # Local dev only — leave unset on managed cloud (ENV=production)
       DEV_API_KEY: ${DEV_API_KEY:-zizkadb_dev_local}
       # IMPORTANT FOR SELF-HOSTERS: set DEPLOYMENT_MODE=self_hosted in your
       # infra/.env (see .env.example). Without it, plan-based API key limits
@@ -76,8 +104,11 @@ services:
       EMAIL_PORT: ${EMAIL_PORT:-465}
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASS: ${EMAIL_PASS}
-      EMAIL_FROM: "${EMAIL_FROM}"
+      EMAIL_FROM: ${EMAIL_FROM}
+
       PUBLIC_API_URL: ${PUBLIC_API_URL:-https://db.zizka.ai}
+      COMMUNITY_UPLOAD_DIR: /data/community_uploads
+
       DASHBOARD_URL: ${DASHBOARD_URL:-https://db.zizka.ai}
       TRIAL_DAYS: ${TRIAL_DAYS:-30}
     depends_on:
@@ -85,9 +116,18 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+    volumes:
+      - ../core:/app
+      - community_uploads:/data/community_uploads
+
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+
+    restart: unless-stopped
 
 volumes:
   postgres_data:
   qdrant_data:
   redis_data:
+  community_uploads:
