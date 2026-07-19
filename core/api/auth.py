@@ -3,13 +3,14 @@ import time
 import logging
 from typing import Literal
 
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, HTTPException, Response, Depends
 from services.exceptions import (
     conflict,
     not_found,
     internal_error,
     unauthorized,
     forbidden,
+    service_unavailable,
 )
 from pydantic import BaseModel, EmailStr
 from services.auth import request_otp, verify_otp, _issue_tokens, email_exists
@@ -21,20 +22,51 @@ from services.api_keys import (
 )
 from api.deps import get_tenant, require_dashboard_session
 from db.connection import get_pool
-from services.rate_limiter import RateLimiter, InMemoryStorage, SlidingWindowStrategy
+from services.rate_limiter import (
+    RateLimiter,
+    InMemoryStorage,
+    RedisStorage,
+    RateLimitStorage,
+    SlidingWindowStrategy,
+)
 from services.event_write import write_event
 
 router = APIRouter()
 log = logging.getLogger(__name__)
 
-# Per-email OTP request limits (in-memory; resets after window)
+# Per-email OTP request limits (shared via Redis in production — see _otp_storage)
 _OTP_RATE_WINDOW_SEC = 15 * 60   # 15 minutes
 _OTP_RATE_MAX = 10               # max requests per email per window
+
+
+def _otp_storage() -> RateLimitStorage:
+    """
+    Choose OTP rate-limit storage.
+
+    OTP_RATE_LIMIT_STORAGE=redis|memory overrides the default.
+    Default: redis when ENV=production (shared across uvicorn workers),
+    memory otherwise (local dev + unit tests).
+    """
+    choice = (os.getenv("OTP_RATE_LIMIT_STORAGE") or "").strip().lower()
+    if not choice:
+        choice = (
+            "redis" if os.getenv("ENV", "development") == "production" else "memory"
+        )
+    if choice == "redis":
+        return RedisStorage(key_prefix="otp")
+    if choice == "memory":
+        return InMemoryStorage()
+    log.warning(
+        "Unknown OTP_RATE_LIMIT_STORAGE=%r; falling back to memory",
+        choice,
+    )
+    return InMemoryStorage()
+
 
 otp_limiter = RateLimiter(
     limit=_OTP_RATE_MAX,
     window_sec=_OTP_RATE_WINDOW_SEC,
-    storage=InMemoryStorage(),
+    storage=_otp_storage(),
     strategy=SlidingWindowStrategy(),
     detail="Too many code requests. Wait 15 minutes and try again."
 )
@@ -65,7 +97,16 @@ class CreateAPIKeyBody(BaseModel):
 @router.post("/request-otp")
 async def request_otp_route(body: RequestOTPBody):
     email = body.email.lower().strip()
-    await otp_limiter.check(email)
+    try:
+        await otp_limiter.check(email)
+    except HTTPException:
+        raise
+    except Exception:
+        # Fail closed: do not allow unlimited OTP sends if Redis is down.
+        log.exception("OTP rate limit backend unavailable")
+        raise service_unavailable(
+            "Login temporarily unavailable. Please try again shortly."
+        )
 
     if body.intent == "signup" and await email_exists(email):
         raise conflict(

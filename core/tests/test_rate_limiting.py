@@ -5,18 +5,24 @@ Tests cover OTP request limits and the shared RateLimiter helpers.
 
 import asyncio
 import time
-import fakeredis.aioredis
 from unittest.mock import patch, AsyncMock, MagicMock
 from datetime import datetime, timezone
+
+import pytest
 from fastapi.testclient import TestClient
 from main import app
-from api.auth import otp_limiter, _OTP_RATE_MAX, _OTP_RATE_WINDOW_SEC
+from api.auth import otp_limiter, _otp_storage, _OTP_RATE_MAX, _OTP_RATE_WINDOW_SEC
 from services.rate_limiter import (
     InMemoryStorage,
     RedisStorage,
     FixedWindowStrategy,
     RateLimiter
 )
+
+try:
+    import fakeredis.aioredis as fakeredis_aioredis
+except ModuleNotFoundError:  # pragma: no cover - optional for local venvs
+    fakeredis_aioredis = None
 
 client = TestClient(app)
 
@@ -27,7 +33,8 @@ client = TestClient(app)
 
 class TestOTPRateLimiting:
     def setup_method(self):
-        # Clear the centralized storage before each test
+        # Unit tests use in-memory storage (no live Redis).
+        otp_limiter.storage = InMemoryStorage()
         asyncio.run(otp_limiter.storage.clear())
 
     @patch("api.auth.email_exists", new_callable=AsyncMock)
@@ -185,7 +192,9 @@ class TestRateLimiterFeatures:
         undercounting real request volume and letting far more requests
         through than the configured limit.
         """
-        fake_redis = fakeredis.aioredis.FakeRedis(decode_responses=True)
+        if fakeredis_aioredis is None:
+            pytest.skip("fakeredis not installed (see core/requirements-dev.txt)")
+        fake_redis = fakeredis_aioredis.FakeRedis(decode_responses=True)
         mock_get_redis.return_value = fake_redis
 
         storage = RedisStorage(key_prefix="ratelimit-concurrency-test")
@@ -205,4 +214,45 @@ class TestRateLimiterFeatures:
             f"concurrency again"
         )
 
+
+class TestOtpStorageSelection:
+    def test_explicit_redis(self, monkeypatch):
+        monkeypatch.setenv("OTP_RATE_LIMIT_STORAGE", "redis")
+        assert isinstance(_otp_storage(), RedisStorage)
+
+    def test_explicit_memory(self, monkeypatch):
+        monkeypatch.setenv("OTP_RATE_LIMIT_STORAGE", "memory")
+        assert isinstance(_otp_storage(), InMemoryStorage)
+
+    def test_production_defaults_to_redis(self, monkeypatch):
+        monkeypatch.delenv("OTP_RATE_LIMIT_STORAGE", raising=False)
+        monkeypatch.setenv("ENV", "production")
+        assert isinstance(_otp_storage(), RedisStorage)
+
+    def test_development_defaults_to_memory(self, monkeypatch):
+        monkeypatch.delenv("OTP_RATE_LIMIT_STORAGE", raising=False)
+        monkeypatch.setenv("ENV", "development")
+        assert isinstance(_otp_storage(), InMemoryStorage)
+
+
+class TestOtpRateLimitFailClosed:
+    def setup_method(self):
+        otp_limiter.storage = InMemoryStorage()
+        asyncio.run(otp_limiter.storage.clear())
+
+    @patch("api.auth.email_exists", new_callable=AsyncMock)
+    @patch("api.auth.request_otp", new_callable=AsyncMock)
+    def test_backend_error_returns_503(self, mock_request_otp, mock_exists):
+        mock_exists.return_value = True
+        otp_limiter.storage = MagicMock()
+        otp_limiter.storage.get_hits = AsyncMock(side_effect=RuntimeError("redis down"))
+        otp_limiter.storage.record_hit = AsyncMock()
+
+        response = client.post(
+            "/v1/auth/request-otp",
+            json={"email": "user@example.com", "intent": "login"},
+        )
+        assert response.status_code == 503
+        assert "temporarily unavailable" in response.json()["detail"]
+        mock_request_otp.assert_not_called()
 
