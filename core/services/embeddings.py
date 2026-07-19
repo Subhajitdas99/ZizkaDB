@@ -1,7 +1,7 @@
 import httpx
 import json
 import logging
-from typing import Any
+from typing import Any, Awaitable, Callable
 
 from db.connection import get_redis
 from services.embedding_config import (
@@ -14,6 +14,11 @@ from services.embedding_config import (
 logger = logging.getLogger(__name__)
 
 CACHE_TTL = 86400  # 24 hours
+
+EmbeddingProvider = Callable[
+    [str, TenantEmbeddingConfig],
+    Awaitable[list[float] | None],
+]
 
 
 async def generate_embedding(text: str, tenant_id: str) -> list[float] | None:
@@ -44,12 +49,13 @@ async def generate_embedding_with_config(
     except Exception:
         pass
 
+    provider = EMBEDDING_PROVIDERS.get(config.provider)
+    if provider is None:
+        logger.warning("Unsupported embedding provider: %s", config.provider)
+        return None
+
     try:
-        if config.provider == "openai":
-            embedding = await _openai_embedding(text, config)
-        else:
-            logger.warning("Unsupported embedding provider: %s", config.provider)
-            return None
+        embedding = await provider(text, config)
 
         if not embedding:
             return None
@@ -90,7 +96,10 @@ async def _openai_embedding(
     }
 
     for model in EMBEDDING_MODELS.get("openai", []):
-        if model["id"] == config.model and model.get("dimensions_param"):
+        if (
+            model["id"] == config.model
+            and model.get("dimensions_param") is not None
+        ):
             payload["dimensions"] = model["dimensions_param"]
             break
 
@@ -106,6 +115,11 @@ async def _openai_embedding(
         response.raise_for_status()
 
         return response.json()["data"][0]["embedding"]
+
+
+EMBEDDING_PROVIDERS: dict[str, EmbeddingProvider] = {
+    "openai": _openai_embedding,
+}
 
 
 def _flatten_data(value: Any, prefix: str = "") -> list[str]:
