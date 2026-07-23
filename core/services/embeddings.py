@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 
 CACHE_TTL = 86400  # 24 hours
 
+API_KEY_REQUIRED_PROVIDERS = {
+     "openai",
+}     
+
 EmbeddingProvider = Callable[
     [str, TenantEmbeddingConfig],
     Awaitable[list[float] | None],
@@ -31,7 +35,10 @@ async def generate_embedding_with_config(
     text: str,
     config: TenantEmbeddingConfig,
 ) -> list[float] | None:
-    if not config.api_key:
+    if (
+        config.provider in API_KEY_REQUIRED_PROVIDERS
+        and not config.api_key
+    ):
         logger.warning(
             "No embedding API key for tenant %s (platform=%s)",
             config.tenant_id,
