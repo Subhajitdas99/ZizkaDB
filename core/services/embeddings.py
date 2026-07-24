@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 CACHE_TTL = 86400  # 24 hours
 
 API_KEY_REQUIRED_PROVIDERS = {
-     "openai",
-}     
+    "openai",
+}
 
 EmbeddingProvider = Callable[
     [str, TenantEmbeddingConfig],
@@ -27,14 +27,12 @@ EmbeddingProvider = Callable[
 
 
 def _cache_key_for(provider: str, model: str, text: str) -> str:
-    """Stable across processes (unlike builtin hash()), so the Redis
-    embedding cache actually gets hit when running with multiple workers."""
+    """Stable across processes (unlike builtin hash())."""
     text_hash = hashlib.sha256(text.encode()).hexdigest()
     return f"emb:{provider}:{model}:{text_hash}"
 
 
 async def generate_embedding(text: str, tenant_id: str) -> list[float] | None:
-    """Generate embedding using the tenant's configured provider/model."""
     config = await get_tenant_embedding_config(tenant_id)
     return await generate_embedding_with_config(text, config)
 
@@ -64,10 +62,15 @@ async def generate_embedding_with_config(
     except Exception:
         pass
 
-    provider = EMBEDDING_PROVIDERS.get(config.provider)
-    if provider is None:
-        logger.warning("Unsupported embedding provider: %s", config.provider)
+    provider_name = EMBEDDING_PROVIDERS.get(config.provider)
+    if provider_name is None:
+        logger.warning(
+            "Unsupported embedding provider: %s",
+            config.provider,
+        )
         return None
+
+    provider = globals()[provider_name]
 
     try:
         embedding = await provider(text, config)
@@ -86,7 +89,11 @@ async def generate_embedding_with_config(
 
         try:
             redis = get_redis()
-            await redis.setex(cache_key, CACHE_TTL, json.dumps(embedding))
+            await redis.setex(
+                cache_key,
+                CACHE_TTL,
+                json.dumps(embedding),
+            )
         except Exception:
             pass
 
@@ -132,24 +139,14 @@ async def _openai_embedding(
         return response.json()["data"][0]["embedding"]
 
 
-EMBEDDING_PROVIDERS: dict[str, EmbeddingProvider] = {
-    "openai": _openai_embedding,
+# Store function names instead of function objects.
+# This allows monkeypatch() to replace the implementation during tests.
+EMBEDDING_PROVIDERS: dict[str, str] = {
+    "openai": "_openai_embedding",
 }
 
 
 def _flatten_data(value: Any, prefix: str = "") -> list[str]:
-    """
-    Recursively flatten nested dictionaries and lists into
-    key:value strings suitable for semantic embeddings.
-
-    Example:
-        {"user": {"city": "Paris"}}
-            -> ["user.city:Paris"]
-
-        {"docs": ["a", "b"]}
-            -> ["docs.0:a", "docs.1:b"]
-    """
-
     parts: list[str] = []
 
     if isinstance(value, dict):
@@ -169,14 +166,6 @@ def _flatten_data(value: Any, prefix: str = "") -> list[str]:
 
 
 def event_to_text(event_type: str, data: dict) -> str:
-    """
-    Convert an event into a semantic text representation
-    for embedding generation.
-
-    Supports nested dictionaries and lists.
-    """
-
     parts = [f"event_type:{event_type}"]
     parts.extend(_flatten_data(data))
-
     return " ".join(parts)
